@@ -1,7 +1,10 @@
 <script lang="ts">
-	import Dock from '$lib/components/Dock.svelte';
-	import { CloudUpload, Menu, Notebook, Pencil, Settings, Tags } from 'lucide-svelte';
 	import '../app.css';
+	import { page } from '$app/state';
+
+	import Dock from '$lib/components/Dock.svelte';
+	import { Import, Notebook, Settings, Tags, WalletCards } from 'lucide-svelte';
+
 	let { children, data } = $props();
 	let notebooks = $derived(data.notebooks);
 	let tags = $derived(data.tags);
@@ -29,9 +32,13 @@
 			{/each}
 			<div class="grow"></div>
 
-			<li><a href="#/notebooks"><Pencil size={18} />Manage Notebooks</a></li>
-			<li><a href="#/upload"><CloudUpload size={18} />Upload</a></li>
-			<li><a href="#/settings"><Settings size={18} />Settings</a></li>
+			<li><a href="#/organize"><WalletCards size={18} />Organize</a></li>
+			<li><a href="#/import"><Import size={18} />Import</a></li>
+			<li>
+				<a class={page.url.hash == '#/settings' ? 'menu-active' : ''} href="#/settings"
+					><Settings size={18} />Settings</a
+				>
+			</li>
 		</ul>
 	</div>
 </div>
