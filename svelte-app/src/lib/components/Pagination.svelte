@@ -17,11 +17,14 @@
 </script>
 
 <div class="join">
-	{clickedPage}
-	{currentPage}
 	{#each pages as page}
-		<button disabled={clickedPage == page} onclick={() => changePage(page)} class="join-item btn"
-			>{page}</button
+		<button
+			disabled={clickedPage == page}
+			onclick={() => {
+				clickedPage = page;
+				changePage();
+			}}
+			class="join-item btn">{page}</button
 		>
 	{/each}
 </div>

@@ -23,7 +23,7 @@
 			<div class="divider"></div>
 			<span class="menu-title flex items-center gap-2"><Notebook size={18} />Notebooks</span>
 			{#each notebooks as notebook}
-				<li><a href="">{notebook.name}</a></li>
+				<li><a href="#/notebook/{notebook.id}">{notebook.name}</a></li>
 			{/each}
 			<div class="divider"></div>
 			<span class="menu-title flex items-center gap-2"><Tags size={18} /> Tags</span>
