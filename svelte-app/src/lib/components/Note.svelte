@@ -14,7 +14,6 @@
 			const img = target as HTMLImageElement;
 			selectedImage = img.src;
 			isOpen = true;
-			console.log('clicked');
 		}
 	}
 
@@ -28,9 +27,9 @@
 	<div class="card bg-base-100 min-w-4xl mx-auto mt-10 w-96 max-w-3xl">
 		<div class="card-body">
 			<h2 class="card-title">{note.title}</h2>
-			<div class="prose" onclick={handleClick}>
+			<button class="prose" onclick={handleClick}>
 				{@html note.content}
-			</div>
+			</button>
 			<div class="card-actions justify-end">
 				<button class="btn btn-neutral">Buy Now</button>
 			</div>
@@ -46,9 +45,9 @@
 		<button class="right-15 absolute top-10 z-30 hover:cursor-pointer" onclick={closeModal}>
 			<CircleX size={42} />
 		</button>
-		<div onclick={(event) => event.stopPropagation()} in:scale={{ start: 0.8, duration: 200 }}>
+		<button onclick={(event) => event.stopPropagation()} in:scale={{ start: 0.8, duration: 200 }}>
 			<ImageViewer src={selectedImage} />
-		</div>
+		</button>
 	</div>
 {/if}
 <div class="pb-20"></div>
