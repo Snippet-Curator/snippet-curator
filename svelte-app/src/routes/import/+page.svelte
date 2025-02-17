@@ -32,7 +32,7 @@
 			required
 			class="file-input"
 		/>
-		<label class="fieldset-label">Max size 5GB</label>
+		<label for="file" class="fieldset-label">Max size 5GB</label>
 		<button onclick={parseUploadedEnex} class="btn btn-neutral">Upload</button>
 	</fieldset>
 </div>

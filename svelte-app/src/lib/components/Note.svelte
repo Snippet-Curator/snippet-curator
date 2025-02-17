@@ -27,7 +27,7 @@
 	<div class="card bg-base-100 min-w-4xl mx-auto mt-10 w-96 max-w-3xl">
 		<div class="card-body">
 			<h2 class="card-title">{note.title}</h2>
-			<button class="prose" onclick={handleClick}>
+			<button class="prose text-left" onclick={handleClick}>
 				{@html note.content}
 			</button>
 			<div class="card-actions justify-end">
@@ -43,7 +43,7 @@
 		transition:fade={{ duration: 100 }}
 	>
 		<button class="right-15 absolute top-10 z-30 hover:cursor-pointer" onclick={closeModal}>
-			<CircleX size={42} />
+			<CircleX size={42} class="stroke-base-content fill-base-100 drop-shadow-lg" />
 		</button>
 		<button onclick={(event) => event.stopPropagation()} in:scale={{ start: 0.8, duration: 200 }}>
 			<ImageViewer src={selectedImage} />
