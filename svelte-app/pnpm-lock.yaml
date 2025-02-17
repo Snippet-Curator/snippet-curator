@@ -32,6 +32,9 @@ importers:
       spark-md5:
         specifier: ^3.0.2
         version: 3.0.2
+      svelte-image-viewer:
+        specifier: ^4.0.0
+        version: 4.0.0(svelte@5.19.9)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^3.0.0
@@ -1324,6 +1327,11 @@ packages:
       svelte:
         optional: true
 
+  svelte-image-viewer@4.0.0:
+    resolution: {integrity: sha512-oZs1Zd8XJKeQXkLKoy/zbqlq4kRsVB6OB+1hfiy2QeD4JzmVrhPDyd3mdfD3Wxwr3zI9UZtHCzMxb2FtF9WsuQ==}
+    peerDependencies:
+      svelte: ^5.0.0
+
   svelte@5.19.9:
     resolution: {integrity: sha512-860s752/ZZxHIsii31ELkdKBOCeAuDsfb/AGUXJyQyzUVLRSt4oqEw/BV5+2+mNg8mbqmD3OK+vMvwWMPM6f8A==}
     engines: {node: '>=18'}
@@ -2499,6 +2507,10 @@ snapshots:
       postcss: 8.5.1
       postcss-scss: 4.0.9(postcss@8.5.1)
     optionalDependencies:
+      svelte: 5.19.9
+
+  svelte-image-viewer@4.0.0(svelte@5.19.9):
+    dependencies:
       svelte: 5.19.9
 
   svelte@5.19.9:

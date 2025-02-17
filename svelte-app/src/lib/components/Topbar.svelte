@@ -3,7 +3,7 @@
 	import { ArrowLeft } from 'lucide-svelte';
 </script>
 
-<div class="menu bg-base-200 border-base-200 w-full border-b px-4 py-2">
+<div class="menu bg-base-200 border-base-200 fixed top-0 z-20 w-full border-b px-4 py-2">
 	<div>
 		<button
 			class="btn btn-ghost group items-center pl-2.5 transition-all"

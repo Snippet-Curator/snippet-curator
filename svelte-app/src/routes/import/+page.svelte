@@ -1,19 +1,15 @@
 <script lang="ts">
-	import { parseEnex, EnImport } from '$lib/parser';
+	import { EnImport } from '$lib/parser';
 
 	let enexFiles: File[] = [];
 
 	async function parseUploadedEnex() {
-		console.log(enexFiles);
-
 		const decoder = new TextDecoder('utf-8');
-		const decodedText = decoder.decode(await enexFiles[0].arrayBuffer());
-
-		const parsedXML = new EnImport(decodedText);
-
-		console.log('enNote: ', parsedXML.content);
-		console.log('enResources: ', parsedXML.enResources);
-		await parsedXML.uploadToDB();
+		for (const file of enexFiles) {
+			const decodedText = decoder.decode(await file.arrayBuffer());
+			const parsedXML = new EnImport(decodedText);
+			await parsedXML.uploadToDB();
+		}
 	}
 
 	function handleFileUpload(event: Event) {
@@ -24,7 +20,7 @@
 	}
 </script>
 
-<div class="mt-20 flex items-center justify-center">
+<div class="flex pl-5 pt-20 md:pl-20">
 	<fieldset class="fieldset">
 		<legend class="fieldset-legend">Upload Evernote Enex File</legend>
 		<input
@@ -36,7 +32,7 @@
 			required
 			class="file-input"
 		/>
-		<label class="fieldset-label">Max size 2MB</label>
+		<label class="fieldset-label">Max size 5GB</label>
 		<button onclick={parseUploadedEnex} class="btn btn-neutral">Upload</button>
 	</fieldset>
 </div>

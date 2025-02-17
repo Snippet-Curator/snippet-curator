@@ -45,22 +45,22 @@
 }
 
 @font-face {
-	font-family: 'Concourse3';
-	src: url('/concourse_3_regular.woff2') format('woff2');
+	font-family: 'Concourse4';
+	src: url('/concourse_4_regular.woff2') format('woff2');
 	font-style: normal;
 	font-variant-numeric: oldstyle-nums;
 }
 
 @font-face {
-	font-family: 'Concourse3_bold';
-	src: url('/concourse_3_bold.woff2') format('woff2');
+	font-family: 'Concourse4_bold';
+	src: url('/concourse_4_bold.woff2') format('woff2');
 	font-style: bold;
 	font-variant-numeric: oldstyle-nums;
 }
 
 @theme {
-	--font-display: 'Concourse3', 'sans-serif';
-	--font-bold: 'Concourse3_bold', 'sans-serif';
+	--font-display: 'Concourse4', 'sans-serif';
+	--font-bold: 'Concourse4_bold', 'sans-serif';
 }
 
 /*
