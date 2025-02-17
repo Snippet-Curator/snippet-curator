@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import pb, { getAuth } from '$lib/db';
-	import Search from '$lib/components/Search.svelte';
+	import { Search, Pagination } from '$lib/components/';
 
 	import type { Note } from '$lib/types';
 
@@ -54,4 +54,7 @@
 	{:else}
 		No notes
 	{/if}
+	<div>
+		<Pagination />
+	</div>
 </div>

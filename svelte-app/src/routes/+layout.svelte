@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { page } from '$app/state';
 
-	import Dock from '$lib/components/Dock.svelte';
+	import { Dock } from '$lib/components';
 	import { Import, Notebook, Settings, Tags, WalletCards } from 'lucide-svelte';
 
 	let { children, data } = $props();

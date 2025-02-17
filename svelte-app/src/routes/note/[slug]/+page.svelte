@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Note from '$lib/components/Note.svelte';
-	import Topbar from '$lib/components/Topbar.svelte';
+	import { Note, Topbar } from '$lib/components/';
+
 	import type { Props } from '$lib/types';
 
 	let { data }: Props = $props();
