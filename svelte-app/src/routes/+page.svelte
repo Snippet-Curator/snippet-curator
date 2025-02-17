@@ -2,16 +2,24 @@
 	import { onMount } from 'svelte';
 	import pb, { getAuth } from '$lib/db';
 	import { Search, Pagination } from '$lib/components/';
-
-	import type { Note } from '$lib/types';
+	import type { NoteRecord } from '$lib/types';
 
 	import { goto } from '$app/navigation';
 
-	let notes = $state<{ items: Note[] }>();
+	let notes = $state<NoteRecord>();
+	let noteCount = $state();
+	let clickedPage = $state(1);
 
 	async function getNotes() {
 		await getAuth();
 		notes = await pb.collection('notes').getList(1, 25, {
+			expand: 'tags'
+		});
+	}
+
+	async function changePage(currentPage: number) {
+		clickedPage = currentPage;
+		notes = await pb.collection('notes').getList(clickedPage, 25, {
 			expand: 'tags'
 		});
 	}
@@ -23,6 +31,15 @@
 
 <div class="relative">
 	<Search />
+</div>
+
+<div>
+	<Pagination
+		totalPages={notes?.totalPages}
+		bind:clickedPage
+		currentPage={notes?.page}
+		{changePage}
+	/>
 </div>
 
 <div
@@ -55,6 +72,11 @@
 		No notes
 	{/if}
 	<div>
-		<Pagination />
+		<Pagination
+			totalPages={notes?.totalPages}
+			bind:clickedPage
+			currentPage={notes?.page}
+			{changePage}
+		/>
 	</div>
 </div>

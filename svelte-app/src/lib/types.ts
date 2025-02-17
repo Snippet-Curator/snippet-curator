@@ -1,3 +1,4 @@
+
 export interface Props {
   data: {
     note?: Note,
@@ -17,6 +18,14 @@ export type Note = {
     notebook?: Notebook,
     tags?: Tag
   }
+}
+
+export type NoteRecord = {
+  items: Note[]
+  page: number,
+  perPage: number,
+  totalItems: number,
+  totalPages: number
 }
 
 export type Notebook = {

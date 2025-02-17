@@ -1,5 +1,4 @@
 <script>
-	import { goto } from '$app/navigation';
 	import { ArrowLeft } from 'lucide-svelte';
 </script>
 
@@ -7,7 +6,7 @@
 	<div>
 		<button
 			class="btn btn-ghost group items-center pl-2.5 transition-all"
-			onclick={() => goto('#/')}
+			onclick={() => window.history.back()}
 		>
 			<ArrowLeft
 				size={18}
