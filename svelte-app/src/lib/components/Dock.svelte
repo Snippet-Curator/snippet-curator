@@ -32,7 +32,7 @@
 		class={page.url.hash == item.url ? 'dock-active' : ''}
 		onclick={() => goto(`${item.url}`)}
 	>
-		<svelte:component this={item.icon} size={22} class=" text-base-content/70" />
+		<svelte:component this={item.icon} size={22} class="text-base-content/70" />
 		<span class="dock-label">{item.name}</span>
 	</button>
 {/snippet}

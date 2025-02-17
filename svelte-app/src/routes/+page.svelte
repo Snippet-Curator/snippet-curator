@@ -4,6 +4,7 @@
 	import Search from '$lib/components/Search.svelte';
 
 	import type { Note } from '$lib/types';
+
 	import { goto } from '$app/navigation';
 
 	let notes = $state<{ items: Note[] }>();
@@ -22,7 +23,9 @@
 
 <Search />
 
-<div class="mx-10 mt-20 grid max-w-3xl grid-cols-4 gap-5 lg:mx-auto">
+<div
+	class="mx-10 mt-20 grid max-w-5xl grid-cols-1 gap-x-10 md:grid-cols-2 lg:mx-auto lg:grid-cols-4"
+>
 	{#if notes?.items.length > 0}
 		{#each notes.items as note}
 			<div

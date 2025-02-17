@@ -34,6 +34,9 @@ export type EnResource = {
   data: {
     "#text": string
   },
+  hash?: string,
+  file?: File,
+  fileURL?: string,
   height: number,
   width: number,
   mime: string,
