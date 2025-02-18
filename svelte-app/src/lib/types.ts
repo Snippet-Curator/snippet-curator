@@ -1,10 +1,11 @@
 
 export interface Props {
   data: {
-    note?: Note,
+    note?: Note
     notes?: Note[]
     notebook?: Notebook
     notebooks?: Notebook[]
+    tag?: Tag
     tags?: Tag[]
   }
 }
@@ -30,11 +31,12 @@ export type NoteRecord = {
 }
 
 export type Notebook = {
-  name: string
   id: string
+  name: string
 }
 
 export type Tag = {
+  id: string
   name: string
 }
 

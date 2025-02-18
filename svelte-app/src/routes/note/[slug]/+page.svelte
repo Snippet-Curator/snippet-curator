@@ -7,5 +7,4 @@
 	let note = $state(data.note);
 </script>
 
-<Topbar />
 <Note {note} />

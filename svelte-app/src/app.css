@@ -82,8 +82,12 @@
 	}
 }
 
+/* * {
+	border: 1px solid black;
+} */
+
 body {
-	@apply text-lg;
+	@apply overflow-hidden text-lg;
 }
 
 ul,

@@ -1,30 +1,33 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import pb, { getAuth } from '$lib/db';
-	import { Search, Pagination, NoteList } from '$lib/components/';
+	import pb from '$lib/db';
+	import { Pagination, NoteList, Search } from '$lib/components/';
 	import type { NoteRecord } from '$lib/types';
-	import { getNotesByPage } from '$lib/utils';
 
 	let notes = $state<NoteRecord>();
 	let clickedPage = $state(1);
 
-	async function changePage() {
-		notes = await getNotesByPage(clickedPage, 'notes');
+	async function getNotesByPage() {
+		notes = await pb.collection('notes').getList(clickedPage, 12, {
+			expand: 'tags',
+			sort: '-updated'
+		});
 	}
 
 	onMount(async () => {
-		notes = await getNotesByPage(clickedPage);
+		await getNotesByPage();
 	});
 </script>
 
-<div class="pt-20">
-	<Pagination
-		totalPages={notes?.totalPages}
-		bind:clickedPage
-		currentPage={notes?.page}
-		{changePage}
-	/>
-</div>
 <Search />
-
-<NoteList {notes} />
+<div class="h-[calc(100vh-60px)] overflow-y-auto">
+	<div class="flex w-full items-center justify-center pb-5 pt-5">
+		<Pagination
+			totalPages={notes?.totalPages}
+			bind:clickedPage
+			currentPage={notes?.page}
+			changePage={getNotesByPage}
+		/>
+	</div>
+	<NoteList {notes} />
+</div>

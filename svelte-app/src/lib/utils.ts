@@ -8,3 +8,4 @@ export async function getNotesByPage(clickedPage: number, notebookID: string) {
   console.log('utils', notes)
   return notes
 }
+

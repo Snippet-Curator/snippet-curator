@@ -5,14 +5,14 @@
 	import pb from '$lib/db';
 
 	let { data }: Props = $props();
-	let notebook = $derived(data.notebook);
+	let tag = $derived(data.tag);
 	let notes = $state<NoteRecord>();
 
 	let clickedPage = $state(1);
 
 	async function getNotesByPage() {
 		notes = await pb.collection('notes').getList(clickedPage, 25, {
-			filter: `notebook = "${notebook?.id}"`,
+			filter: `tags = "${tag?.id}"`,
 			expand: 'tags'
 		});
 	}

@@ -1,9 +1,19 @@
 <script lang="ts">
-	import { CircleX } from 'lucide-svelte';
 	import { ImageViewer } from 'svelte-image-viewer';
 	import { fade, scale } from 'svelte/transition';
 
-	let { note } = $props();
+	import pb from '$lib/db';
+	import { Topbar } from '$lib/components';
+
+	import { CircleX } from 'lucide-svelte';
+	import type { Note } from '$lib/types';
+	import { goto } from '$app/navigation';
+
+	type Props = {
+		note: Note;
+	};
+
+	let { note }: Props = $props();
 
 	let isOpen = $state(false);
 	let selectedImage = $state('');
@@ -20,22 +30,27 @@
 	function closeModal() {
 		isOpen = false;
 	}
+
+	async function deleteNote() {
+		await pb.collection('notes').delete(note.id);
+		console.log('delete');
+		goto('#/');
+	}
 </script>
 
-<div class="pt-20"></div>
-{#if note}
-	<div class="card bg-base-100 min-w-4xl mx-auto mt-10 w-96 max-w-3xl">
-		<div class="card-body">
-			<h2 class="card-title">{note.title}</h2>
-			<button class="prose text-left" onclick={handleClick}>
-				{@html note.content}
-			</button>
-			<div class="card-actions justify-end">
-				<button class="btn btn-neutral">Buy Now</button>
+<Topbar {deleteNote} />
+<div class="h-[calc(100vh-60px)] overflow-y-auto">
+	{#if note}
+		<div class="card bg-base-100 min-w-4xl mx-auto mt-10 w-96 max-w-3xl">
+			<div class="card-body">
+				<h2 class="card-title">{note.title}</h2>
+				<button class="prose text-left" onclick={handleClick}>
+					{@html note.content}
+				</button>
 			</div>
 		</div>
-	</div>
-{/if}
+	{/if}
+</div>
 
 {#if isOpen}
 	<div

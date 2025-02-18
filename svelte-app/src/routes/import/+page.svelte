@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { EnImport } from '$lib/parser';
 
 	let enexFiles: File[] = [];
@@ -10,6 +11,7 @@
 			const parsedXML = new EnImport(decodedText);
 			await parsedXML.uploadToDB();
 		}
+		goto('#/');
 	}
 
 	function handleFileUpload(event: Event) {

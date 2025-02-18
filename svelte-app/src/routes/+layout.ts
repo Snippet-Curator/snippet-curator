@@ -5,8 +5,9 @@ export async function load() {
 
   const notebooks = await pb.collection('notebooks').getFullList()
   const tags = await pb.collection('tags').getFullList()
+  const notes = await pb.collection('notes').getList(1, 1)
 
   return {
-    notebooks, tags
+    notebooks, tags, notes
   }
 }
