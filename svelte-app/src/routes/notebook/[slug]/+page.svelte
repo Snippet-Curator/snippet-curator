@@ -3,6 +3,7 @@
 	import { Pagination, NoteList, Search } from '$lib/components/';
 	import type { NoteRecord, Props } from '$lib/types';
 	import pb from '$lib/db';
+	import { page } from '$app/state';
 
 	let { data }: Props = $props();
 	let notebook = $derived(data.notebook);
@@ -33,6 +34,7 @@
 			bind:clickedPage
 			currentPage={notes?.page}
 			changePage={getNotesByPage}
+			url={page.url.hash}
 		/>
 	</div>
 </div>

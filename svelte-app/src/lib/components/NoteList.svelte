@@ -13,10 +13,14 @@
 				class="card hover:bg-base-200/70 bg-base-100 card-border w-full border transition-colors duration-300 hover:cursor-pointer"
 			>
 				<figure class="w-full">
-					<img src="http://127.0.0.1:8090/api/files/notes/{note.id}/{note.attachments[0]}" alt="" />
+					<img
+						class="w-full"
+						src="http://127.0.0.1:8090/api/files/notes/{note.id}/{note.attachments[0]}"
+						alt=""
+					/>
 				</figure>
 				<div class="card-body w-full pb-2 pt-5">
-					<div class="card-title text-left">
+					<div class="card-title text-pretty break-all text-left">
 						{note.title}
 					</div>
 					{#if note.attachments.length == 0}

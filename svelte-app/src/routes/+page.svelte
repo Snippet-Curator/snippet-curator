@@ -3,6 +3,7 @@
 	import pb from '$lib/db';
 	import { Pagination, NoteList, Search } from '$lib/components/';
 	import type { NoteRecord } from '$lib/types';
+	import { page } from '$app/state';
 
 	let notes = $state<NoteRecord>();
 	let clickedPage = $state(1);
@@ -12,9 +13,13 @@
 			expand: 'tags',
 			sort: '-updated'
 		});
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
 	onMount(async () => {
+		if (page.state.url && page.state.url == page.url.hash) {
+			clickedPage = page.state.previousHistoryPage;
+		}
 		await getNotesByPage();
 	});
 </script>
@@ -27,7 +32,17 @@
 			bind:clickedPage
 			currentPage={notes?.page}
 			changePage={getNotesByPage}
+			url={page.url.hash}
 		/>
 	</div>
 	<NoteList {notes} />
+	<div class="flex w-full items-center justify-center pb-5 pt-5">
+		<Pagination
+			totalPages={notes?.totalPages}
+			bind:clickedPage
+			currentPage={notes?.page}
+			changePage={getNotesByPage}
+			url={page.url.hash}
+		/>
+	</div>
 </div>

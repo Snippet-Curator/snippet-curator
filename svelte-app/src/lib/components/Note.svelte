@@ -2,12 +2,9 @@
 	import { ImageViewer } from 'svelte-image-viewer';
 	import { fade, scale } from 'svelte/transition';
 
-	import pb from '$lib/db';
-	import { Topbar } from '$lib/components';
-
 	import { CircleX } from 'lucide-svelte';
 	import type { Note } from '$lib/types';
-	import { goto } from '$app/navigation';
+
 	import { onMount } from 'svelte';
 	import { categorizeMediabyType } from '$lib/utils';
 
@@ -34,30 +31,21 @@
 		isOpen = false;
 	}
 
-	async function deleteNote() {
-		await pb.collection('notes').delete(note.id);
-		console.log('delete');
-		goto('#/');
-	}
-
 	onMount(() => {
 		content = categorizeMediabyType(content);
 	});
 </script>
 
-<Topbar {deleteNote} />
-<div class="h-[calc(100vh-60px)] overflow-y-auto">
-	{#if note}
-		<div class="card bg-base-100 min-w-4xl mx-auto mt-10 w-96 max-w-3xl">
-			<div class="card-body">
-				<h2 class="card-title">{note.title}</h2>
-				<button class="prose text-left" onclick={handleClick}>
-					{@html content}
-				</button>
-			</div>
+{#if note}
+	<div class="card bg-base-100 min-w-4xl mx-auto mt-10 w-96 max-w-3xl">
+		<div class="card-body">
+			<h2 class="card-title">{note.title}</h2>
+			<button class="prose select-text text-left" onclick={handleClick}>
+				{@html content}
+			</button>
 		</div>
-	{/if}
-</div>
+	</div>
+{/if}
 
 {#if isOpen}
 	<div
