@@ -45,14 +45,16 @@ export class EnImport {
     this.collectionID = 'notes'
     this.baseURL = 'http://127.0.0.1:8090/api/files'
 
-    const { xmlNote, xmlMedia } = this.parseEnex(fileContent)
+    const { xmlNote, xmlMedia, xmlContent } = this.parseEnex(fileContent)
+
     this.enNote = xmlNote
-    const tags = this.enNote['en-export'].note.tags
+    this.content = xmlContent
     this.enMedias = Array.isArray(xmlMedia) ? xmlMedia : [xmlMedia]
+
+    const tags = this.enNote['en-export'].note.tags
     this.xmlResource = xmlNote["en-export"]['note']['resource']
     this.enResources = Array.isArray(this.xmlResource) ? this.xmlResource : [this.xmlResource]
     this.title = this.enNote['en-export'].note.title
-    this.content = this.enNote['en-export'].note.content
     this.created = this.enNote['en-export'].note.created
     this.updated = this.enNote['en-export'].note.updated
     this.source = this.enNote['en-export'].note['note-attributes'].source
@@ -64,10 +66,12 @@ export class EnImport {
   parseEnex(fileContent: string) {
     const xmlNote: EnNote = parser.parse(fileContent)
     const xmlMedia: EnMedia = parser.parse(xmlNote['en-export']['note']['content'])['en-note']['en-media']
+    const xmlContent = xmlNote['en-export']['note']['content'].match(/<en-note[\s\S]*<\/en-note>/)?.[0] as string
 
     return {
       xmlNote,
-      xmlMedia
+      xmlMedia,
+      xmlContent
     }
   }
 
@@ -120,7 +124,7 @@ export class EnImport {
       const resource = this.enResources.filter((resource) => {
         return resource.hash == hash
       })
-      return `<img src=${resource[0].fileURL}>`
+      return `<media src=${resource[0].fileURL} type=${resource[0].mime}>`
     }
 
     this.content = this.content.replace(mediaMatch, replaceMedia);

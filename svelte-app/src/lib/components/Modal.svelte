@@ -10,8 +10,8 @@
 				{@render children()}
 			</div>
 			<div class="modal-action">
-				<button class="btn btn-error" onclick={action}>Delete</button>
 				<button class="btn" onclick={close}>Close</button>
+				<button class="btn btn-error" onclick={action}>Delete</button>
 			</div>
 		</div>
 	</div>

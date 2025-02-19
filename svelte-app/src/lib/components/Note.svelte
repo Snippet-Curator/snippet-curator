@@ -8,12 +8,15 @@
 	import { CircleX } from 'lucide-svelte';
 	import type { Note } from '$lib/types';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { categorizeMediabyType } from '$lib/utils';
 
 	type Props = {
 		note: Note;
 	};
 
 	let { note }: Props = $props();
+	let content = $state(note.content);
 
 	let isOpen = $state(false);
 	let selectedImage = $state('');
@@ -36,6 +39,10 @@
 		console.log('delete');
 		goto('#/');
 	}
+
+	onMount(() => {
+		content = categorizeMediabyType(content);
+	});
 </script>
 
 <Topbar {deleteNote} />
@@ -45,7 +52,7 @@
 			<div class="card-body">
 				<h2 class="card-title">{note.title}</h2>
 				<button class="prose text-left" onclick={handleClick}>
-					{@html note.content}
+					{@html content}
 				</button>
 			</div>
 		</div>
