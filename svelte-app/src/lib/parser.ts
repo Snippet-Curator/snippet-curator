@@ -63,6 +63,7 @@ export class EnImport {
 
   }
 
+
   parseEnex(fileContent: string) {
     const xmlNote: EnNote = parser.parse(fileContent)
     const xmlMedia: EnMedia = parser.parse(xmlNote['en-export']['note']['content'])['en-note']['en-media']
@@ -74,6 +75,8 @@ export class EnImport {
       xmlContent
     }
   }
+
+
 
   convertResourceToFile(resource: EnResource) {
     const binaryStr = atob(resource.data['#text']);
@@ -89,6 +92,39 @@ export class EnImport {
       type: resource.mime,
     });
   }
+
+  async getVideoThumb(videoUrl: string) {
+
+    return new Promise((resolve) => {
+      const video = document.createElement("video");
+      video.src = videoUrl;
+      video.crossOrigin = "anonymous"; // Prevent CORS issues
+      video.muted = true;
+      video.playsInline = true;
+
+      video.onloadeddata = () => {
+        video.currentTime = 1; // Capture at 2 seconds
+      };
+
+      video.onseeked = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth; // Resize to reduce file size
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas to Blob and create a File
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const thumbnailFile = new File([blob], "thumbnail.png", { type: "image/png" });
+            resolve(thumbnailFile)
+          }
+        }, "image/png");
+      };
+    })
+  }
+
 
   async uploadResources() {
     for (const [index, resource] of this.enResources.entries()) {
@@ -108,6 +144,31 @@ export class EnImport {
         'attachments+': [resource.file]
       })
 
+      // fill in thumbnail
+      if (record.thumbnail == '') {
+        let thumbnailURL = ''
+
+        // make thumbnail based on type of resource file
+        if (resource.mime == 'image/gif') {
+          thumbnailURL = `${this.baseURL}/${this.collectionID}/${this.recordID}/${record.attachments[0]}`
+        } else if (resource.mime == 'video/mp4') {
+          const videoURL = `${this.baseURL}/${this.collectionID}/${this.recordID}/${record.attachments[0]}`
+          const thumbnailFile = await this.getVideoThumb(videoURL)
+          const thumbedRecord = await pb.collection('notes').update(this.recordID, {
+            'attachments+': [thumbnailFile]
+          })
+          thumbnailURL = `${this.baseURL}/${this.collectionID}/${this.recordID}/${thumbedRecord.attachments[1]}?thumb=500x0`
+        }
+        else {
+          thumbnailURL = `${this.baseURL}/${this.collectionID}/${this.recordID}/${record.attachments[0]}?thumb=500x0`
+        }
+
+        // update thumbnail
+        await pb.collection('notes').update(this.recordID, {
+          'thumbnail': thumbnailURL
+        })
+      }
+
       // get new filename and url
       const newName = record.attachments[index]
       const newURL = `${this.baseURL}/${this.collectionID}/${this.recordID}/${newName}`
@@ -119,11 +180,15 @@ export class EnImport {
   replaceEnMedia() {
     const mediaMatch = /<en-media[^>]+?hash="([a-zA-Z0-9]+)"[^>]*\/?>/g
 
+    if (this.enResources.length == 0) return
+
     const replaceMedia = (match: string, hash: string) => {
-      console.log('replaceEnMedia hash: ', hash)
       const resource = this.enResources.filter((resource) => {
         return resource.hash == hash
       })
+
+      if (resource.length == 0) return
+
       return `<media src=${resource[0].fileURL} type=${resource[0].mime}>`
     }
 
@@ -137,7 +202,6 @@ export class EnImport {
 
     const record = await pb.collection('notes').create(skeletonData)
     this.recordID = record.id
-    console.log('after upload: ', this.recordID, this.collectionID)
 
     await this.uploadResources()
     this.replaceEnMedia()
@@ -146,9 +210,6 @@ export class EnImport {
       'content': this.content,
     }
 
-    console.log('content: ', this.content)
-
-    const record2 = await pb.collection('notes').update(this.recordID, data)
-    console.log('after update', record2)
+    await pb.collection('notes').update(this.recordID, data)
   }
 }

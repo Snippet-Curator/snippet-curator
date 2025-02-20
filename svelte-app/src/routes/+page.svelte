@@ -9,7 +9,7 @@
 	let clickedPage = $state(1);
 
 	async function getNotesByPage() {
-		notes = await pb.collection('notes').getList(clickedPage, 12, {
+		notes = await pb.collection('notes').getList(clickedPage, 24, {
 			expand: 'tags',
 			sort: '-updated'
 		});
@@ -26,23 +26,27 @@
 
 <Search />
 <div class="h-[calc(100vh-60px)] overflow-y-auto">
-	<div class="flex w-full items-center justify-center pb-5 pt-5">
-		<Pagination
-			totalPages={notes?.totalPages}
-			bind:clickedPage
-			currentPage={notes?.page}
-			changePage={getNotesByPage}
-			url={page.url.hash}
-		/>
-	</div>
-	<NoteList {notes} />
-	<div class="flex w-full items-center justify-center pb-5 pt-5">
-		<Pagination
-			totalPages={notes?.totalPages}
-			bind:clickedPage
-			currentPage={notes?.page}
-			changePage={getNotesByPage}
-			url={page.url.hash}
-		/>
-	</div>
+	{#if notes?.totalItems > 0}
+		<div class="flex w-full items-center justify-center pb-5 pt-5">
+			<Pagination
+				totalPages={notes?.totalPages}
+				bind:clickedPage
+				currentPage={notes?.page}
+				changePage={getNotesByPage}
+				url={page.url.hash}
+			/>
+		</div>
+		<NoteList {notes} />
+		<div class="flex w-full items-center justify-center pb-5 pt-5">
+			<Pagination
+				totalPages={notes?.totalPages}
+				bind:clickedPage
+				currentPage={notes?.page}
+				changePage={getNotesByPage}
+				url={page.url.hash}
+			/>
+		</div>
+	{:else}
+		no notes
+	{/if}
 </div>

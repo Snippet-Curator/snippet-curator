@@ -3,21 +3,38 @@
 	import { EnImport } from '$lib/parser';
 
 	let enexFiles: File[] = [];
+	let listOfUploads;
+	let listOfErrors: string[] = $state([]);
+	let listofSuccesses: string[] = $state([]);
+	let totalFiles: number = $state(0);
+	let progress: number = $state(0);
+	let currentFile: string = $state('');
+	let uploadStatus: 'stopped' | 'in progress' | 'error' | 'completed' = $state('stopped');
 
 	async function parseUploadedEnex() {
+		uploadStatus = 'in progress';
 		const decoder = new TextDecoder('utf-8');
-		for (const file of enexFiles) {
+		for (const [index, file] of enexFiles.entries()) {
+			progress = Math.round(((index + 1) / totalFiles) * 100);
+			currentFile = file.name;
+
 			const decodedText = decoder.decode(await file.arrayBuffer());
 			const parsedXML = new EnImport(decodedText);
-			await parsedXML.uploadToDB();
+			try {
+				await parsedXML.uploadToDB();
+				listofSuccesses.push(file.name);
+			} catch (e) {
+				console.log(e);
+			}
 		}
-		goto('#/');
+		uploadStatus = 'completed';
 	}
 
 	function handleFileUpload(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (input.files) {
 			enexFiles = Array.from(input.files);
+			totalFiles = enexFiles.length;
 		}
 	}
 </script>
@@ -37,4 +54,32 @@
 		<label for="file" class="fieldset-label">Max size 5GB</label>
 		<button onclick={parseUploadedEnex} class="btn btn-neutral">Upload</button>
 	</fieldset>
+</div>
+
+<div>
+	Total files: {totalFiles}
+</div>
+<div>
+	Progress:
+	<progress class="progress h-4 w-72" value={progress} max="100"></progress>
+</div>
+<div>uploadStatus: {uploadStatus}</div>
+<div>
+	currentFile: {currentFile}
+</div>
+
+<div>
+	Successes
+	{#each listofSuccesses as item}
+		<ul class="list">
+			<li class="list-row">{item}</li>
+		</ul>
+	{/each}
+</div>
+
+<div>
+	Errors
+	{#each listOfErrors as item}
+		<div>{item}</div>
+	{/each}
 </div>

@@ -15,7 +15,7 @@ export function categorizeMediabyType(content: string) {
 
   const replaceMedia = (match: string, src: string, type: string) => {
 
-    // console.log(type)
+    console.log(type)
     if (type.includes('image')) {
       return `<img src=${src}>`;
     }
