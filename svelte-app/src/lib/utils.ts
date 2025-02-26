@@ -17,7 +17,7 @@ export function categorizeMediabyType(content: string) {
 
     console.log(type)
     if (type.includes('image')) {
-      return `<img style='max-width:100%; cursor: zoom-in' src=${src}>`;
+      return `<img style='max-width:100%' src=${src}>`;
     }
 
     if (type == 'video/mp4') {

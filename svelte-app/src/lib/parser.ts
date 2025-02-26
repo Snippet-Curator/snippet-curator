@@ -11,6 +11,7 @@ const parser = new XMLParser({
 export class htmlImport {
   title: string
   content: string
+  parsedHTML: Document
   created: string
   updated: string
   source: string
@@ -25,8 +26,9 @@ export class htmlImport {
     this.collectionID = 'notes'
     this.baseURL = 'http://127.0.0.1:8090/api/files'
 
-    const { htmlContent, title } = this.parseHTML(fileContent)
+    const { parsedHTML, htmlContent, title } = this.parseHTML(fileContent)
     this.title = title
+    this.parsedHTML = parsedHTML
     this.content = htmlContent
     this.created = ''
     this.updated = ''
@@ -44,18 +46,63 @@ export class htmlImport {
     const htmlContent = `${styleTags} ${bodyContent}`
 
     return {
-      htmlContent, title
+      parsedHTML, htmlContent, title
     }
   }
 
-  replaceImg() {
-    const imgElements = document.querySelectorAll('img')
-    for (const img of imgElements) {
+  base64ToFile(base64: string, mimeType: string) {
+    const extension = mimeType.split("/")[1];
+    const filename = `${crypto.randomUUID()}.${extension}`;
+
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+
+    return new File([byteArray], filename, { type: mimeType });
+  }
+
+  async uploadImg() {
+    const imgElements = this.parsedHTML.querySelectorAll('img')
+    for (const [index, img] of imgElements.entries()) {
 
       const base64Data = img.src.split(',')[1]
       const mimeType = img.src.split(';')[0].split(':')[1]
       const extension = mimeType.split('/')[1]
-      const imgName = `${crypto.randomUUID()}.${extension}`
+
+      // convert to file
+      const imgFile = this.base64ToFile(base64Data, mimeType)
+
+      // upload to database
+      const record = await pb.collection('notes').update(this.recordID, {
+        'attachments+': [imgFile]
+      })
+
+      // fill in thumbnail
+      if (record.thumbnail == '') {
+        let thumbnailURL = ''
+
+        // make thumbnail based on type of resource file
+        if (mimeType == 'image/gif') {
+          thumbnailURL = `${this.baseURL}/${this.collectionID}/${this.recordID}/${record.attachments[0]}`
+        } else {
+          thumbnailURL = `${this.baseURL}/${this.collectionID}/${this.recordID}/${record.attachments[0]}?thumb=500x0`
+        }
+
+        // update thumbnail
+        await pb.collection('notes').update(this.recordID, {
+          'thumbnail': thumbnailURL
+        })
+      }
+
+      // get new filename and url
+      const newName = record.attachments[index]
+      const newURL = `${this.baseURL}/${this.collectionID}/${this.recordID}/${newName}`
+
+      // replace img src
+      img.setAttribute('src', newURL)
     }
   }
 
@@ -68,12 +115,13 @@ export class htmlImport {
     const record = await pb.collection('notes').create(skeletonData)
     this.recordID = record.id
 
-    // await this.uploadResources()
-    // this.replaceEnMedia()
+    await this.uploadImg()
 
     const data = {
       'content': this.content,
     }
+
+    console.log(data)
 
     await pb.collection('notes').update(this.recordID, data)
   }

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ImageViewer } from 'svelte-image-viewer';
+	import sanitizeHTML from 'sanitize-html';
 	import { fade, scale } from 'svelte/transition';
 
 	import { CircleX } from 'lucide-svelte';
@@ -42,7 +43,65 @@
 	onMount(() => {
 		content = categorizeMediabyType(content);
 		const shadow = container.attachShadow({ mode: 'open' });
-		shadow.innerHTML = content;
+		const cleanContent = sanitizeHTML(
+			content,
+			{
+				// allowedTags: sanitizeHTML.defaults.allowedTags.concat([
+				// 	'img',
+				// 	'a',
+				// 	'body',
+				// 	'form',
+				// 	'ul',
+				// 	'li',
+				// 	'svg'
+				// ]),
+				allowedTags: false,
+				disallowedtags: [],
+				allowedAttributes: {
+					'*': ['style', 'id', 'class', 'src']
+				},
+				// allowedAttributes: false,
+				allowedSchemes: ['data', 'http', 'https'],
+				allowedStyles: {
+					p: {
+						color: {}
+					}
+				},
+				transformTags: {
+					div: sanitizeHTML.simpleTransform('div', {
+						style:
+							'background-color: var(--color-base-100); background: var(--color-base-100); color: var(--color-base-content);'
+					})
+				}
+			}
+			// allowedStyles: {
+			// 	'*': {
+			// 		// color: [/^#/, /^rgb/, /^hsl/], // Allow only color styles
+			// 		'font-size': [/^\d+(px|em|rem|%)$/], // Allow limited font sizes
+			// 		'text-align': [/^left$/, /^right$/, /^center$/, /^justify$/], // Allow text alignment,
+			// 		'font-weight': [/^bold$/, /^normal$/, /^[1-9]00$/], // Allow boldness
+			// 		'font-style': [/^italic$/, /^normal$/], // Allow italic
+			// 		display: [/^flex$/, /^block$/, /^inline$/, /^inline-block$/, /^grid$/, /^none$/], // Allow flex and layout styles
+			// 		'justify-content': [
+			// 			/^flex-start$/,
+			// 			/^flex-end$/,
+			// 			/^center$/,
+			// 			/^space-between$/,
+			// 			/^space-around$/,
+			// 			/^space-evenly$/
+			// 		], // Allow flex alignment
+			// 		'align-items': [/^stretch$/, /^flex-start$/, /^flex-end$/, /^center$/, /^baseline$/], // Allow flex alignment
+			// 		'flex-direction': [/^row$/, /^row-reverse$/, /^column$/, /^column-reverse$/], // Allow flex directions
+			// 		'flex-wrap': [/^nowrap$/, /^wrap$/, /^wrap-reverse$/], // Allow flex wrapping
+			// 		gap: [/^\d+(px|em|rem|%)$/] // Allow gaps
+			// 	},
+			// 	div: {
+			// 		'background-color': []
+			// 	}
+			// }
+		);
+		// shadow.innerHTML = content;
+		shadow.innerHTML = cleanContent;
 		// click link opens browser
 		const links = shadow.querySelectorAll('a');
 		links.forEach((link) => {
@@ -66,6 +125,16 @@
 				onImageClick(img.src);
 			});
 		});
+		const style = document.createElement('style');
+		style.textContent = `
+		:host, :host * {
+			font-size: 16px !important;
+			line-height: 1.4;
+		}
+	
+ 
+			`;
+		shadow.appendChild(style);
 	});
 </script>
 

@@ -11,6 +11,14 @@
 	let currentFile: string = $state('');
 	let uploadStatus: 'stopped' | 'in progress' | 'error' | 'completed' = $state('stopped');
 
+	function handleFileUpload(event: Event) {
+		const input = event.target as HTMLInputElement;
+		if (input.files) {
+			enexFiles = Array.from(input.files);
+			totalFiles = enexFiles.length;
+		}
+	}
+
 	async function parseUploadedEnex() {
 		uploadStatus = 'in progress';
 		const decoder = new TextDecoder('utf-8');
@@ -21,8 +29,6 @@
 
 			if (file.type == 'text/html') {
 				const parsedHTML = new htmlImport(decodedText);
-				console.log(parsedHTML.title);
-				console.log(parsedHTML.content);
 				await parsedHTML.uploadToDB();
 			}
 
@@ -37,14 +43,6 @@
 			}
 		}
 		uploadStatus = 'completed';
-	}
-
-	function handleFileUpload(event: Event) {
-		const input = event.target as HTMLInputElement;
-		if (input.files) {
-			enexFiles = Array.from(input.files);
-			totalFiles = enexFiles.length;
-		}
 	}
 </script>
 
