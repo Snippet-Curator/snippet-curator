@@ -8,19 +8,77 @@ const parser = new XMLParser({
   attributeNamePrefix: "",
 })
 
-export function base64ToMD(base64String: string) {
-  const binaryStr = atob(base64String);
-  return SparkMD5.hashBinary(binaryStr);
-}
+export class htmlImport {
+  title: string
+  content: string
+  created: string
+  updated: string
+  source: string
+  sourceUrl: string
+  tags: string[]
+  recordID: string
+  collectionID: string
+  baseURL: string
 
-export function parseEnex(fileContent: string) {
-  const xmlNote = parser.parse(fileContent)
-  const xmlMedia = parser.parse(xmlNote['en-export']['note']['content'])
-  return {
-    xmlNote,
-    xmlMedia
+  constructor(fileContent: string) {
+    this.recordID = ''
+    this.collectionID = 'notes'
+    this.baseURL = 'http://127.0.0.1:8090/api/files'
+
+    const { htmlContent, title } = this.parseHTML(fileContent)
+    this.title = title
+    this.content = htmlContent
+    this.created = ''
+    this.updated = ''
+    this.source = ''
+    this.sourceUrl = ''
+    this.tags = ['']
+  }
+
+  parseHTML(fileContent: string) {
+    const parser = new DOMParser()
+    const parsedHTML = parser.parseFromString(fileContent, 'text/html')
+    const title = parsedHTML.querySelector('title')?.textContent || 'Untitled'
+    const bodyContent = parsedHTML.body.innerHTML
+    const styleTags = [...parsedHTML.querySelectorAll('style')].map(style => style.outerHTML).join('\n')
+    const htmlContent = `${styleTags} ${bodyContent}`
+
+    return {
+      htmlContent, title
+    }
+  }
+
+  replaceImg() {
+    const imgElements = document.querySelectorAll('img')
+    for (const img of imgElements) {
+
+      const base64Data = img.src.split(',')[1]
+      const mimeType = img.src.split(';')[0].split(':')[1]
+      const extension = mimeType.split('/')[1]
+      const imgName = `${crypto.randomUUID()}.${extension}`
+    }
+  }
+
+
+  async uploadToDB() {
+    const skeletonData = {
+      'title': this.title,
+    }
+
+    const record = await pb.collection('notes').create(skeletonData)
+    this.recordID = record.id
+
+    // await this.uploadResources()
+    // this.replaceEnMedia()
+
+    const data = {
+      'content': this.content,
+    }
+
+    await pb.collection('notes').update(this.recordID, data)
   }
 }
+
 
 export class EnImport {
   enNote: EnNote

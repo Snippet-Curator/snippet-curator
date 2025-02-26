@@ -17,11 +17,11 @@ export function categorizeMediabyType(content: string) {
 
     console.log(type)
     if (type.includes('image')) {
-      return `<img src=${src}>`;
+      return `<img style='max-width:100%; cursor: zoom-in' src=${src}>`;
     }
 
     if (type == 'video/mp4') {
-      return `<video controls class="w-full mx-auto rounded-md shadow-md"><source src=${src} type=${type} />Your browser does not support the video tag.</video>`
+      return `<video style='width:100%' controls class="w-full mx-auto rounded-md shadow-md"><source src=${src} type=${type} />Your browser does not support the video tag.</video>`
     }
   };
 

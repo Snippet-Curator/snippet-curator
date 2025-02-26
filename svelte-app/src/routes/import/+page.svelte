@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { EnImport } from '$lib/parser';
+	import { EnImport, htmlImport } from '$lib/parser';
 
 	let enexFiles: File[] = [];
 	let listOfUploads;
@@ -17,14 +17,23 @@
 		for (const [index, file] of enexFiles.entries()) {
 			progress = Math.round(((index + 1) / totalFiles) * 100);
 			currentFile = file.name;
-
 			const decodedText = decoder.decode(await file.arrayBuffer());
-			const parsedXML = new EnImport(decodedText);
-			try {
-				await parsedXML.uploadToDB();
-				listofSuccesses.push(file.name);
-			} catch (e) {
-				console.log(e);
+
+			if (file.type == 'text/html') {
+				const parsedHTML = new htmlImport(decodedText);
+				console.log(parsedHTML.title);
+				console.log(parsedHTML.content);
+				await parsedHTML.uploadToDB();
+			}
+
+			if (file.name.includes('.enex')) {
+				const parsedXML = new EnImport(decodedText);
+				try {
+					await parsedXML.uploadToDB();
+					listofSuccesses.push(file.name);
+				} catch (e) {
+					console.log(e);
+				}
 			}
 		}
 		uploadStatus = 'completed';
@@ -46,7 +55,7 @@
 			onchange={handleFileUpload}
 			type="file"
 			multiple
-			accept=".enex"
+			accept=".enex, .html"
 			id="file"
 			required
 			class="file-input"
@@ -54,32 +63,37 @@
 		<label for="file" class="fieldset-label">Max size 5GB</label>
 		<button onclick={parseUploadedEnex} class="btn btn-neutral">Upload</button>
 	</fieldset>
+
+	<div class="mx-4">
+		<div>
+			Total files: {totalFiles}
+		</div>
+		<div>
+			Progress:
+			<progress class="progress h-4 w-72" value={progress} max="100"></progress>
+			{progress}%
+		</div>
+		<div>uploadStatus: {uploadStatus}</div>
+		<div>
+			currentFile: {currentFile}
+		</div>
+	</div>
 </div>
 
-<div>
-	Total files: {totalFiles}
-</div>
-<div>
-	Progress:
-	<progress class="progress h-4 w-72" value={progress} max="100"></progress>
-</div>
-<div>uploadStatus: {uploadStatus}</div>
-<div>
-	currentFile: {currentFile}
-</div>
+<div class="max-h-screen overflow-y-auto">
+	<div>
+		Successes
+		{#each listofSuccesses as item}
+			<ul class="list">
+				<li class="list-row">{item}</li>
+			</ul>
+		{/each}
+	</div>
 
-<div>
-	Successes
-	{#each listofSuccesses as item}
-		<ul class="list">
-			<li class="list-row">{item}</li>
-		</ul>
-	{/each}
-</div>
-
-<div>
-	Errors
-	{#each listOfErrors as item}
-		<div>{item}</div>
-	{/each}
+	<div>
+		Errors
+		{#each listOfErrors as item}
+			<div>{item}</div>
+		{/each}
+	</div>
 </div>

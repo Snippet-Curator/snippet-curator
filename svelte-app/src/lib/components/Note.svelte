@@ -17,35 +17,73 @@
 
 	let isOpen = $state(false);
 	let selectedImage = $state('');
+	let container;
 
-	function handleClick(event: MouseEvent) {
-		const target = event.target as HTMLElement;
-		if (target.tagName === 'IMG') {
-			const img = target as HTMLImageElement;
-			selectedImage = img.src;
-			isOpen = true;
-		}
-	}
+	// function handleClick(event: MouseEvent) {
+	// 	console.log('click');
+	// 	console.log(event.target);
+	// 	const target = event.target as HTMLElement;
+	// 	if (target.tagName === 'IMG') {
+	// 		const img = target as HTMLImageElement;
+	// 		selectedImage = img.src;
+	// 		isOpen = true;
+	// 	}
+	// }
 
 	function closeModal() {
 		isOpen = false;
 	}
 
+	function onImageClick(src: string) {
+		selectedImage = src;
+		isOpen = true;
+	}
+
 	onMount(() => {
 		content = categorizeMediabyType(content);
+		const shadow = container.attachShadow({ mode: 'open' });
+		shadow.innerHTML = content;
+		// click link opens browser
+		const links = shadow.querySelectorAll('a');
+		links.forEach((link) => {
+			link.addEventListener('click', (e) => {
+				e.preventDefault(); // Prevent default navigation
+				window.open(link.href);
+			});
+		});
+		// remove image links
+		const imgLinks = shadow.querySelectorAll('a img');
+		imgLinks.forEach((img) => {
+			const link = img.parentElement;
+			console.log(link);
+			link.parentNode.insertBefore(img, link);
+			link.parentNode.removeChild(link);
+		});
+		// add image viewing clicks
+		const images = shadow.querySelectorAll('img');
+		images.forEach((img) => {
+			img.addEventListener('click', () => {
+				onImageClick(img.src);
+			});
+		});
 	});
 </script>
 
-{#if note}
+<!-- {#if note}
 	<div class="card bg-base-100 min-w-4xl mx-auto mt-10 w-96 max-w-3xl">
 		<div class="card-body">
 			<h2 class="card-title">{note.title}</h2>
-			<button class="prose select-text text-left" onclick={handleClick}>
+			<button class="prose select-text text-left">
 				{@html content}
 			</button>
 		</div>
 	</div>
-{/if}
+{/if} -->
+
+<div class="card bg-base-100 mx-auto mt-10 max-w-3xl px-10">
+	<h2 class="card-title">{note.title}</h2>
+	<div class="card-body text-lg" bind:this={container}></div>
+</div>
 
 {#if isOpen}
 	<div
