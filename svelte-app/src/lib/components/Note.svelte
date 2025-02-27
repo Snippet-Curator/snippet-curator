@@ -18,6 +18,7 @@
 
 	let isOpen = $state(false);
 	let selectedImage = $state('');
+	let textSize = $state(16);
 	let container;
 
 	// function handleClick(event: MouseEvent) {
@@ -40,9 +41,11 @@
 		isOpen = true;
 	}
 
+	let shadow;
+
 	onMount(() => {
 		content = categorizeMediabyType(content);
-		const shadow = container.attachShadow({ mode: 'open' });
+		shadow = container.attachShadow({ mode: 'open' });
 		const cleanContent = sanitizeHTML(content, {
 			allowedTags: sanitizeHTML.defaults.allowedTags.concat([
 				'img',
@@ -104,7 +107,16 @@
 		const style = document.createElement('style');
 		style.textContent = `
 		:host, :host * {
-			font-size: 16px !important;
+			font-size: ${textSize}px !important;
+			line-height: 1.4;
+		}`;
+		shadow.appendChild(style);
+	});
+	$effect(() => {
+		const style = document.createElement('style');
+		style.textContent = `
+		:host, :host * {
+			font-size: ${textSize}px !important;
 			line-height: 1.4;
 		}`;
 		shadow.appendChild(style);
@@ -121,9 +133,19 @@
 		</div>
 	</div>
 {/if} -->
+<div class="bg-base-100 sticky top-0 z-20 flex w-full px-8 py-4">
+	<div class=" flex w-full">
+		<h2 class="card-title grow">{note.title}</h2>
+		<div
+			class="text-base-content/20 hover:text-base-content flex gap-x-4 transition-colors duration-300"
+		>
+			<input type="range" class="range" min="14" max="30" bind:value={textSize} />
+			<div class="w-40 text-nowrap">font {textSize}</div>
+		</div>
+	</div>
+</div>
 
 <div class="card bg-base-100 mx-auto mt-10 max-w-3xl px-10">
-	<h2 class="card-title">{note.title}</h2>
 	<div class="card-body text-lg" bind:this={container}></div>
 </div>
 
