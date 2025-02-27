@@ -43,63 +43,40 @@
 	onMount(() => {
 		content = categorizeMediabyType(content);
 		const shadow = container.attachShadow({ mode: 'open' });
-		const cleanContent = sanitizeHTML(
-			content,
-			{
-				// allowedTags: sanitizeHTML.defaults.allowedTags.concat([
-				// 	'img',
-				// 	'a',
-				// 	'body',
-				// 	'form',
-				// 	'ul',
-				// 	'li',
-				// 	'svg'
-				// ]),
-				allowedTags: false,
-				disallowedtags: [],
-				allowedAttributes: {
-					'*': ['style', 'id', 'class', 'src']
+		const cleanContent = sanitizeHTML(content, {
+			allowedTags: sanitizeHTML.defaults.allowedTags.concat([
+				'img',
+				'form',
+				'svg',
+				'code',
+				'style'
+			]),
+			// allowedTags: false,
+			allowVulnerableTags: true,
+			allowedAttributes: {
+				'*': ['style', 'id', 'class', 'src']
+			},
+			allowedSchemes: ['data', 'http', 'https'],
+			transformTags: {
+				div: function (tagName, attribs) {
+					let newStyle =
+						'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;';
+					attribs.style = attribs.style ? `${attribs.style};${newStyle}` : newStyle;
+					return {
+						tagName: 'div',
+						attribs: attribs
+					};
 				},
-				// allowedAttributes: false,
-				allowedSchemes: ['data', 'http', 'https'],
-				allowedStyles: {
-					p: {
-						color: {}
-					}
-				},
-				transformTags: {
-					div: sanitizeHTML.simpleTransform('div', {
-						style:
-							'background-color: var(--color-base-100); background: var(--color-base-100); color: var(--color-base-content);'
-					})
-				}
+				pre: sanitizeHTML.simpleTransform('pre', {
+					style:
+						'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
+				}),
+				p: sanitizeHTML.simpleTransform('p', {
+					style:
+						'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
+				})
 			}
-			// allowedStyles: {
-			// 	'*': {
-			// 		// color: [/^#/, /^rgb/, /^hsl/], // Allow only color styles
-			// 		'font-size': [/^\d+(px|em|rem|%)$/], // Allow limited font sizes
-			// 		'text-align': [/^left$/, /^right$/, /^center$/, /^justify$/], // Allow text alignment,
-			// 		'font-weight': [/^bold$/, /^normal$/, /^[1-9]00$/], // Allow boldness
-			// 		'font-style': [/^italic$/, /^normal$/], // Allow italic
-			// 		display: [/^flex$/, /^block$/, /^inline$/, /^inline-block$/, /^grid$/, /^none$/], // Allow flex and layout styles
-			// 		'justify-content': [
-			// 			/^flex-start$/,
-			// 			/^flex-end$/,
-			// 			/^center$/,
-			// 			/^space-between$/,
-			// 			/^space-around$/,
-			// 			/^space-evenly$/
-			// 		], // Allow flex alignment
-			// 		'align-items': [/^stretch$/, /^flex-start$/, /^flex-end$/, /^center$/, /^baseline$/], // Allow flex alignment
-			// 		'flex-direction': [/^row$/, /^row-reverse$/, /^column$/, /^column-reverse$/], // Allow flex directions
-			// 		'flex-wrap': [/^nowrap$/, /^wrap$/, /^wrap-reverse$/], // Allow flex wrapping
-			// 		gap: [/^\d+(px|em|rem|%)$/] // Allow gaps
-			// 	},
-			// 	div: {
-			// 		'background-color': []
-			// 	}
-			// }
-		);
+		});
 		// shadow.innerHTML = content;
 		shadow.innerHTML = cleanContent;
 		// click link opens browser
@@ -114,7 +91,6 @@
 		const imgLinks = shadow.querySelectorAll('a img');
 		imgLinks.forEach((img) => {
 			const link = img.parentElement;
-			console.log(link);
 			link.parentNode.insertBefore(img, link);
 			link.parentNode.removeChild(link);
 		});
@@ -130,10 +106,7 @@
 		:host, :host * {
 			font-size: 16px !important;
 			line-height: 1.4;
-		}
-	
- 
-			`;
+		}`;
 		shadow.appendChild(style);
 	});
 </script>
