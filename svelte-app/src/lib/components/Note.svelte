@@ -133,7 +133,7 @@
 		</div>
 	</div>
 {/if} -->
-<div class="bg-base-100 sticky top-0 z-20 flex w-full px-8 py-4">
+<div class="bg-base-100/90 sticky top-0 z-20 flex w-full px-8 py-4 backdrop-blur-2xl">
 	<div class=" flex w-full">
 		<h2 class="card-title grow">{note.title}</h2>
 		<div
@@ -145,8 +145,10 @@
 	</div>
 </div>
 
-<div class="card bg-base-100 mx-auto mt-10 max-w-3xl px-10">
-	<div class="card-body text-lg" bind:this={container}></div>
+<div class="card mx-auto mt-10 max-w-3xl px-10 lg:max-w-5xl">
+	<div class="card-body text-lg">
+		<div bind:this={container}></div>
+	</div>
 </div>
 
 {#if isOpen}
