@@ -57,10 +57,27 @@
 			// allowedTags: false,
 			allowVulnerableTags: true,
 			allowedAttributes: {
-				'*': ['style', 'id', 'class', 'src']
+				'*': ['style', 'id', 'class', 'src', 'href']
 			},
 			allowedSchemes: ['data', 'http', 'https'],
 			transformTags: {
+				a: function (tagName, attribs) {
+					if (
+						!attribs.href ||
+						!attribs.href == undefined ||
+						attribs['href'] == '#' ||
+						attribs['href'].includes('javascript:')
+					) {
+						return {
+							tagName: 'span',
+							attribs: attribs
+						};
+					}
+					return {
+						tagName: 'a',
+						attribs: attribs
+					};
+				},
 				div: function (tagName, attribs) {
 					let newStyle =
 						'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;';
@@ -79,6 +96,9 @@
 						'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
 				})
 			}
+			// exclusiveFilter: function (frame) {
+			// 	return frame.tag === 'a' && !frame.attribs.hasOwnProperty('href');
+			// }
 		});
 		// shadow.innerHTML = content;
 		shadow.innerHTML = cleanContent;
