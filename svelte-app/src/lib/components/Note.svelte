@@ -96,9 +96,6 @@
 						'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
 				})
 			}
-			// exclusiveFilter: function (frame) {
-			// 	return frame.tag === 'a' && !frame.attribs.hasOwnProperty('href');
-			// }
 		});
 		// shadow.innerHTML = content;
 		shadow.innerHTML = cleanContent;

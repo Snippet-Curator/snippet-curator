@@ -29,16 +29,15 @@
 
 <Search />
 <div bind:this={noteContainer} class="h-[calc(100vh-60px)] overflow-y-auto">
+	<Pagination
+		totalPages={notes?.totalPages}
+		bind:clickedPage
+		currentPage={notes?.page}
+		changePage={getNotesByPage}
+		url={page.url.hash}
+	/>
 	{#if notes?.totalItems > 0}
 		<NoteList {notes} />
-
-		<Pagination
-			totalPages={notes?.totalPages}
-			bind:clickedPage
-			currentPage={notes?.page}
-			changePage={getNotesByPage}
-			url={page.url.hash}
-		/>
 	{:else}
 		no notes
 	{/if}
