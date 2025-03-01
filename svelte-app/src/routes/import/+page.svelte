@@ -64,9 +64,6 @@
 
 	<div class="mx-4">
 		<div>
-			Total files: {totalFiles}
-		</div>
-		<div>
 			Progress:
 			<progress class="progress h-4 w-72" value={progress} max="100"></progress>
 			{progress}%
@@ -78,9 +75,9 @@
 	</div>
 </div>
 
-<div class="max-h-screen overflow-y-auto">
-	<div>
-		Successes
+<div class="card card-border flex space-x-2 p-4">
+	<div class="card">
+		Success
 		{#each listofSuccesses as item}
 			<ul class="list">
 				<li class="list-row">{item}</li>
@@ -89,7 +86,7 @@
 	</div>
 
 	<div>
-		Errors
+		Failures
 		{#each listOfErrors as item}
 			<div>{item}</div>
 		{/each}

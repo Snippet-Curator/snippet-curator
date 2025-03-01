@@ -1,19 +1,22 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/state';
+
 	import pb from '$lib/db';
+
 	import { Pagination, NoteList, Search } from '$lib/components/';
 	import type { NoteRecord } from '$lib/types';
-	import { page } from '$app/state';
 
 	let notes = $state<NoteRecord>();
 	let clickedPage = $state(1);
+	let noteContainer;
 
 	async function getNotesByPage() {
 		notes = await pb.collection('notes').getList(clickedPage, 24, {
 			expand: 'tags',
 			sort: '-updated'
 		});
-		window.scrollTo({ top: 0, behavior: 'smooth' });
+		noteContainer.scrollTo({ top: 0 });
 	}
 
 	onMount(async () => {
@@ -25,27 +28,17 @@
 </script>
 
 <Search />
-<div class="h-[calc(100vh-60px)] overflow-y-auto">
+<div bind:this={noteContainer} class="h-[calc(100vh-60px)] overflow-y-auto">
 	{#if notes?.totalItems > 0}
-		<div class="flex w-full items-center justify-center pb-5 pt-5">
-			<Pagination
-				totalPages={notes?.totalPages}
-				bind:clickedPage
-				currentPage={notes?.page}
-				changePage={getNotesByPage}
-				url={page.url.hash}
-			/>
-		</div>
 		<NoteList {notes} />
-		<div class="flex w-full items-center justify-center pb-5 pt-5">
-			<Pagination
-				totalPages={notes?.totalPages}
-				bind:clickedPage
-				currentPage={notes?.page}
-				changePage={getNotesByPage}
-				url={page.url.hash}
-			/>
-		</div>
+
+		<Pagination
+			totalPages={notes?.totalPages}
+			bind:clickedPage
+			currentPage={notes?.page}
+			changePage={getNotesByPage}
+			url={page.url.hash}
+		/>
 	{:else}
 		no notes
 	{/if}

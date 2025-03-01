@@ -3,7 +3,7 @@
 	import sanitizeHTML from 'sanitize-html';
 	import { fade, scale } from 'svelte/transition';
 
-	import { CircleX } from 'lucide-svelte';
+	import { CaseSensitive, CircleX } from 'lucide-svelte';
 	import type { Note } from '$lib/types';
 
 	import { onMount } from 'svelte';
@@ -143,24 +143,14 @@
 	});
 </script>
 
-<!-- {#if note}
-	<div class="card bg-base-100 min-w-4xl mx-auto mt-10 w-96 max-w-3xl">
-		<div class="card-body">
-			<h2 class="card-title">{note.title}</h2>
-			<button class="prose select-text text-left">
-				{@html content}
-			</button>
-		</div>
-	</div>
-{/if} -->
 <div class="bg-base-100/90 sticky top-0 z-20 flex w-full px-8 py-4 backdrop-blur-2xl">
-	<div class=" flex w-full">
+	<div class="flex w-full">
 		<h2 class="card-title grow">{note.title}</h2>
 		<div
-			class="text-base-content/20 hover:text-base-content flex gap-x-4 transition-colors duration-300"
+			class="text-base-content/20 hover:text-base-content flex items-center gap-x-4 transition-colors duration-300"
 		>
-			<input type="range" class="range" min="14" max="30" bind:value={textSize} />
-			<div class="w-40 text-nowrap">font {textSize}</div>
+			<input type="range" class="range range-xs" min="14" max="30" bind:value={textSize} />
+			<CaseSensitive size={32} />
 		</div>
 	</div>
 </div>

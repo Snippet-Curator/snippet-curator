@@ -27,7 +27,9 @@
 	$effect(() => (pages = getPages()));
 </script>
 
-<div class="join">
+<div
+	class="join bg-base-100/95 sticky bottom-10 z-20 flex w-full items-center justify-center pb-5 pt-5 backdrop-blur-2xl lg:bottom-0"
+>
 	<button disabled={clickedPage == 1} onclick={() => handleClick(1)} class="btn join-item"
 		>First</button
 	>

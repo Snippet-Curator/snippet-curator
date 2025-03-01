@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '$lib/components';
-	import { ArrowLeft, Notebook, Pencil, Tag, Trash2 } from 'lucide-svelte';
+	import { ArrowLeft, Info, Notebook, Pencil, Tag, Trash2 } from 'lucide-svelte';
 
 	let { deleteNote } = $props();
 
@@ -30,10 +30,7 @@
 		<div class="flex grow items-center space-x-4 text-right">
 			<div class="grow"></div>
 			<button class="btn btn-ghost flex items-center gap-2"><Notebook size={18} />Notebook</button>
-			<button class="btn btn-ghost flex items-center gap-2"><Tag size={18} />Tags</button>
-			<span>Edited Feb 28 2025</span>
-
-			<a href="">https://google.com...</a>
+			<span class="badge">#Tags</span>
 
 			<div class="rating rating-xs">
 				<input
@@ -67,6 +64,17 @@
 					class="mask mask-star-2 bg-orange-400"
 					aria-label="5 star"
 				/>
+			</div>
+
+			<div class="dropdown dropdown-center">
+				<div tabindex="0" class="btn btn-square"><Info size={18} /></div>
+				<div tabindex="0" class="dropdown-content bg-base-100 rounded-box w-70 px-4 py-2 shadow-sm">
+					<ul class="list">
+						<li class="list-row">Created: 2/28/2025</li>
+						<li class="list-row">Modified: 2/28/2025</li>
+						<li class="list-row items-center">Source:<a href="">https://google.com...</a></li>
+					</ul>
+				</div>
 			</div>
 			<button class="btn btn-ghost">
 				<Pencil size={18} />
