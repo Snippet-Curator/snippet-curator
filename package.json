@@ -15,5 +15,6 @@
   },
   "dependencies": {
     "sanitize-html": "^2.14.0"
-  }
+  },
+  "packageManager": "pnpm@8.6.7+sha1.019f4b93c5b07fb12e3097bae3d8f2d0cff444b7"
 }

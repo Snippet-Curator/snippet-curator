@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '$lib/components';
-	import { ArrowLeft } from 'lucide-svelte';
+	import { ArrowLeft, Notebook, Pencil, Tag, Trash2 } from 'lucide-svelte';
 
 	let { deleteNote } = $props();
 
@@ -26,9 +26,52 @@
 
 			<div>Back to Notes</div>
 		</button>
-		<div class="flex grow">
+
+		<div class="flex grow items-center space-x-4 text-right">
 			<div class="grow"></div>
-			<button onclick={openModal} class="btn btn-neutral">Delete Note</button>
+			<button class="btn btn-ghost flex items-center gap-2"><Notebook size={18} />Notebook</button>
+			<button class="btn btn-ghost flex items-center gap-2"><Tag size={18} />Tags</button>
+			<span>Edited Feb 28 2025</span>
+
+			<a href="">https://google.com...</a>
+
+			<div class="rating rating-xs">
+				<input
+					type="radio"
+					name="rating-5"
+					class="mask mask-star-2 bg-orange-400"
+					aria-label="1 star"
+				/>
+				<input
+					type="radio"
+					name="rating-5"
+					class="mask mask-star-2 bg-orange-400"
+					aria-label="2 star"
+					checked="checked"
+				/>
+				<input
+					type="radio"
+					name="rating-5"
+					class="mask mask-star-2 bg-orange-400"
+					aria-label="3 star"
+				/>
+				<input
+					type="radio"
+					name="rating-5"
+					class="mask mask-star-2 bg-orange-400"
+					aria-label="4 star"
+				/>
+				<input
+					type="radio"
+					name="rating-5"
+					class="mask mask-star-2 bg-orange-400"
+					aria-label="5 star"
+				/>
+			</div>
+			<button class="btn btn-ghost">
+				<Pencil size={18} />
+			</button>
+			<button onclick={openModal} class="btn btn-square"><Trash2 size={18} /> </button>
 		</div>
 	</div>
 </div>
