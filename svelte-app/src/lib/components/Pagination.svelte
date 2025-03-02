@@ -1,7 +1,25 @@
 <script lang="ts">
 	import { pushState } from '$app/navigation';
 
-	let { currentPage, totalPages, clickedPage = $bindable(), changePage, url } = $props();
+	type Props = {
+		currentPage: number;
+		totalPages: number;
+		clickedPage: number;
+		changePage: () => void;
+		url: string;
+		pageType: 'notes' | 'tags' | 'notebooks';
+		currentID;
+	};
+
+	let {
+		currentPage = 1,
+		totalPages = 1,
+		clickedPage = $bindable(),
+		changePage,
+		pageType,
+		currentID
+	}: Props = $props();
+
 	const maxVisiblePages = 5;
 	let pages = $state(getPages());
 
@@ -17,10 +35,29 @@
 
 	function handleClick(page: number) {
 		clickedPage = page;
-		pushState('', {
-			url: url,
-			previousHistoryPage: clickedPage
-		});
+		let currentTagID;
+		let currentNotebookID;
+
+		if (pageType == 'notes') {
+			pushState('', {
+				pageType: pageType,
+				previousHistoryPage: page
+			});
+		} else if (pageType == 'tags') {
+			currentTagID = currentID;
+			pushState('', {
+				pageType: pageType,
+				currentTagID: currentTagID,
+				previousHistoryPage: page
+			});
+		} else if (pageType == 'notebooks') {
+			currentNotebookID = currentID;
+			pushState('', {
+				pageType: pageType,
+				currentNotebookID: currentNotebookID,
+				previousHistoryPage: page
+			});
+		}
 		changePage();
 	}
 

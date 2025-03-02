@@ -23,6 +23,7 @@ async function getDefaultNotebook() {
 
 export function sanitizeContent(content: string) {
   const cleanContent = sanitizeHTML(content, {
+    parseStyleAttributes: false,
     allowedTags: sanitizeHTML.defaults.allowedTags.concat([
       'img',
       'form',
@@ -236,7 +237,7 @@ export class EnImport {
     this.content = xmlContent
     this.enMedias = Array.isArray(xmlMedia) ? xmlMedia : [xmlMedia]
 
-    const tags = this.enNote['en-export'].note.tag
+    const tags = this.enNote['en-export'].note.tag || ''
     this.xmlResource = xmlNote["en-export"]['note']['resource']
     this.enResources = Array.isArray(this.xmlResource) ? this.xmlResource : [this.xmlResource]
     this.title = this.enNote['en-export'].note.title
@@ -386,13 +387,17 @@ export class EnImport {
   }
 
   async addTags() {
+    if (this.tags.length == 1 && this.tags[0] == '') return ''
     const tagList: string[] = []
+    const existingTags = await pb.collection('tags').getFullList() as { id: string; name: string }[]
+    const existingTagNames = new Set(existingTags.map((tag: { name: string }) => tag.name))
+
     for (const tag of this.tags) {
-      try {
-        const record = await pb.collection('tags').getFirstListItem(`name="${tag}"`)
+      if (existingTagNames.has(tag)) {
+        const record = existingTags.find((record: { name: string }) => record.name === tag)
         tagList.push(record.id)
-      } catch {
-        const newTagRecord = await pb.collection('tags').create({ 'name': tag })
+      } else {
+        const newTagRecord = await pb.collection('tags').create({ 'name': tag.toLowerCase() })
         tagList.push(newTagRecord.id)
       }
     }
@@ -401,7 +406,12 @@ export class EnImport {
 
   async uploadToDB() {
     const defaultNotebook = await getDefaultNotebook()
-    const tags = await this.addTags()
+    let tags
+    try {
+      tags = await this.addTags()
+    } catch (e) {
+      console.log(this.title, 'Error adding tags')
+    }
 
 
     const skeletonData = {

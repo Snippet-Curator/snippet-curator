@@ -59,19 +59,20 @@
 			class="file-input"
 		/>
 		<label for="file" class="fieldset-label">Max size 5GB</label>
-		<button onclick={parseUploadedEnex} class="btn btn-neutral">Upload</button>
+		<button onclick={parseUploadedEnex} class="btn btn-neutral">Import</button>
 	</fieldset>
 
-	<div class="mx-4">
-		<div>
-			Progress:
+	<div class="card card-border mx-4 grid grid-cols-3 items-center p-4">
+		<div>Progress</div>
+		<div class="col-span-2 flex items-center gap-x-2">
 			<progress class="progress h-4 w-72" value={progress} max="100"></progress>
 			{progress}%
 		</div>
-		<div>uploadStatus: {uploadStatus}</div>
-		<div>
-			currentFile: {currentFile}
-		</div>
+
+		<div>Status</div>
+		<div class="col-span-2">{uploadStatus}</div>
+		<div>Current File</div>
+		<div class="col-span-2">{currentFile}</div>
 	</div>
 </div>
 

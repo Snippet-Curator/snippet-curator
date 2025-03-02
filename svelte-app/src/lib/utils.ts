@@ -1,4 +1,4 @@
-
+import { page } from '$app/state';
 
 export function categorizeMediabyType(content: string) {
   const mediaMatch =
@@ -17,4 +17,23 @@ export function categorizeMediabyType(content: string) {
   };
 
   return content.replace(mediaMatch, replaceMedia);
+}
+
+
+export async function getCorrectPage() {
+  if (!page.state.previousHistoryPage) return 1
+
+  if (page.state) {
+    const { pageType, previousHistoryPage } = page.state;
+
+    console.log(page.state, pageType);
+
+    if (pageType == 'notes') {
+      return previousHistoryPage;
+    } else if (pageType == 'tags') {
+      return previousHistoryPage;
+    } else if (pageType == 'notebooks') {
+      return previousHistoryPage
+    }
+  }
 }

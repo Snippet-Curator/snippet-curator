@@ -6,10 +6,11 @@
 
 	import { Pagination, NoteList, Search } from '$lib/components/';
 	import type { NoteRecord } from '$lib/types';
+	import { getCorrectPage } from '$lib/utils';
 
 	let notes = $state<NoteRecord>();
 	let clickedPage = $state(1);
-	let noteContainer;
+	let noteContainer: HTMLDivElement;
 
 	async function getNotesByPage() {
 		notes = await pb.collection('notes').getList(clickedPage, 24, {
@@ -20,9 +21,7 @@
 	}
 
 	onMount(async () => {
-		if (page.state.url && page.state.url == page.url.hash) {
-			clickedPage = page.state.previousHistoryPage;
-		}
+		clickedPage = await getCorrectPage();
 		await getNotesByPage();
 	});
 </script>
@@ -34,6 +33,7 @@
 		bind:clickedPage
 		currentPage={notes?.page}
 		changePage={getNotesByPage}
+		pageType="notes"
 		url={page.url.hash}
 	/>
 	{#if notes?.totalItems > 0}
