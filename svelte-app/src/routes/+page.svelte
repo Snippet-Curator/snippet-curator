@@ -39,6 +39,6 @@
 	{#if notes?.totalItems > 0}
 		<NoteList {notes} />
 	{:else}
-		no notes
+		<br />
 	{/if}
 </div>

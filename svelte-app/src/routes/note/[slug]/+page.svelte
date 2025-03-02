@@ -5,7 +5,6 @@
 	import pb from '$lib/db';
 
 	import type { Props } from '$lib/types';
-	import { onMount } from 'svelte';
 
 	let { data }: Props = $props();
 	let note = $state(data.note);
@@ -16,7 +15,7 @@
 	}
 </script>
 
-<Topbar {deleteNote} />
+<Topbar {deleteNote} {...note} />
 <div class="h-[calc(100vh-60px)] overflow-y-auto">
 	<Note {note} />
 </div>

@@ -31,7 +31,9 @@
 
 			<div class="divider"></div>
 
-			<span class="menu-title flex items-center gap-2"><Notebook size={18} />Notebooks</span>
+			<span class="menu-title flex max-h-60 items-center gap-2 overflow-y-auto"
+				><Notebook size={18} />Notebooks</span
+			>
 
 			{#each notebooks as notebook}
 				<li>
@@ -45,9 +47,11 @@
 			<div class="divider"></div>
 			<span class="menu-title flex items-center gap-2"><Tags size={18} /> Tags</span>
 
-			{#each tags as tag}
-				<li><a href="#/tags/{tag.id}">{tag.name}</a></li>
-			{/each}
+			<div class="max-h-60 overflow-y-auto">
+				{#each tags as tag}
+					<li><a href="#/tags/{tag.id}">{tag.name}</a></li>
+				{/each}
+			</div>
 
 			<div class="grow"></div>
 

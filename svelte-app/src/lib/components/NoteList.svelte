@@ -21,13 +21,7 @@
 				{#if note.attachments.length == 0}
 					<div class="text-left">{@html note.content.slice(0, 200)}</div>
 				{/if}
-				<div>
-					{#each note.expand.tags as tag}
-						<div class="badge badge-outline">
-							{tag.name}
-						</div>
-					{/each}
-				</div>
+				<div></div>
 			</div>
 		</button>
 	{/each}

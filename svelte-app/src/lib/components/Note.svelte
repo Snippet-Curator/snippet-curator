@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { ImageViewer } from 'svelte-image-viewer';
 	import sanitizeHTML from 'sanitize-html';
+
 	import { fade, scale } from 'svelte/transition';
 
 	import { CaseSensitive, CircleX } from 'lucide-svelte';
 	import type { Note } from '$lib/types';
 
 	import { onMount } from 'svelte';
-	import { categorizeMediabyType } from '$lib/utils';
 
 	type Props = {
 		note: Note;
@@ -41,64 +41,22 @@
 		isOpen = true;
 	}
 
+	function changeTextSize(event: Event) {
+		const target = event.target as HTMLInputElement;
+		let newTextSize = Number(target.value);
+		style.textContent = `
+		:host, :host * {
+			font-size: ${newTextSize}px !important;
+			line-height: 1.4;
+		}`;
+	}
+
 	let shadow;
+	let style = document.createElement('style');
 
 	onMount(() => {
-		content = categorizeMediabyType(content);
 		shadow = container.attachShadow({ mode: 'open' });
-		const cleanContent = sanitizeHTML(content, {
-			allowedTags: sanitizeHTML.defaults.allowedTags.concat([
-				'img',
-				'form',
-				'svg',
-				'code',
-				'style'
-			]),
-			// allowedTags: false,
-			allowVulnerableTags: true,
-			allowedAttributes: {
-				'*': ['style', 'id', 'class', 'src', 'href']
-			},
-			allowedSchemes: ['data', 'http', 'https'],
-			transformTags: {
-				a: function (tagName, attribs) {
-					if (
-						!attribs.href ||
-						!attribs.href == undefined ||
-						attribs['href'] == '#' ||
-						attribs['href'].includes('javascript:')
-					) {
-						return {
-							tagName: 'span',
-							attribs: attribs
-						};
-					}
-					return {
-						tagName: 'a',
-						attribs: attribs
-					};
-				},
-				div: function (tagName, attribs) {
-					let newStyle =
-						'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;';
-					attribs.style = attribs.style ? `${attribs.style};${newStyle}` : newStyle;
-					return {
-						tagName: 'div',
-						attribs: attribs
-					};
-				},
-				pre: sanitizeHTML.simpleTransform('pre', {
-					style:
-						'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
-				}),
-				p: sanitizeHTML.simpleTransform('p', {
-					style:
-						'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
-				})
-			}
-		});
-		// shadow.innerHTML = content;
-		shadow.innerHTML = cleanContent;
+		shadow.innerHTML = content;
 		// click link opens browser
 		const links = shadow.querySelectorAll('a');
 		links.forEach((link) => {
@@ -121,16 +79,6 @@
 				onImageClick(img.src);
 			});
 		});
-		const style = document.createElement('style');
-		style.textContent = `
-		:host, :host * {
-			font-size: ${textSize}px !important;
-			line-height: 1.4;
-		}`;
-		shadow.appendChild(style);
-	});
-	$effect(() => {
-		const style = document.createElement('style');
 		style.textContent = `
 		:host, :host * {
 			font-size: ${textSize}px !important;
@@ -146,7 +94,14 @@
 		<div
 			class="text-base-content/20 hover:text-base-content flex items-center gap-x-4 transition-colors duration-300"
 		>
-			<input type="range" class="range range-xs" min="14" max="30" bind:value={textSize} />
+			<input
+				type="range"
+				class="range range-xs"
+				min="14"
+				max="30"
+				bind:value={textSize}
+				oninput={changeTextSize}
+			/>
 			<CaseSensitive size={32} />
 		</div>
 	</div>

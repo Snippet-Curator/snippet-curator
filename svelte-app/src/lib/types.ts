@@ -83,7 +83,7 @@ export type EnNote = {
         source: string,
         "source-url": string
       },
-      tags: string | string[],
+      tag: string | string[],
       resource: EnResource | EnResource[]
     }
   }
