@@ -6,6 +6,7 @@
 	import { getCorrectPage } from '$lib/utils';
 	import { Pagination, NoteList, Search } from '$lib/components/';
 	import type { NoteRecord } from '$lib/types';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	let tag = $state();
 	let notes = $state<NoteRecord>();
@@ -34,7 +35,7 @@
 </script>
 
 <Search />
-<div bind:this={noteContainer} class="h-[calc(100vh-60px)] overflow-y-auto">
+<ScrollArea bind:this={noteContainer} class="h-[calc(100vh-60px)] overflow-y-auto">
 	<Pagination
 		totalPages={notes?.totalPages}
 		bind:clickedPage
@@ -50,4 +51,4 @@
 		<br />
 	{/if}
 	<div class="pt-20"></div>
-</div>
+</ScrollArea>

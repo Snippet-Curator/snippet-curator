@@ -5,6 +5,7 @@
 	import pb from '$lib/db';
 	import { getCorrectPage } from '$lib/utils';
 	import { Pagination, NoteList, Search } from '$lib/components/';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import type { NoteRecord, Props } from '$lib/types';
 
 	let notebook = $state();
@@ -15,10 +16,11 @@
 
 	async function getNotesByPage() {
 		notes = await pb.collection('notes').getList(clickedPage, 25, {
-			filter: `notebook = "${notebook?.id}"`,
+			filter: `notebook="${notebook?.id}"`,
 			expand: 'tags,notebook'
 		});
-		noteContainer.scrollTo({ top: 0 });
+
+		// noteContainer.scrollTo({ top: 0 });
 	}
 
 	async function updatePage() {
@@ -34,7 +36,7 @@
 </script>
 
 <Search />
-<div bind:this={noteContainer} class="h-[calc(100vh-60px)] overflow-y-auto">
+<ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
 	<Pagination
 		totalPages={notes?.totalPages}
 		bind:clickedPage
@@ -50,4 +52,4 @@
 		<br />
 	{/if}
 	<div class="pt-20"></div>
-</div>
+</ScrollArea>
