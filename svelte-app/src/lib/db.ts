@@ -24,14 +24,21 @@ export async function getNotes(notebook: string) {
   return notes
 }
 
-export async function getNotebooks() {
-  const notebooks = await pb.collection('notebooks').getFullList()
-  return notebooks
-}
-
 export async function getNotebook(name: string) {
   const notebook = await pb.collection('notebooks').getFirstListItem(`name='${name}'`)
   return notebook
+}
+
+export async function getNotebooks() {
+  return await pb.collection('notebooks').getFullList({
+    sort: 'name'
+  });
+}
+
+export async function getTags() {
+  return await pb.collection('tags').getFullList({
+    sort: 'name'
+  });
 }
 
 export default pb
