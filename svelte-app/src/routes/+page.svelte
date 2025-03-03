@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { ScrollArea as ScrollAreaPrimitive } from 'bits-ui';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import pb from '$lib/db';
 
@@ -22,7 +22,7 @@
 			expand: 'tags',
 			sort: '-updated'
 		});
-		noteContainer.scrollTo({ top: 0 });
+		// noteContainer.scrollTo({ top: 0 });
 	}
 
 	onMount(async () => {
@@ -33,29 +33,18 @@
 
 <Search />
 
-<div class="h-[calc(100vh-60px)]">
-	<ScrollAreaPrimitive.Root bind:this={noteContainer} class="relative h-full overflow-hidden">
-		<ScrollAreaPrimitive.Viewport class="h-full w-full rounded-[inherit]">
-			<Pagination
-				totalPages={notes?.totalPages}
-				bind:clickedPage
-				currentPage={notes?.page}
-				changePage={getNotesByPage}
-				pageType="notes"
-				url={page.url.hash}
-			/>
-			{#if notes?.totalItems > 0}
-				<NoteList {notes} />
-			{:else}
-				<br />
-			{/if}
-		</ScrollAreaPrimitive.Viewport>
-		{#if orientation === 'vertical' || orientation === 'both'}
-			<ScrollAreaPrimitive.Scrollbar orientation="vertical" class={scrollbarYClasses} />
-		{/if}
-		{#if orientation === 'horizontal' || orientation === 'both'}
-			<ScrollAreaPrimitive.Scrollbar orientation="horizontal" class={scrollbarXClasses} />
-		{/if}
-		<ScrollAreaPrimitive.Corner />
-	</ScrollAreaPrimitive.Root>
-</div>
+<ScrollArea class="h-[calc(100vh-60px)]">
+	<Pagination
+		totalPages={notes?.totalPages}
+		bind:clickedPage
+		currentPage={notes?.page}
+		changePage={getNotesByPage}
+		pageType="notes"
+		url={page.url.hash}
+	/>
+	{#if notes?.totalItems > 0}
+		<NoteList {notes} />
+	{:else}
+		<br />
+	{/if}
+</ScrollArea>
