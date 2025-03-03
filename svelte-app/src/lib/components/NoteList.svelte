@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+
 	let { notes } = $props();
-	console.log('notelist', notes);
 </script>
 
 <div

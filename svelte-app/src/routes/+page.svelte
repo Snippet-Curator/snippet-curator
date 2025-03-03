@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { ScrollArea as ScrollAreaPrimitive } from 'bits-ui';
 
 	import pb from '$lib/db';
 
 	import { Pagination, NoteList, Search } from '$lib/components/';
 	import type { NoteRecord } from '$lib/types';
 	import { getCorrectPage } from '$lib/utils';
+
+	let orientation = 'vertical';
+	let scrollbarXClasses: string = '';
+	let scrollbarYClasses: string = '';
 
 	let notes = $state<NoteRecord>();
 	let clickedPage = $state(1);
@@ -27,18 +32,30 @@
 </script>
 
 <Search />
-<div bind:this={noteContainer} class="h-[calc(100vh-60px)] overflow-y-auto">
-	<Pagination
-		totalPages={notes?.totalPages}
-		bind:clickedPage
-		currentPage={notes?.page}
-		changePage={getNotesByPage}
-		pageType="notes"
-		url={page.url.hash}
-	/>
-	{#if notes?.totalItems > 0}
-		<NoteList {notes} />
-	{:else}
-		<br />
-	{/if}
+
+<div class="h-[calc(100vh-60px)]">
+	<ScrollAreaPrimitive.Root bind:this={noteContainer} class="relative h-full overflow-hidden">
+		<ScrollAreaPrimitive.Viewport class="h-full w-full rounded-[inherit]">
+			<Pagination
+				totalPages={notes?.totalPages}
+				bind:clickedPage
+				currentPage={notes?.page}
+				changePage={getNotesByPage}
+				pageType="notes"
+				url={page.url.hash}
+			/>
+			{#if notes?.totalItems > 0}
+				<NoteList {notes} />
+			{:else}
+				<br />
+			{/if}
+		</ScrollAreaPrimitive.Viewport>
+		{#if orientation === 'vertical' || orientation === 'both'}
+			<ScrollAreaPrimitive.Scrollbar orientation="vertical" class={scrollbarYClasses} />
+		{/if}
+		{#if orientation === 'horizontal' || orientation === 'both'}
+			<ScrollAreaPrimitive.Scrollbar orientation="horizontal" class={scrollbarXClasses} />
+		{/if}
+		<ScrollAreaPrimitive.Corner />
+	</ScrollAreaPrimitive.Root>
 </div>

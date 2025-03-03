@@ -7,11 +7,11 @@
 	import { Pagination, NoteList, Search } from '$lib/components/';
 	import type { NoteRecord, Props } from '$lib/types';
 
-	let { data }: Props = $props();
-	let notebook = $derived(data.notebook);
+	let notebook = $state();
 	let notes = $state<NoteRecord>();
 	let clickedPage = $state(1);
 	let noteContainer: HTMLDivElement;
+	let notebookID: string;
 
 	async function getNotesByPage() {
 		notes = await pb.collection('notes').getList(clickedPage, 25, {
@@ -21,11 +21,16 @@
 		noteContainer.scrollTo({ top: 0 });
 	}
 
-	onMount(async () => {
+	async function updatePage() {
+		notebookID = page.params.slug;
+		notebook = await pb.collection('notebooks').getOne(notebookID);
 		clickedPage = await getCorrectPage();
 		await getNotesByPage();
-		console.log(clickedPage, notes);
-	});
+	}
+
+	onMount(async () => await updatePage());
+
+	$effect(async () => await updatePage());
 </script>
 
 <Search />

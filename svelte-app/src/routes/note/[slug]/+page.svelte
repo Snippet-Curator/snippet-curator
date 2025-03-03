@@ -16,6 +16,6 @@
 </script>
 
 <Topbar {deleteNote} {...note} />
-<div class="h-[calc(100vh-60px)] overflow-y-auto">
+<div class="h-[calc(100vh-60px)]">
 	<Note {note} />
 </div>

@@ -1,5 +1,9 @@
 import { page } from '$app/state';
 
+import type { ClassValue } from "clsx";
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 export function categorizeMediabyType(content: string) {
   const mediaMatch =
     /<media\s+src=["']?(?<src>[^"'\s>]+)["']?\s+type=["']?(?<type>[^"'\s>]+)["']?\s*>/g;
@@ -17,6 +21,10 @@ export function categorizeMediabyType(content: string) {
   };
 
   return content.replace(mediaMatch, replaceMedia);
+}
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 
 
