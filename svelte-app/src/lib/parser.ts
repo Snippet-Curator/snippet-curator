@@ -278,24 +278,51 @@ export class EnImport {
     });
   }
 
-  async getVideoThumb(videoUrl: string) {
+  async getVideoThumb(videoUrl: string): Promise<File> {
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+
+      if (!videoUrl || videoUrl.trim() == '') {
+        return reject(new Error('Video URL is empty'))
+      }
+
       const video = document.createElement("video");
+
+      // setting up properties
       video.src = videoUrl;
       video.crossOrigin = "anonymous"; // Prevent CORS issues
       video.muted = true;
       video.playsInline = true;
+      video.preload = 'metadata'
 
-      video.onloadeddata = () => {
-        video.currentTime = 1; // Capture at 1 second
-      };
+      // add error handling
+      video.onerror = (e) => {
+        reject(new Error(`Video loading error: ${video.error?.message} || 'Unknown error'`))
+      }
 
-      video.onseeked = () => {
+      // make sure metadata loaded before seeking
+      video.onloadedmetadata = () => {
+        // now seek
+        video.onloadeddata = () => {
+          video.currentTime = 1; // Capture at 1 second
+        };
+      }
+
+      video.onseeked = async () => {
+        // small delay
+        await new Promise((res) => setTimeout(res, 200));
+
         const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth; // Resize to reduce file size
+        canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
+
+        // draw the current video frame to the canvas
         const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'))
+          return
+        }
 
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
@@ -304,9 +331,13 @@ export class EnImport {
           if (blob) {
             const thumbnailFile = new File([blob], "thumbnail.png", { type: "image/png" });
             resolve(thumbnailFile)
+          } else {
+            reject(new Error('Failed to create thumbnail blob'))
           }
         }, "image/png");
       };
+
+
     })
   }
 
