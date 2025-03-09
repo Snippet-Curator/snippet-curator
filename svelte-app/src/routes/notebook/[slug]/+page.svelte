@@ -4,9 +4,9 @@
 
 	import pb from '$lib/db';
 	import { getCorrectPage } from '$lib/utils';
-	import { Pagination, NoteList, Search } from '$lib/components/';
+	import { Pagination, NoteList } from '$lib/components/';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import type { NoteRecord, Props } from '$lib/types';
+	import type { NoteRecord } from '$lib/types';
 
 	let notebook = $state();
 	let notes = $state<NoteRecord>();
@@ -35,7 +35,6 @@
 	$effect(async () => await updatePage());
 </script>
 
-<Search />
 <ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
 	<Pagination
 		totalPages={notes?.totalPages}

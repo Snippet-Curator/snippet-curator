@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { EnImport, htmlImport } from '$lib/parser';
+	import * as Tabs from '$lib/components/ui/tabs/index';
 
 	let enexFiles: File[] = [];
 	let listOfUploads;
@@ -62,34 +62,39 @@
 		<button onclick={parseUploadedEnex} class="btn btn-neutral">Import</button>
 	</fieldset>
 
-	<div class="card card-border mx-4 grid grid-cols-3 items-center p-4">
-		<div>Progress</div>
-		<div class="col-span-2 flex items-center gap-x-2">
-			<progress class="progress h-4 w-72" value={progress} max="100"></progress>
-			{progress}%
+	{#if uploadStatus == 'in progress' || uploadStatus == 'completed'}
+		<div class="card card-border mx-4 grid grid-cols-3 items-center p-4">
+			<div>Progress</div>
+			<div class="col-span-2 flex items-center gap-x-2">
+				<progress class="progress h-4 w-72" value={progress} max="100"></progress>
+				{progress}%
+			</div>
+
+			<div>Status</div>
+			<div class="col-span-2">{uploadStatus}</div>
+			<div>Current File</div>
+			<div class="col-span-2">{currentFile}</div>
 		</div>
-
-		<div>Status</div>
-		<div class="col-span-2">{uploadStatus}</div>
-		<div>Current File</div>
-		<div class="col-span-2">{currentFile}</div>
-	</div>
+	{/if}
 </div>
 
-<div class="card card-border flex space-x-2 p-4">
-	<div class="card">
-		Success
-		{#each listofSuccesses as item}
-			<ul class="list">
-				<li class="list-row">{item}</li>
-			</ul>
-		{/each}
-	</div>
-
-	<div>
-		Failures
-		{#each listOfErrors as item}
-			<div>{item}</div>
-		{/each}
-	</div>
-</div>
+{#if uploadStatus == 'in progress' || uploadStatus == 'completed'}
+	<Tabs.Root value="upload" class="mx-10 my-10 w-[400px]">
+		<Tabs.List>
+			<Tabs.Trigger value="success">Success</Tabs.Trigger>
+			<Tabs.Trigger value="errors">Errors</Tabs.Trigger>
+		</Tabs.List>
+		<Tabs.Content value="success">
+			{#each listofSuccesses as item}
+				<ul class="list">
+					<li class="list-row">{item}</li>
+				</ul>
+			{/each}
+		</Tabs.Content>
+		<Tabs.Content value="errors">
+			{#each listOfErrors as item}
+				<div>{item}</div>
+			{/each}
+		</Tabs.Content>
+	</Tabs.Root>
+{/if}

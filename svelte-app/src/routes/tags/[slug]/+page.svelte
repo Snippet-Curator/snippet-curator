@@ -34,7 +34,6 @@
 	$effect(async () => await updatePage());
 </script>
 
-<Search />
 <ScrollArea bind:this={noteContainer} class="h-[calc(100vh-60px)] overflow-y-auto">
 	<Pagination
 		totalPages={notes?.totalPages}
