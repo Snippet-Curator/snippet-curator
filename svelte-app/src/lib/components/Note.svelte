@@ -108,7 +108,7 @@
 	</div>
 </div>
 
-<ScrollArea class="h-full">
+<ScrollArea class="h-full pb-20">
 	<div class="card mx-auto mt-10 max-w-3xl px-10 lg:max-w-5xl">
 		<div class="card-body text-lg">
 			<div bind:this={container}></div>

@@ -76,7 +76,12 @@
 				<span class="menu-title flex items-center gap-2"><Tags size={18} /> Tags</span>
 
 				{#each tags as tag}
-					<li><a href="#/tags/{tag.id}">{tag.name}</a></li>
+					<li>
+						<a
+							class={page.url.hash == `#/tags/${tag.id}` ? 'menu-active' : ''}
+							href="#/tags/{tag.id}">{tag.name}</a
+						>
+					</li>
 				{/each}
 			</ScrollArea>
 
