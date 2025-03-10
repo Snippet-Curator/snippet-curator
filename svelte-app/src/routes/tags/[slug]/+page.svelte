@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 
 	import pb from '$lib/db';
-	import { getCorrectPage } from '$lib/utils';
+	import { getCorrectPage } from '$lib/utils.svelte';
 	import { Pagination, NoteList, Search } from '$lib/components/';
 	import type { NoteRecord } from '$lib/types';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';

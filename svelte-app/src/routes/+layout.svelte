@@ -53,7 +53,9 @@
 				<a class={page.url.hash == '#/discover' ? 'menu-active' : ''} href="#/discover">Discover</a>
 			</li>
 			<li>
-				<a class={page.url.hash == '#/' ? 'menu-active' : ''} href="#/">Notes</a>
+				<a class={page.url.hash == '#/' || page.url.hash == '' ? 'menu-active' : ''} href="#/"
+					>Notes</a
+				>
 			</li>
 
 			<div class="divider"></div>

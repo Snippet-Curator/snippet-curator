@@ -9,7 +9,7 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { Pagination, NoteList, Search } from '$lib/components/';
 	import type { NoteRecord } from '$lib/types';
-	import { getCorrectPage } from '$lib/utils';
+	import { getCorrectPage, searchTerm } from '$lib/utils.svelte';
 
 	const query = PocketbaseQuery.getInstance<{ title: string; content: string; tags: string }>();
 	let notes = $state<NoteRecord>();
@@ -20,7 +20,6 @@
 	async function getNotesByPage() {
 		if (searchInput == '') {
 			notes = await pb.collection('notes').getList(clickedPage, 24, {
-				expand: 'tags',
 				sort: '-updated'
 			});
 			return;
@@ -47,9 +46,13 @@
 			filter: customFilters
 		});
 		// noteContainer.scrollTo({ top: 0 });
+		searchTerm.searchTerm = searchInput;
 	}
 
 	onMount(async () => {
+		if (searchTerm.searchTerm) {
+			searchInput = searchTerm.searchTerm;
+		}
 		clickedPage = await getCorrectPage();
 		await getNotesByPage();
 	});

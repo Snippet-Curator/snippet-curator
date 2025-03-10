@@ -9,7 +9,6 @@ export function categorizeMediabyType(content: string) {
 
   const replaceMedia = (match: string, src: string, type: string) => {
 
-    console.log(type)
     if (type.includes('image')) {
       return `<img style='max-width: 100%; height: auto' src=${src}>`;
     }
@@ -27,20 +26,17 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 
-export async function getCorrectPage() {
+export function getCorrectPage() {
   if (!page.state.previousHistoryPage) return 1
+  return page.state.previousHistoryPage
+}
 
-  if (page.state) {
-    const { pageType, previousHistoryPage } = page.state;
-
-    console.log(page.state, pageType);
-
-    if (pageType == 'notes') {
-      return previousHistoryPage;
-    } else if (pageType == 'tags') {
-      return previousHistoryPage;
-    } else if (pageType == 'notebooks') {
-      return previousHistoryPage
-    }
+function changeSearchTerm() {
+  let searchTerm = $state('');
+  return {
+    get searchTerm() { return searchTerm },
+    set searchTerm(value) { searchTerm = value },
   }
 }
+
+export const searchTerm = changeSearchTerm()
