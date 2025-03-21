@@ -41,4 +41,8 @@ export async function getTags() {
   });
 }
 
+export async function deleteTag(recordID: string) {
+  await pb.collection('tags').delete(recordID)
+}
+
 export default pb

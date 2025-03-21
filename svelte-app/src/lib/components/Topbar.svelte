@@ -26,15 +26,15 @@
 <div class="menu bg-base-200 border-base-200 h-15 w-full border-b px-4">
 	<div class="flex items-center gap-x-2">
 		<button
-			class="btn btn-ghost group items-center justify-center pl-2.5 transition-all"
+			class="btn btn-outline hover:btn-primary border-base-300 group flex pl-4 transition-all"
 			onclick={() => window.history.back()}
 		>
 			<ArrowLeft
 				size={18}
-				class="-mr-6 opacity-0 transition-all group-hover:mr-[2px] group-hover:opacity-100"
+				class="text-primary-content -mr-6 opacity-0 transition-all group-hover:mr-[2px] group-hover:opacity-100"
 			/>
 
-			<div>Back to Notes</div>
+			<div>Notes</div>
 		</button>
 
 		<div class="grow"></div>
