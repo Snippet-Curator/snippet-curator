@@ -36,10 +36,28 @@ export async function getNotebooks() {
 }
 
 export async function getTags() {
-  return await pb.collection('tags').getFullList({
+  const records = await pb.collection('tags').getFullList({
     sort: 'name',
-    expand: 'tags_via_parent,parent'
+    expand: 'parent'
   });
+
+  const tagMap = new Map()
+  records.forEach(tag => {
+    tagMap.set(tag.id, { ...tag, children: [] })
+  })
+
+  let rootTags = []
+  tagMap.forEach(tag => {
+    if (tag.expand.parent) {
+      const parent = tagMap.get(tag.expand.parent.id)
+      parent.children.push(tag)
+    } else {
+      rootTags.push(tag)
+    }
+  })
+
+  const tags = rootTags
+  return tags
 }
 
 export async function deleteTag(recordID: string) {

@@ -29,7 +29,6 @@
 			sort: 'name'
 		});
 		tags = await getTags();
-		tags = tags.filter((tag) => !tag.expand.parent);
 	});
 	onDestroy(() => {
 		pb.realtime.unsubscribe('notebooks');
@@ -78,7 +77,7 @@
 
 				{#each tags as tag}
 					<li class="flex-1">
-						{#if tag.expand.tags_via_parent}
+						{#if tag.children}
 							<details>
 								<summary>
 									<a
@@ -87,7 +86,7 @@
 									>
 								</summary>
 								<ul>
-									{#each tag.expand.tags_via_parent as subtag}
+									{#each tag.children as subtag}
 										<li>
 											<a
 												class={page.url.hash == `#/tags/${subtag.id}` ? 'menu-active' : ''}

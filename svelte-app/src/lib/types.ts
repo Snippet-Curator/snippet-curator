@@ -38,6 +38,7 @@ export type Notebook = {
 export type Tag = {
   id: string
   name: string
+  children?: Tag
 }
 
 export type NoteList = {
