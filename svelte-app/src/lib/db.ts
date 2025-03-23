@@ -37,7 +37,8 @@ export async function getNotebooks() {
 
 export async function getTags() {
   return await pb.collection('tags').getFullList({
-    sort: 'name'
+    sort: 'name',
+    expand: 'tags_via_parent,parent'
   });
 }
 

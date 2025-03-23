@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import { onDestroy, onMount } from 'svelte';
 
-	import pb from '$lib/db';
+	import pb, { getTags } from '$lib/db';
 
 	import { Dock } from '$lib/components';
 	import { Import, Notebook, Settings, Tags, WalletCards } from 'lucide-svelte';
@@ -28,9 +28,8 @@
 		notebooks = await pb.collection('notebooks').getFullList({
 			sort: 'name'
 		});
-		tags = await pb.collection('tags').getFullList({
-			sort: 'name'
-		});
+		tags = await getTags();
+		tags = tags.filter((tag) => !tag.expand.parent);
 	});
 	onDestroy(() => {
 		pb.realtime.unsubscribe('notebooks');
@@ -78,12 +77,40 @@
 				<span class="menu-title flex items-center gap-2"><Tags size={18} /> Tags</span>
 
 				{#each tags as tag}
-					<li>
+					<li class="flex-1">
+						{#if tag.expand.tags_via_parent}
+							<details>
+								<summary>
+									<a
+										href="#/tags/{tag.id}"
+										class={page.url.hash == `#/tags/${tag.id}` ? 'menu-active' : ''}>{tag.name}</a
+									>
+								</summary>
+								<ul>
+									{#each tag.expand.tags_via_parent as subtag}
+										<li>
+											<a
+												class={page.url.hash == `#/tags/${subtag.id}` ? 'menu-active' : ''}
+												href="#/tags/{subtag.id}">{subtag.name}</a
+											>
+										</li>
+									{/each}
+								</ul>
+							</details>
+						{:else}
+							<a
+								class={page.url.hash == `#/tags/${tag.id}` ? 'menu-active' : ''}
+								href="#/tags/{tag.id}">{tag.name}</a
+							>
+						{/if}
+					</li>
+
+					<!-- <li>
 						<a
 							class={page.url.hash == `#/tags/${tag.id}` ? 'menu-active' : ''}
 							href="#/tags/{tag.id}">{tag.name}</a
 						>
-					</li>
+					</li> -->
 				{/each}
 			</ScrollArea>
 
