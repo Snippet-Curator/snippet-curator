@@ -30,9 +30,28 @@ export async function getNotebook(name: string) {
 }
 
 export async function getNotebooks() {
-  return await pb.collection('notebooks').getFullList({
-    sort: 'name'
+  const records = await pb.collection('notebooks').getFullList({
+    sort: 'name',
+    expand: 'parent'
   });
+
+  const notebookMap = new Map()
+  records.forEach(notebook => {
+    notebookMap.set(notebook.id, { ...notebook, children: [] })
+  })
+
+  let rootNotebooks = []
+  notebookMap.forEach(notebook => {
+    if (notebook.expand.parent) {
+      const parent = notebookMap.get(notebook.expand.parent.id)
+      parent.children.push(notebook)
+    } else {
+      rootNotebooks.push(notebook)
+    }
+  })
+
+  const notebooks = rootNotebooks
+  return notebooks
 }
 
 export async function getTags() {
@@ -63,5 +82,22 @@ export async function getTags() {
 export async function deleteTag(recordID: string) {
   await pb.collection('tags').delete(recordID)
 }
+
+export async function subscribeToTag(tags) {
+  pb.realtime.subscribe('tags', async function (event) {
+    tags = await pb.collection('tags').getFullList({
+      sort: 'name'
+    });
+  });
+}
+
+export async function subscribeToNotebook(notebooks) {
+  pb.realtime.subscribe('notebooks', async function (event) {
+    notebooks = await pb.collection('notebooks').getFullList({
+      sort: 'name'
+    });
+  })
+}
+
 
 export default pb

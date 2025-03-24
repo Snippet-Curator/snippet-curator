@@ -33,6 +33,7 @@ export type NoteRecord = {
 export type Notebook = {
   id: string
   name: string
+  children?: Notebook
 }
 
 export type Tag = {

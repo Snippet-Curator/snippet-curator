@@ -3,9 +3,9 @@
 	import { page } from '$app/state';
 	import { onDestroy, onMount } from 'svelte';
 
-	import pb, { getTags } from '$lib/db';
+	import pb, { getNotebooks, getTags, subscribeToNotebook, subscribeToTag } from '$lib/db';
 
-	import { Dock } from '$lib/components';
+	import { Dock, NotebookList, TagList } from '$lib/components';
 	import { Import, Notebook, Settings, Tags, WalletCards } from 'lucide-svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
 
@@ -13,22 +13,11 @@
 	let notebooks = $state();
 	let tags = $state();
 
-	pb.realtime.subscribe('tags', async function (event) {
-		tags = await pb.collection('tags').getFullList({
-			sort: 'name'
-		});
-	});
-	pb.realtime.subscribe('notebooks', async function (event) {
-		notebooks = await pb.collection('notebooks').getFullList({
-			sort: 'name'
-		});
-	});
-
 	onMount(async () => {
-		notebooks = await pb.collection('notebooks').getFullList({
-			sort: 'name'
-		});
+		notebooks = await getNotebooks();
 		tags = await getTags();
+		subscribeToTag(tags);
+		subscribeToNotebook(notebooks);
 	});
 	onDestroy(() => {
 		pb.realtime.unsubscribe('notebooks');
@@ -63,54 +52,13 @@
 					><Notebook size={18} />Notebooks</span
 				>
 
-				{#each notebooks as notebook}
-					<li>
-						<a
-							class={page.url.hash == `#/notebook/${notebook.id}` ? 'menu-active' : ''}
-							href="#/notebook/{notebook.id}">{notebook.name}</a
-						>
-					</li>
-				{/each}
+				<NotebookList {notebooks} />
 
 				<div class="divider"></div>
+
 				<span class="menu-title flex items-center gap-2"><Tags size={18} /> Tags</span>
 
-				{#each tags as tag}
-					<li class="flex-1">
-						{#if tag.children}
-							<details>
-								<summary>
-									<a
-										href="#/tags/{tag.id}"
-										class={page.url.hash == `#/tags/${tag.id}` ? 'menu-active' : ''}>{tag.name}</a
-									>
-								</summary>
-								<ul>
-									{#each tag.children as subtag}
-										<li>
-											<a
-												class={page.url.hash == `#/tags/${subtag.id}` ? 'menu-active' : ''}
-												href="#/tags/{subtag.id}">{subtag.name}</a
-											>
-										</li>
-									{/each}
-								</ul>
-							</details>
-						{:else}
-							<a
-								class={page.url.hash == `#/tags/${tag.id}` ? 'menu-active' : ''}
-								href="#/tags/{tag.id}">{tag.name}</a
-							>
-						{/if}
-					</li>
-
-					<!-- <li>
-						<a
-							class={page.url.hash == `#/tags/${tag.id}` ? 'menu-active' : ''}
-							href="#/tags/{tag.id}">{tag.name}</a
-						>
-					</li> -->
-				{/each}
+				<TagList {tags} />
 			</ScrollArea>
 
 			<div class="grow"></div>
