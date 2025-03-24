@@ -52,6 +52,7 @@
 		"pocketbase": "^0.25.1",
 		"sanitize-html": "^2.14.0",
 		"spark-md5": "^3.0.2",
-		"svelte-image-viewer": "^4.0.0"
+		"svelte-image-viewer": "^4.0.0",
+		"tw-golden-spacing": "^4.0.0"
 	}
 }

@@ -47,6 +47,9 @@ importers:
       svelte-image-viewer:
         specifier: ^4.0.0
         version: 4.0.0(svelte@5.20.5)
+      tw-golden-spacing:
+        specifier: ^4.0.0
+        version: 4.0.0
     devDependencies:
       '@lucide/svelte':
         specifier: ^0.483.0
@@ -1492,6 +1495,9 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
+  tw-golden-spacing@4.0.0:
+    resolution: {integrity: sha512-qC0VnOhf1TsLL37dzAIZ6veBuWeIMLFOD4dTv8fN+ZnzNgB3JwSDVM53q/1OxRBqeO6xX/8CoUV03gRfHJO7sw==}
+
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
@@ -2790,6 +2796,8 @@ snapshots:
       typescript: 5.8.2
 
   tslib@2.8.1: {}
+
+  tw-golden-spacing@4.0.0: {}
 
   type-check@0.4.0:
     dependencies:

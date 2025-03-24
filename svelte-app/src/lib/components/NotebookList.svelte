@@ -21,7 +21,7 @@
 						href="#/notebook/{notebook.id}"
 						class="{page.url.hash == `#/notebook/${notebook.id}`
 							? 'bg-neutral'
-							: ''} hover:bg-neutral flex w-full items-center gap-x-2 rounded-lg px-2 py-1 opacity-100 transition-colors"
+							: ''} hover:bg-base-content/10 flex w-full items-center gap-x-2 rounded-lg px-2 py-1 opacity-100 transition-colors"
 						><NotebookIcon size={18} />{notebook.name}</a
 					>
 					<div class="grow"></div>
