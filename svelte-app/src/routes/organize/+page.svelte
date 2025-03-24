@@ -1,32 +1,17 @@
 <script lang="ts">
-	import { getContext, onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-
-	import pb, { getNotebooks, getTags } from '$lib/db.svelte';
+	import { signalNotebooks, signalTags } from '$lib/utils.svelte';
 	import { type Tag, type Notebook } from '$lib/types';
 	import { NotebookList, TagList } from '$lib/components';
 
-	let notebooks = $state<Notebook[]>();
-	let tags = $state<Tag[]>();
+	let notebooks = $state<Notebook[]>(signalNotebooks.notebooks);
+	let tags = $state<Tag[]>(signalTags.tags);
 
-	onMount(async () => {
-		tags = getContext('tags');
-		notebooks = getContext('notebooks');
-
-		// notebooks = await getNotebooks();
-		// tags = await getTags();
-		// pb.realtime.subscribe('tags', async function (event) {
-		// 	tags = await getTags();
-		// });
-
-		// pb.realtime.subscribe('notebooks', async function (event) {
-		// 	notebooks = await getNotebooks();
-		// });
-	});
-	onDestroy(() => {
-		// pb.realtime.unsubscribe('notebooks');
-		// pb.realtime.unsubscribe('tags');
+	$effect(() => {
+		tags = signalTags.tags;
+		notebooks = signalNotebooks.notebooks;
 	});
 </script>
 

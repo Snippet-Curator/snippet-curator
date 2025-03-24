@@ -1,9 +1,10 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/state';
-	import { onDestroy, onMount, setContext } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	import pb, { getNotebooks, getTags } from '$lib/db.svelte';
+	import { signalNotebooks, signalTags } from '$lib/utils.svelte';
 	import { type Tag, type Notebook } from '$lib/types';
 
 	import { Dock, NotebookList, TagList } from '$lib/components';
@@ -11,23 +12,29 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
 
 	let { children } = $props();
-	let notebooks = $state<Notebook[]>();
-	let tags = $state<Tag[]>();
+	let notebooks = $state<Notebook[]>(signalNotebooks.notebooks);
+	let tags = $state<Tag[]>(signalTags.tags);
 
 	onMount(async () => {
 		notebooks = await getNotebooks();
+		console.log(notebooks);
 		tags = await getTags();
 		pb.realtime.subscribe('tags', async function (event) {
 			tags = await getTags();
 		});
-
 		pb.realtime.subscribe('notebooks', async function (event) {
 			notebooks = await getNotebooks();
 		});
+		signalTags.tags = tags;
+		signalNotebooks.notebooks = notebooks;
 	});
 	onDestroy(() => {
 		pb.realtime.unsubscribe('notebooks');
 		pb.realtime.unsubscribe('tags');
+	});
+	$effect(() => {
+		signalNotebooks.notebooks = notebooks;
+		signalTags.tags = tags;
 	});
 </script>
 

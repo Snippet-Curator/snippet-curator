@@ -31,4 +31,22 @@ function changeSearchTerm() {
   }
 }
 
+export function getSignalTags() {
+  let tags = $state()
+  return {
+    get tags() { return tags },
+    set tags(newTags) { tags = newTags }
+  }
+}
+
+export function getSignalNotebooks() {
+  let notebooks = $state()
+  return {
+    get notebooks() { return notebooks },
+    set notebooks(newNotebooks) { notebooks = newNotebooks }
+  }
+}
+
 export const searchTerm = changeSearchTerm()
+export const signalTags = getSignalTags()
+export const signalNotebooks = getSignalNotebooks()

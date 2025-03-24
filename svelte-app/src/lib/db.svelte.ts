@@ -103,17 +103,4 @@ export async function updateTag(recordID: string, newName: string, parentTag: st
   }
 }
 
-// export async function subscribeToTag(tags) {
-//   pb.realtime.subscribe('tags', async function (event) {
-//     tags = await getTags()
-//   });
-// }
-
-// export async function subscribeToNotebook(notebooks) {
-//   pb.realtime.subscribe('notebooks', async function (event) {
-//     notebooks = await getNotebooks();
-//   })
-// }
-
-
 export default pb
