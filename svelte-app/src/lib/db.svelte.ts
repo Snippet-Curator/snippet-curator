@@ -1,4 +1,5 @@
 import PocketBase from 'pocketbase'
+import type { Tag } from './types'
 
 const pb = new PocketBase('http://127.0.0.1:8090')
 
@@ -57,7 +58,7 @@ export async function getNotebooks() {
 export async function getTags() {
   const records = await pb.collection('tags').getFullList({
     sort: 'name',
-    expand: 'parent'
+    expand: 'parent,notes_via_tags'
   });
 
   const tagMap = new Map()
@@ -83,21 +84,36 @@ export async function deleteTag(recordID: string) {
   await pb.collection('tags').delete(recordID)
 }
 
-export async function subscribeToTag(tags) {
-  pb.realtime.subscribe('tags', async function (event) {
-    tags = await pb.collection('tags').getFullList({
-      sort: 'name'
-    });
-  });
+export async function updateTag(recordID: string, newName: string, parentTag: string) {
+  if (parentTag && newName) {
+    await pb.collection('tags').update(recordID, {
+      'name': newName,
+      'parent': parentTag
+    })
+  }
+  else if (newName) {
+    await pb.collection('tags').update(recordID, {
+      'name': newName
+    })
+  }
+  else if (parentTag) {
+    await pb.collection('tags').update(recordID, {
+      'parent': parentTag
+    })
+  }
 }
 
-export async function subscribeToNotebook(notebooks) {
-  pb.realtime.subscribe('notebooks', async function (event) {
-    notebooks = await pb.collection('notebooks').getFullList({
-      sort: 'name'
-    });
-  })
-}
+// export async function subscribeToTag(tags) {
+//   pb.realtime.subscribe('tags', async function (event) {
+//     tags = await getTags()
+//   });
+// }
+
+// export async function subscribeToNotebook(notebooks) {
+//   pb.realtime.subscribe('notebooks', async function (event) {
+//     notebooks = await getNotebooks();
+//   })
+// }
 
 
 export default pb

@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 
 import type { EnNote, EnMedia, EnResource } from './types';
-import pb from '$lib/db'
+import pb from '$lib/db.svelte'
 
 dayjs.extend(customParseFormat)
 

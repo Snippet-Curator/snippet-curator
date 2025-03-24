@@ -39,7 +39,11 @@ export type Notebook = {
 export type Tag = {
   id: string
   name: string
-  children?: Tag
+  children?: Tag,
+  expand: {
+    notes_via_tags: Note[]
+  },
+  parent?: Tag
 }
 
 export type NoteList = {

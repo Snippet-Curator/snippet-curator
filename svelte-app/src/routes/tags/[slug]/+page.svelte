@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 
-	import pb from '$lib/db';
+	import pb from '$lib/db.svelte';
 	import { getCorrectPage } from '$lib/utils.svelte';
 	import { Pagination, NoteList, Search } from '$lib/components/';
 	import type { NoteRecord } from '$lib/types';

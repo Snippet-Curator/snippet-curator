@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { Tag as TagIcon, Pencil } from 'lucide-svelte';
+	import { Tag as TagIcon } from 'lucide-svelte';
 
 	import * as ContextMenu from '$lib/components/ui/context-menu/index';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import * as Dialog from '$lib/components/ui/dialog/index';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import type { Tag } from '$lib/types';
-	import TagList from './Taglist.svelte';
+
 	import { page } from '$app/state';
-	import { Rename } from '$lib/components/';
+	import { TagList } from '$lib/components/';
+	import { deleteTag, updateTag } from '$lib/db.svelte';
+	import { onMount } from 'svelte';
 
 	type Props = {
 		tags: Tag[];
@@ -16,22 +19,62 @@
 
 	let { tags, allowEdit = false }: Props = $props();
 
-	let isOpen = $state(false);
+	let isEditOpen = $state(false);
+	let isDeleteOpen = $state(false);
+	let isChangeParentOpen = $state(false);
+	let selectedTag = $state<Tag>();
+	let newTagName = $state<string>('');
+	let tagSearchTerm = $state<string>();
+	let filteredTags = $state(tags);
+	let selectedParentTag = $state<string>('');
+
+	function filterTag() {
+		if (!tagSearchTerm) {
+			filteredTags = tags;
+			return;
+		}
+		filteredTags = tags.filter((tag) => {
+			return tag.name.includes(tagSearchTerm.toLowerCase());
+		});
+	}
+
+	$effect(() => {
+		newTagName = selectedTag?.name || '';
+	});
 </script>
 
 {#snippet renderTag(tag)}
 	<ContextMenu.Root>
-		<ContextMenu.Trigger class="p-0">
+		<ContextMenu.Trigger class="flex items-center justify-between p-0 pr-2">
 			<a
 				href="#/tags/{tag.id}"
 				class="{page.url.hash == `#/tags/${tag.id}`
 					? 'badge-neutral'
 					: ''} badge hover:badge-neutral badge-xl mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
-				><TagIcon size={18} />{tag.name}</a
-			>
+				><TagIcon size={18} />{tag.name}
+			</a>
+
+			<span class="text-right">{tag.expand.notes_via_tags.length}</span>
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
-			<ContextMenu.Item onSelect={() => (isOpen = true)}>Rename</ContextMenu.Item>
+			<ContextMenu.Item
+				onSelect={() => {
+					selectedTag = tag;
+					isEditOpen = true;
+				}}>Rename</ContextMenu.Item
+			>
+			<ContextMenu.Item
+				onSelect={() => {
+					selectedTag = tag;
+					isChangeParentOpen = true;
+				}}>Change Parent</ContextMenu.Item
+			>
+			<ContextMenu.Item
+				onSelect={() => {
+					selectedTag = tag;
+					isDeleteOpen = true;
+				}}>Delete</ContextMenu.Item
+			>
 		</ContextMenu.Content>
 	</ContextMenu.Root>
 {/snippet}
@@ -40,8 +83,10 @@
 	<li class="group">
 		{#if tag.children.length > 0}
 			<details class="w-full">
-				<summary class="flex justify-between py-0 pl-0">
-					{@render renderTag(tag)}
+				<summary class="flex py-0 pl-0">
+					<div class="grow">
+						{@render renderTag(tag)}
+					</div>
 				</summary>
 
 				{#if tag.children}
@@ -56,9 +101,86 @@
 	</li>
 {/each}
 
-{isOpen}
-<Rename bind:isOpen>
-	{#snippet name()}
-		Rename Tag
-	{/snippet}
-</Rename>
+<Dialog.Root open={isEditOpen}>
+	<Dialog.Content onCloseAutoFocus={(e) => e.preventDefault()}>
+		<Dialog.Header>
+			<Dialog.Title>Rename Tag</Dialog.Title>
+			<Dialog.Description>Change tag to new name</Dialog.Description>
+		</Dialog.Header>
+		<label class="input w-full">
+			<span class="label">Tag Name</span>
+			<input
+				type="text"
+				class="ring-0"
+				placeholder={selectedTag.name || ''}
+				bind:value={newTagName}
+			/>
+		</label>
+		<div class="flex justify-end gap-x-2">
+			<button onclick={() => (isEditOpen = false)} class="btn">Close</button>
+			<button
+				onclick={() => {
+					updateTag(selectedTag?.id, newTagName, selectedTag?.parent);
+					isEditOpen = false;
+				}}
+				class="btn btn-primary">Save</button
+			>
+		</div>
+	</Dialog.Content>
+</Dialog.Root>
+
+<Dialog.Root open={isDeleteOpen}>
+	<Dialog.Content onCloseAutoFocus={(e) => e.preventDefault()}>
+		<Dialog.Header>
+			<Dialog.Title>Delete Tag</Dialog.Title>
+			<Dialog.Description>Are you sure you want to delete this tag?</Dialog.Description>
+		</Dialog.Header>
+		<div class="flex justify-end gap-x-2">
+			<button onclick={() => (isDeleteOpen = false)} class="btn">Close</button>
+			<button
+				onclick={() => {
+					deleteTag(selectedTag?.id);
+					isDeleteOpen = false;
+				}}
+				class="btn btn-error">Delete</button
+			>
+		</div>
+	</Dialog.Content>
+</Dialog.Root>
+
+<Dialog.Root open={isChangeParentOpen}>
+	<Dialog.Content onCloseAutoFocus={(e) => e.preventDefault()}>
+		<Dialog.Header>
+			<Dialog.Title>Change Parent Tag</Dialog.Title>
+			<Dialog.Description>Select parent tag to change</Dialog.Description>
+		</Dialog.Header>
+		<input type="text" oninput={filterTag} bind:value={tagSearchTerm} class="input w-full" />
+		<ScrollArea class="bg-base-200/30 h-[30vh] rounded-lg">
+			{#each filteredTags as tag}
+				<ul class="list">
+					<li class="list-row flex items-center">
+						<input
+							type="radio"
+							class="radio radio-sm"
+							name="radio-1"
+							oninput={() => (selectedParentTag = tag.id)}
+						/>
+						{tag.name}
+					</li>
+				</ul>
+			{/each}
+		</ScrollArea>
+
+		<div class="flex justify-end gap-x-2">
+			<button onclick={() => (isChangeParentOpen = false)} class="btn">Close</button>
+			<button
+				onclick={() => {
+					console.log(selectedTag?.id, selectedTag?.name, selectedParentTag);
+					updateTag(selectedTag?.id, selectedTag?.name, selectedParentTag);
+					isChangeParentOpen = false;
+				}}
+				class="btn btn-primary">Save</button
+			>
+		</div>
+	</Dialog.Content>
+</Dialog.Root>

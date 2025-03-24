@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 
-	import pb from '$lib/db';
+	import pb from '$lib/db.svelte';
 	import { getCorrectPage } from '$lib/utils.svelte';
 	import { Pagination, NoteList } from '$lib/components/';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';

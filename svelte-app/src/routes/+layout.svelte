@@ -1,23 +1,29 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/state';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, setContext } from 'svelte';
 
-	import pb, { getNotebooks, getTags, subscribeToNotebook, subscribeToTag } from '$lib/db';
+	import pb, { getNotebooks, getTags } from '$lib/db.svelte';
+	import { type Tag, type Notebook } from '$lib/types';
 
 	import { Dock, NotebookList, TagList } from '$lib/components';
-	import { Import, Notebook, Settings, Tags, WalletCards } from 'lucide-svelte';
+	import { Import, Notebook as NotebookIcon, Settings, Tags, WalletCards } from 'lucide-svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
 
 	let { children } = $props();
-	let notebooks = $state();
-	let tags = $state();
+	let notebooks = $state<Notebook[]>();
+	let tags = $state<Tag[]>();
 
 	onMount(async () => {
 		notebooks = await getNotebooks();
 		tags = await getTags();
-		subscribeToTag(tags);
-		subscribeToNotebook(notebooks);
+		pb.realtime.subscribe('tags', async function (event) {
+			tags = await getTags();
+		});
+
+		pb.realtime.subscribe('notebooks', async function (event) {
+			notebooks = await getNotebooks();
+		});
 	});
 	onDestroy(() => {
 		pb.realtime.unsubscribe('notebooks');
@@ -49,7 +55,7 @@
 
 			<ScrollArea class="h-[calc(80%-200px)]">
 				<span class="menu-title flex max-h-60 items-center gap-2 overflow-y-auto"
-					><Notebook size={18} />Notebooks</span
+					><NotebookIcon size={18} />Notebooks</span
 				>
 
 				<NotebookList {notebooks} />

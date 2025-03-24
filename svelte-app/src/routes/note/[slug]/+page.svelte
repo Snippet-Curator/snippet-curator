@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 
 	import { Note, Topbar } from '$lib/components/';
-	import pb from '$lib/db';
+	import pb from '$lib/db.svelte';
 
 	import type { Props } from '$lib/types';
 

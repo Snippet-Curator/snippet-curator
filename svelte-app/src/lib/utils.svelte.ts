@@ -18,8 +18,6 @@ export function categorizeMediabyType(content: string) {
   return content.replace(mediaMatch, replaceMedia);
 }
 
-
-
 export function getCorrectPage() {
   if (!page.state.previousHistoryPage) return 1
   return page.state.previousHistoryPage

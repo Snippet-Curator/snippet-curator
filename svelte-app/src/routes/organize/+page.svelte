@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { getContext, onDestroy, onMount } from 'svelte';
 
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
-	import { getNotebooks, getTags } from '$lib/db';
+	import pb, { getNotebooks, getTags } from '$lib/db.svelte';
 	import { type Tag, type Notebook } from '$lib/types';
 	import { NotebookList, TagList } from '$lib/components';
 
@@ -11,8 +11,22 @@
 	let tags = $state<Tag[]>();
 
 	onMount(async () => {
-		notebooks = await getNotebooks();
-		tags = await getTags();
+		tags = getContext('tags');
+		notebooks = getContext('notebooks');
+
+		// notebooks = await getNotebooks();
+		// tags = await getTags();
+		// pb.realtime.subscribe('tags', async function (event) {
+		// 	tags = await getTags();
+		// });
+
+		// pb.realtime.subscribe('notebooks', async function (event) {
+		// 	notebooks = await getNotebooks();
+		// });
+	});
+	onDestroy(() => {
+		// pb.realtime.unsubscribe('notebooks');
+		// pb.realtime.unsubscribe('tags');
 	});
 </script>
 
