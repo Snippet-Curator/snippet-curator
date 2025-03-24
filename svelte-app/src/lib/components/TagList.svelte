@@ -10,7 +10,6 @@
 	import { page } from '$app/state';
 	import { TagList } from '$lib/components/';
 	import { deleteTag, updateTag } from '$lib/db.svelte';
-	import { onMount } from 'svelte';
 
 	type Props = {
 		tags: Tag[];
@@ -163,6 +162,7 @@
 							type="radio"
 							class="radio radio-sm"
 							name="radio-1"
+							checked={tag.id == selectedTag.parent}
 							oninput={() => (selectedParentTag = tag.id)}
 						/>
 						{tag.name}
@@ -175,8 +175,8 @@
 			<button onclick={() => (isChangeParentOpen = false)} class="btn">Close</button>
 			<button
 				onclick={() => {
-					console.log(selectedTag?.id, selectedTag?.name, selectedParentTag);
 					updateTag(selectedTag?.id, selectedTag?.name, selectedParentTag);
+					tagSearchTerm = '';
 					isChangeParentOpen = false;
 				}}
 				class="btn btn-primary">Save</button

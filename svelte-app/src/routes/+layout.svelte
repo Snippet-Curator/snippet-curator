@@ -12,29 +12,26 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
 
 	let { children } = $props();
-	let notebooks = $state<Notebook[]>(signalNotebooks.notebooks);
-	let tags = $state<Tag[]>(signalTags.tags);
+	let notebooks = $state<Notebook[]>();
+	let tags = $state<Tag[]>();
 
 	onMount(async () => {
 		notebooks = await getNotebooks();
-		console.log(notebooks);
 		tags = await getTags();
+		signalTags.tags = tags;
+		signalNotebooks.notebooks = notebooks;
 		pb.realtime.subscribe('tags', async function (event) {
 			tags = await getTags();
+			signalTags.tags = tags;
 		});
 		pb.realtime.subscribe('notebooks', async function (event) {
 			notebooks = await getNotebooks();
+			signalNotebooks.notebooks = notebooks;
 		});
-		signalTags.tags = tags;
-		signalNotebooks.notebooks = notebooks;
 	});
 	onDestroy(() => {
 		pb.realtime.unsubscribe('notebooks');
 		pb.realtime.unsubscribe('tags');
-	});
-	$effect(() => {
-		signalNotebooks.notebooks = notebooks;
-		signalTags.tags = tags;
 	});
 </script>
 
