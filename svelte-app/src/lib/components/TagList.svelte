@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { Tag as TagIcon } from 'lucide-svelte';
 
+	import { page } from '$app/state';
+
 	import * as ContextMenu from '$lib/components/ui/context-menu/index';
 	import * as Dialog from '$lib/components/ui/dialog/index';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import type { Tag } from '$lib/types';
-
-	import { page } from '$app/state';
 	import { TagList } from '$lib/components/';
-	import { deleteTag, updateTag } from '$lib/db.svelte';
+	import { getTagState } from '$lib/db.svelte';
 
 	type Props = {
 		tags: Tag[];
@@ -17,6 +17,8 @@
 	};
 
 	let { tags, allowEdit = false }: Props = $props();
+
+	const tagState = getTagState();
 
 	let isEditOpen = $state(false);
 	let isDeleteOpen = $state(false);
@@ -89,9 +91,9 @@
 				</summary>
 
 				{#if tag.children}
-					<div class="pl-6">
+					<ul>
 						<TagList {allowEdit} tags={tag.children} />
-					</div>
+					</ul>
 				{/if}
 			</details>
 		{:else}
@@ -119,7 +121,7 @@
 			<button onclick={() => (isEditOpen = false)} class="btn">Close</button>
 			<button
 				onclick={() => {
-					updateTag(selectedTag?.id, newTagName, selectedTag?.parent);
+					tagState.updateOne(selectedTag?.id, newTagName, selectedTag?.parent);
 					isEditOpen = false;
 				}}
 				class="btn btn-primary">Save</button
@@ -138,7 +140,7 @@
 			<button onclick={() => (isDeleteOpen = false)} class="btn">Close</button>
 			<button
 				onclick={() => {
-					deleteTag(selectedTag?.id);
+					tagState.delete(selectedTag?.id);
 					isDeleteOpen = false;
 				}}
 				class="btn btn-error">Delete</button

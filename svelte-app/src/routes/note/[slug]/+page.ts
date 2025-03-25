@@ -1,4 +1,4 @@
-import pb from '$lib/db'
+import pb from '$lib/db.svelte'
 import type { Note } from '$lib/types'
 
 export async function load({ params }): Promise<Note> {

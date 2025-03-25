@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { House, Notebook, NotebookText, Settings, WalletCards } from 'lucide-svelte';
+	import { House, NotebookText, Settings, WalletCards } from 'lucide-svelte';
 
 	const pages = [
 		{

@@ -1,38 +1,24 @@
 <script lang="ts">
 	import '../app.css';
 	import { page } from '$app/state';
-	import { onDestroy, onMount } from 'svelte';
-
-	import pb, { getNotebooks, getTags } from '$lib/db.svelte';
-	import { signalNotebooks, signalTags } from '$lib/utils.svelte';
-	import { type Tag, type Notebook } from '$lib/types';
-
-	import { Dock, NotebookList, TagList } from '$lib/components';
 	import { Import, Notebook as NotebookIcon, Settings, Tags, WalletCards } from 'lucide-svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
 
-	let { children } = $props();
-	let notebooks = $state<Notebook[]>();
-	let tags = $state<Tag[]>();
+	import {
+		getNotebookState,
+		setNotebookState,
+		setNoteState,
+		getTagState,
+		setTagState
+	} from '$lib/db.svelte';
+	import { type Tag, type Notebook } from '$lib/types';
+	import { Dock, NotebookList, TagList } from '$lib/components';
 
-	onMount(async () => {
-		notebooks = await getNotebooks();
-		tags = await getTags();
-		signalTags.tags = tags;
-		signalNotebooks.notebooks = notebooks;
-		pb.realtime.subscribe('tags', async function (event) {
-			tags = await getTags();
-			signalTags.tags = tags;
-		});
-		pb.realtime.subscribe('notebooks', async function (event) {
-			notebooks = await getNotebooks();
-			signalNotebooks.notebooks = notebooks;
-		});
-	});
-	onDestroy(() => {
-		pb.realtime.unsubscribe('notebooks');
-		pb.realtime.unsubscribe('tags');
-	});
+	let { children } = $props();
+	setTagState();
+	setNotebookState();
+	const tagState = getTagState();
+	const notebookState = getNotebookState();
 </script>
 
 <div class="drawer lg:drawer-open font-display">
@@ -62,13 +48,13 @@
 					><NotebookIcon size={18} />Notebooks</span
 				>
 
-				<NotebookList {notebooks} />
+				<NotebookList notebooks={notebookState.notebooks} />
 
 				<div class="divider"></div>
 
 				<span class="menu-title flex items-center gap-2"><Tags size={18} /> Tags</span>
 
-				<TagList {tags} />
+				<TagList tags={tagState.tags} />
 			</ScrollArea>
 
 			<div class="grow"></div>
