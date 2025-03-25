@@ -1,6 +1,8 @@
 import PocketBase from 'pocketbase'
-import type { Notebook, Tag, Note } from './types'
+import type { Notebook, Tag, Note, NoteRecord } from './types'
 import { getContext, setContext } from 'svelte'
+import { tryCatch } from './utils.svelte'
+import { goto } from '$app/navigation'
 
 const pb = new PocketBase('http://127.0.0.1:8090')
 
@@ -45,26 +47,33 @@ export class TagState {
   }
 
   async delete(recordID: string) {
-    await pb.collection(this.collectionName).delete(recordID)
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).delete(recordID))
+
+    if (error) {
+      console.error('Error while deleting tag: ', error)
+    }
+
     await this.getAll()
   }
 
-  async updateOne(recordID: string, newName: string, parentTag: string) {
-    if (parentTag && newName) {
-      await pb.collection(this.collectionName).update(recordID, {
-        'name': newName,
-        'parent': parentTag
-      })
-    }
-    else if (newName) {
-      await pb.collection(this.collectionName).update(recordID, {
+  async updateOnebyName(recordID: string, newName: string) {
+    const { data, error } = await tryCatch(
+      pb.collection(this.collectionName).update(recordID, {
         'name': newName
       })
+    )
+    if (error) {
+      console.error('Error while updating tag name: ', error)
     }
-    else if (parentTag) {
-      await pb.collection(this.collectionName).update(recordID, {
-        'parent': parentTag
-      })
+    await this.getAll()
+  }
+
+  async updateOnebyParent(recordID: string, parentTag: string) {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(recordID, {
+      'parent': parentTag
+    }))
+    if (error) {
+      console.error('Error while updating parent tag: ', error)
     }
     await this.getAll()
   }
@@ -136,37 +145,40 @@ export class NotebookState {
 }
 
 export class NoteState {
-  notes = $state<Note[]>([])
+  notes = $state<NoteRecord>({
+    items: [],
+    page: 1,
+    perPage: 25,
+    totalItems: 0,
+    totalPages: 0,
+  })
+  clickedPage = 1
   collectionName = 'notes'
 
-  constructor() {
-    $effect(() => {
-      this.getAll()
-    })
+  constructor() { }
+
+  async getByPage(clickedPage = 1, sort = '-updated') {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(clickedPage, 24, {
+      sort: sort,
+    }))
+
+    if (error) {
+      console.error('Error while deleting tag: ', error)
+    }
+
+    this.notes = data
   }
 
-  async getAll() {
-    const records = await pb.collection(this.collectionName).getFullList({
-      sort: 'name',
-      expand: 'parent'
-    });
+  async getByNotebook(notebookID: string) {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 25, {
+      filter: `notebook="${notebookID}"`,
+      expand: 'tags,notebook'
+    }))
 
-    const notebookMap = new Map()
-    records.forEach(notebook => {
-      notebookMap.set(notebook.id, { ...notebook, children: [] })
-    })
-
-    let rootNotebooks: Notebook[] = []
-    notebookMap.forEach(notebook => {
-      if (notebook.expand.parent) {
-        const parent = notebookMap.get(notebook.expand.parent.id)
-        parent.children.push(notebook)
-      } else {
-        rootNotebooks.push(notebook)
-      }
-    })
-
-    this.notebooks = rootNotebooks
+    if (error) {
+      console.error('Error getting notes: ', error)
+    }
+    this.notes = data
   }
 
   async getOneByName() {
@@ -176,6 +188,7 @@ export class NoteState {
   async delete(recordID: string) {
     await pb.collection(this.collectionName).delete(recordID)
     await this.getAll()
+    goto('#/');
   }
 
   async updateOne(recordID: string, newName: string, parentNotebook: string) {
@@ -221,7 +234,6 @@ export default pb
 
 const TAG_KEY = Symbol('TAG')
 const NOTEBOOK_KEY = Symbol('NOTEBOOK')
-const NOTE_KEY = Symbol('NOTE')
 
 export function setTagState() {
   return setContext(TAG_KEY, new TagState())
@@ -239,11 +251,11 @@ export function getNotebookState() {
   return getContext<ReturnType<typeof setNotebookState>>(NOTEBOOK_KEY)
 }
 
-export function setNoteState() {
-  return setContext(NOTE_KEY, new NotebookState())
+export function setNoteState(NOTE_KEY: symbol) {
+  return setContext(NOTE_KEY, new NoteState())
 }
 
-export function getNoteState() {
+export function getNoteState(NOTE_KEY: symbol) {
   return getContext<ReturnType<typeof setNoteState>>(NOTE_KEY)
 }
 

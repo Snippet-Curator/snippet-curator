@@ -4,14 +4,8 @@
 	import { Import, Notebook as NotebookIcon, Settings, Tags, WalletCards } from 'lucide-svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
 
-	import {
-		getNotebookState,
-		setNotebookState,
-		setNoteState,
-		getTagState,
-		setTagState
-	} from '$lib/db.svelte';
-	import { type Tag, type Notebook } from '$lib/types';
+	import { getNotebookState, setNotebookState, getTagState, setTagState } from '$lib/db.svelte';
+
 	import { Dock, NotebookList, TagList } from '$lib/components';
 
 	let { children } = $props();
@@ -74,6 +68,12 @@
 			<li>
 				<a class={page.url.hash == '#/settings' ? 'menu-active' : ''} href="#/settings"
 					><Settings size={18} />Settings</a
+				>
+			</li>
+
+			<li>
+				<a class={page.url.hash == '#/test' ? 'menu-active' : ''} href="#/test"
+					><Settings size={18} />Test</a
 				>
 			</li>
 		</ul>

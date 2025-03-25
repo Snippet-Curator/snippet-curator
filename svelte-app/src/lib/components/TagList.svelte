@@ -26,22 +26,18 @@
 	let selectedTag = $state<Tag>();
 	let newTagName = $state<string>('');
 	let tagSearchTerm = $state<string>();
-	let filteredTags = $state(tags);
+	let filteredTags = $state(tagState.tags);
 	let selectedParentTag = $state<string>('');
 
-	function filterTag() {
+	function filterTag(ownTag: Tag) {
 		if (!tagSearchTerm) {
-			filteredTags = tags;
+			filteredTags = tagState.tags.filter((tag) => !tag.id.includes(ownTag.id));
 			return;
 		}
-		filteredTags = tags.filter((tag) => {
-			return tag.name.includes(tagSearchTerm.toLowerCase());
+		filteredTags = tagState.tags.filter((tag) => {
+			return tag.name.includes(tagSearchTerm.toLowerCase()) && !tag.id.includes(ownTag.id);
 		});
 	}
-
-	$effect(() => {
-		newTagName = selectedTag?.name || '';
-	});
 </script>
 
 {#snippet renderTag(tag)}
@@ -67,6 +63,7 @@
 			<ContextMenu.Item
 				onSelect={() => {
 					selectedTag = tag;
+					filterTag(selectedTag);
 					isChangeParentOpen = true;
 				}}>Change Parent</ContextMenu.Item
 			>
@@ -113,15 +110,16 @@
 			<input
 				type="text"
 				class="ring-0"
-				placeholder={selectedTag.name || ''}
+				placeholder={selectedTag.name}
 				bind:value={newTagName}
+				onfocus={() => (newTagName = selectedTag.name)}
 			/>
 		</label>
 		<div class="flex justify-end gap-x-2">
 			<button onclick={() => (isEditOpen = false)} class="btn">Close</button>
 			<button
 				onclick={() => {
-					tagState.updateOne(selectedTag?.id, newTagName, selectedTag?.parent);
+					tagState.updateOnebyName(selectedTag?.id, newTagName);
 					isEditOpen = false;
 				}}
 				class="btn btn-primary">Save</button
@@ -155,29 +153,33 @@
 			<Dialog.Title>Change Parent Tag</Dialog.Title>
 			<Dialog.Description>Select parent tag to change</Dialog.Description>
 		</Dialog.Header>
-		<input type="text" oninput={filterTag} bind:value={tagSearchTerm} class="input w-full" />
+		<input type="text" bind:value={tagSearchTerm} class="input w-full" />
 		<ScrollArea class="bg-base-200/30 h-[30vh] rounded-lg">
 			{#each filteredTags as tag}
 				<ul class="list">
 					<li class="list-row flex items-center">
-						<input
-							type="radio"
-							class="radio radio-sm"
-							name="radio-1"
-							checked={tag.id == selectedTag.parent}
-							oninput={() => (selectedParentTag = tag.id)}
-						/>
-						{tag.name}
+						<label for="">
+							<input
+								type="radio"
+								class="radio radio-sm mx-2"
+								name="radio-1"
+								bind:group={selectedParentTag}
+								value={tag}
+							/>
+							{tag.name}
+						</label>
 					</li>
 				</ul>
 			{/each}
 		</ScrollArea>
+		{selectedParentTag}
 
 		<div class="flex justify-end gap-x-2">
 			<button onclick={() => (isChangeParentOpen = false)} class="btn">Close</button>
 			<button
 				onclick={() => {
-					updateTag(selectedTag?.id, selectedTag?.name, selectedParentTag);
+					console.log(selectedTag?.id, selectedTag?.name, selectedParentTag);
+					tagState.updateOnebyParent(selectedTag?.id, selectedParentTag);
 					tagSearchTerm = '';
 					isChangeParentOpen = false;
 				}}
