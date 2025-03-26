@@ -3,7 +3,6 @@
 	import type { Notebook } from '$lib/types';
 	import NotebookList from './NotebookList.svelte';
 	import { page } from '$app/state';
-	import { getNotebookState } from '$lib/db.svelte';
 
 	type Props = {
 		notebooks: Notebook[];

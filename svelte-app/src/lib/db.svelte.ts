@@ -155,7 +155,11 @@ export class NoteState {
   clickedPage = 1
   collectionName = 'notes'
 
-  constructor() { }
+  constructor() {
+    $effect(() => {
+      // this.getByNotebook('vq750rjh2no1et8')
+    })
+  }
 
   async getByPage(clickedPage = 1, sort = '-updated') {
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(clickedPage, 24, {
@@ -179,6 +183,7 @@ export class NoteState {
       console.error('Error getting notes: ', error)
     }
     this.notes = data
+    return this.notes
   }
 
   async getOneByName() {
@@ -251,11 +256,11 @@ export function getNotebookState() {
   return getContext<ReturnType<typeof setNotebookState>>(NOTEBOOK_KEY)
 }
 
-export function setNoteState(NOTE_KEY: symbol) {
+export function setNoteState(NOTE_KEY: string) {
   return setContext(NOTE_KEY, new NoteState())
 }
 
-export function getNoteState(NOTE_KEY: symbol) {
+export function getNoteState(NOTE_KEY: string) {
   return getContext<ReturnType<typeof setNoteState>>(NOTE_KEY)
 }
 

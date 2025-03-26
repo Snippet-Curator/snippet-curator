@@ -31,6 +31,17 @@ function changeSearchTerm() {
   }
 }
 
+function signalSavePage() {
+  let savedPages = $state(new Map())
+  return {
+    get savedPages() { return savedPages },
+    set savedPages(value) { savedPages = value },
+    updatePageData(url: string, currentPage: number) {
+      savedPages.set(url, currentPage)
+    }
+  }
+}
+
 // Types for the result object with discriminated union
 type Success<T> = {
   data: T;
@@ -59,3 +70,4 @@ export async function tryCatch<T, E = Error>(
 
 
 export const searchTerm = changeSearchTerm()
+export const signalPageState = signalSavePage()

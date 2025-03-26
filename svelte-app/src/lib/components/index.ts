@@ -1,7 +1,7 @@
 export { default as Dock } from './Dock.svelte'
 export { default as Note } from './Note.svelte'
+export { default as PaginationBackup } from './PaginationBackup.svelte'
 export { default as Pagination } from './Pagination.svelte'
-export { default as Pagination2 } from './Pagination2.svelte'
 export { default as Search } from './Search.svelte'
 export { default as Topbar } from './Topbar.svelte'
 export { default as NoteList } from './NoteList.svelte'
