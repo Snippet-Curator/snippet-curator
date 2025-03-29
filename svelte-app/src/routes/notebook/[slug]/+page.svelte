@@ -10,13 +10,11 @@
 	let notebookID = $derived(page.params.slug);
 	setNoteState(notebookID);
 	const noteState = getNoteState(notebookID);
-	let notes = $state(noteState.notes);
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
 
 	async function updatePage() {
-		notes = await noteState.getByNotebook(notebookID);
+		await noteState.getByNotebook(notebookID);
 		signalPageState.updatePageData(page.url.hash, noteState.clickedPage);
-		console.log('signal page', signalPageState.savedPages);
 	}
 
 	let initialLoading = $state();
@@ -33,8 +31,8 @@
 		Loading Notes...
 	{:then}
 		<Pagination {noteState} changePage={updatePage} currentID={notebookID} />
-		{#if notes.totalItems > 0}
-			<NoteList {notes} />
+		{#if noteState.notes.totalItems > 0}
+			<NoteList notes={noteState.notes} />
 		{:else}
 			<br />
 		{/if}
