@@ -156,21 +156,20 @@ export class NoteState {
   collectionName = 'notes'
 
   constructor() {
-    $effect(() => {
-      // this.getByNotebook('vq750rjh2no1et8')
-    })
   }
 
-  async getByPage(clickedPage = 1, sort = '-updated') {
-    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(clickedPage, 24, {
+  async getByPage(sort = '-updated') {
+
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       sort: sort,
     }))
 
     if (error) {
-      console.error('Error while deleting tag: ', error)
+      console.error('Unable to get notes by page ', error)
     }
 
     this.notes = data
+    return this.notes
   }
 
   async getByNotebook(notebookID: string) {
@@ -182,6 +181,21 @@ export class NoteState {
     if (error) {
       console.error('Error getting notes: ', error)
     }
+    this.notes = data
+    return this.notes
+  }
+
+  async getByFilter(sort = '-updated', customFilters) {
+    console.log('getbyfilter ', this.clickedPage)
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
+      sort: sort,
+      filter: customFilters
+    }))
+
+    if (error) {
+      console.error('Unable to get notes by filter ', error)
+    }
+
     this.notes = data
     return this.notes
   }

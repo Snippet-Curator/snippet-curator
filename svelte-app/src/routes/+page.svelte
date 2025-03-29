@@ -1,30 +1,38 @@
 <script lang="ts">
 	import PocketbaseQuery from '@emresandikci/pocketbase-query';
 
-	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
-	import pb from '$lib/db.svelte';
+	import pb, { getNoteState, setNoteState } from '$lib/db.svelte';
 	import { Pagination, NoteList, Search } from '$lib/components/';
-	import type { NoteRecord } from '$lib/types';
-	import { getCorrectPage, searchTerm } from '$lib/utils.svelte';
+	import { searchTerm, signalPageState } from '$lib/utils.svelte';
 
 	const query = PocketbaseQuery.getInstance<{ title: string; content: string; tags: string }>();
-	let notes = $state<NoteRecord>();
-	let clickedPage = $state(1);
-	// let noteContainer: HTMLDivElement;
+
 	let searchInput = $state('');
 
-	async function getNotesByPage() {
+	let notebookID = 'homepage';
+	setNoteState(notebookID);
+	const noteState = getNoteState(notebookID);
+
+	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
+
+	async function updatePage() {
 		if (searchInput == '') {
-			notes = await pb.collection('notes').getList(clickedPage, 24, {
-				sort: '-updated'
-			});
+			await noteState.getByPage();
+			searchTerm.searchTerm = '';
+			// saves current page
+			signalPageState.updatePageData(page.url.hash, noteState.clickedPage);
 			return;
 		}
+		await searchNotes();
+		signalPageState.updatePageData(page.url.hash, noteState.clickedPage);
+	}
 
+	async function searchNotes() {
 		let searchedTag;
 		try {
 			searchedTag = await pb.collection('tags').getFirstListItem(`name~"${searchInput}"`);
@@ -40,38 +48,43 @@
 			.like('tags', searchedTag.id)
 			.build();
 
-		notes = await pb.collection('notes').getList(clickedPage, 24, {
-			expand: 'tags',
-			sort: '-updated',
-			filter: customFilters
-		});
-		// noteContainer.scrollTo({ top: 0 });
+		if (searchTerm.searchTerm != searchInput) {
+			noteState.clickedPage = 1;
+		}
+
+		await noteState.getByFilter('-updated', customFilters);
 		searchTerm.searchTerm = searchInput;
 	}
 
+	let initialLoading = $state();
+
 	onMount(async () => {
+		// gets from signal search on mount only
 		if (searchTerm.searchTerm) {
 			searchInput = searchTerm.searchTerm;
 		}
-		clickedPage = await getCorrectPage();
-		await getNotesByPage();
+	});
+
+	$effect(() => {
+		// signal saved page
+		noteState.clickedPage = savedPage ? savedPage : 1;
+
+		initialLoading = updatePage();
 	});
 </script>
 
-<Search bind:searchInput {getNotesByPage} />
+<Search bind:searchInput />
 
-<ScrollArea class="h-[calc(100vh-60px)]">
-	<Pagination
-		totalPages={notes?.totalPages}
-		bind:clickedPage
-		currentPage={notes?.page}
-		changePage={getNotesByPage}
-		pageType="notes"
-		url={page.url.hash}
-	/>
-	{#if notes?.totalItems > 0}
-		<NoteList {notes} />
-	{:else}
-		<br />
-	{/if}
+<ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
+	{#await initialLoading}
+		Loading Notes...
+	{:then}
+		<Pagination {noteState} changePage={updatePage} currentID={notebookID} />
+		{#if noteState.notes.totalItems > 0}
+			<NoteList notes={noteState.notes} />
+		{:else}
+			<br />
+		{/if}
+		<div class="pt-20"></div>
+	{/await}
 </ScrollArea>

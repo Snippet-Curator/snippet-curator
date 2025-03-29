@@ -1,29 +1,47 @@
 <script lang="ts">
-	import { ScrollArea } from '$lib/components/ui/scroll-area';
-
-	import { signalPageState } from '$lib/utils.svelte';
-	import { getNoteState, setNoteState } from '$lib/db.svelte';
-	import { Pagination, NoteList } from '$lib/components/';
-	import type { NoteRecord } from '$lib/types';
 	import { page } from '$app/state';
+	import { NoteList } from '$lib/components';
+	import * as Pagination from '$lib/components/ui/pagination/index';
+	import { getNoteState, setNoteState } from '$lib/db.svelte';
+	import { signalPageState } from '$lib/utils.svelte';
 
-	let notebookID = 'vq750rjh2no1et8';
-	const PAGE_KEY = 'vq750rjh2no1et8';
-	setNoteState(PAGE_KEY);
-	const noteState = getNoteState(PAGE_KEY);
-	console.log('page note', noteState);
-	noteState.clickedPage = signalPageState.savedPages.get(page.url.hash);
-
-	async function updatePage() {
-		console.log('clicked page ', noteState.clickedPage);
-		const records = await noteState.getByNotebook('vq750rjh2no1et8');
-		signalPageState.updatePageData(page.url.hash, noteState.clickedPage);
-		console.log('signal page', signalPageState.savedPages);
-		// console.log('loading records: ', records);
+	let notebookID = 'homepage';
+	setNoteState(notebookID);
+	signalPageState;
+	const noteState = getNoteState(notebookID);
+	async function getNotes() {
+		await noteState.getByPage();
+		console.log(noteState.notes);
 	}
-
-	const initialLoading = updatePage();
+	getNotes();
+	let notes = $state();
+	let currentPage = $derived(noteState.notes.page);
+	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
+	let pages = $derived(noteState.notes);
+	let totalPages = $derived(noteState.notes.totalPages);
 </script>
+
+<Pagination.Root count={totalPages} perPage={10}>
+	{#snippet children({ pages, currentPage })}
+		<Pagination.Content>
+			<Pagination.Item>
+				<Pagination.PrevButton />
+			</Pagination.Item>
+			{#each pages as page (page.key)}
+				<Pagination.Item>
+					<Pagination.Link>
+						<NoteList notes={pages} />
+					</Pagination.Link>
+				</Pagination.Item>
+			{/each}
+			<Pagination.Item>
+				<Pagination.NextButton />
+			</Pagination.Item>
+		</Pagination.Content>
+	{/snippet}
+</Pagination.Root>
+
+<!-- 
 
 <ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
 	{#await initialLoading}
@@ -37,4 +55,4 @@
 		{/if}
 		<div class="pt-20"></div>
 	{/await}
-</ScrollArea>
+</ScrollArea> -->

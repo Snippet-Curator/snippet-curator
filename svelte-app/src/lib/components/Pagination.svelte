@@ -1,11 +1,11 @@
 <script lang="ts">
-	let { noteState, currentID, changePage } = $props();
+	let { noteState, currentID = '', changePage } = $props();
 
 	let currentPage = $derived(noteState.notes.page);
 	let totalPages = $derived(noteState.notes.totalPages);
 
 	const maxVisiblePages = 5;
-	let pages = $state(getPages());
+	let pages = $derived(getPages());
 
 	function getPages() {
 		let start = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
@@ -17,11 +17,17 @@
 		return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 	}
 
-	async function handleClick(currentPage: number) {
-		noteState.clickedPage = currentPage;
-		await noteState.getByNotebook(currentID);
-		pages = getPages();
+	async function handleClick(clickedPage: number) {
+		// pages = getPages();
+
+		noteState.clickedPage = clickedPage;
 		changePage();
+		// if (currentID == 'homepage') {
+		// 	console.log('home page change');
+		// 	await noteState.getByPage();
+		// } else {
+		// 	await noteState.getByNotebook(currentID);
+		// }
 	}
 </script>
 
