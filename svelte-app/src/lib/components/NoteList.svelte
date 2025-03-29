@@ -17,7 +17,7 @@
 				/>
 				<button
 					onclick={() => goto(`#/note/${note.id}`)}
-					class="card hover:bg-base-200/70 bg-base-100 card-border w-full border transition-colors duration-300 hover:cursor-pointer"
+					class="card hover:bg-base-200/70 bg-base-100 card-border max-h-[calc(100vh-60px)] w-full border transition-colors duration-300 hover:cursor-pointer"
 				>
 					<figure class="w-full">
 						<img class="w-full" src={note.thumbnail} alt="" />

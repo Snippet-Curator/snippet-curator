@@ -11,17 +11,15 @@
 	setNoteState(tagID);
 	const noteState = getNoteState(tagID);
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
-	console.log(tagID);
 
 	async function updatePage() {
 		await noteState.getByTag(tagID);
 		signalPageState.updatePageData(page.url.hash, noteState.clickedPage);
-		console.log(noteState.notes);
 	}
 
 	let initialLoading = $state();
 
-	$effect(async () => {
+	$effect(() => {
 		console.log('Slug changed:', page.params.slug);
 		noteState.clickedPage = savedPage ? savedPage : 1;
 		initialLoading = updatePage();

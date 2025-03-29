@@ -24,7 +24,6 @@
 		if (searchInput == '') {
 			if (searchState.searchTerm != searchInput) {
 				noteState.clickedPage = 1;
-				console.log('updatePage: ', searchState.searchTerm, searchInput, noteState.clickedPage);
 				await noteState.getByPage();
 			}
 			await noteState.getByPage();
