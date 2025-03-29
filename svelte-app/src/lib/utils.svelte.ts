@@ -69,5 +69,5 @@ export async function tryCatch<T, E = Error>(
 
 
 
-export const searchTerm = changeSearchTerm()
+export const searchState = changeSearchTerm()
 export const signalPageState = signalSavePage()

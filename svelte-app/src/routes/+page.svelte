@@ -8,7 +8,7 @@
 
 	import pb, { getNoteState, setNoteState } from '$lib/db.svelte';
 	import { Pagination, NoteList, Search } from '$lib/components/';
-	import { searchTerm, signalPageState } from '$lib/utils.svelte';
+	import { searchState, signalPageState } from '$lib/utils.svelte';
 
 	const query = PocketbaseQuery.getInstance<{ title: string; content: string; tags: string }>();
 
@@ -22,8 +22,13 @@
 
 	async function updatePage() {
 		if (searchInput == '') {
+			if (searchState.searchTerm != searchInput) {
+				noteState.clickedPage = 1;
+				console.log('updatePage: ', searchState.searchTerm, searchInput, noteState.clickedPage);
+				await noteState.getByPage();
+			}
 			await noteState.getByPage();
-			searchTerm.searchTerm = '';
+			searchState.searchTerm = '';
 			// saves current page
 			signalPageState.updatePageData(page.url.hash, noteState.clickedPage);
 			return;
@@ -48,27 +53,25 @@
 			.like('tags', searchedTag.id)
 			.build();
 
-		if (searchTerm.searchTerm != searchInput) {
+		if (searchState.searchTerm != searchInput) {
 			noteState.clickedPage = 1;
 		}
 
 		await noteState.getByFilter('-updated', customFilters);
-		searchTerm.searchTerm = searchInput;
+		searchState.searchTerm = searchInput;
 	}
 
 	let initialLoading = $state();
 
 	onMount(async () => {
 		// gets from signal search on mount only
-		if (searchTerm.searchTerm) {
-			searchInput = searchTerm.searchTerm;
+		if (searchState.searchTerm) {
+			searchInput = searchState.searchTerm;
 		}
+		noteState.clickedPage = savedPage ? savedPage : 1;
 	});
 
 	$effect(() => {
-		// signal saved page
-		noteState.clickedPage = savedPage ? savedPage : 1;
-
 		initialLoading = updatePage();
 	});
 </script>

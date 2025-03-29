@@ -4,7 +4,7 @@
 	import { Modal } from '$lib/components';
 	import { ArrowLeft, Info, Notebook, Pencil, Trash2 } from 'lucide-svelte';
 
-	let { deleteNote, added, updated, expand, source, sourceURL } = $props();
+	let { deleteNote, added, updated, created, expand, source, sourceURL } = $props();
 
 	let notebook = $state(expand.notebook);
 	let tags = $state(expand.tags);
@@ -94,9 +94,11 @@
 			<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 			<div tabindex="0" class="dropdown-content bg-base-100 rounded-box w-76 px-4 py-2 shadow-sm">
 				<div class="grid grid-cols-3 gap-x-2 gap-y-1 p-2">
-					<div>Created</div>
+					<div>Original Creation Date</div>
 					<div class="col-span-2">{dayjs(added).format('MMM DD YYYY, hh:ss a')}</div>
-					<div>Modified</div>
+					<div>Created in Curator</div>
+					<div class="col-span-2">{dayjs(created).format('MMM DD YYYY, hh:ss a')}</div>
+					<div>Last Modified</div>
 					<div class="col-span-2">{dayjs(updated).format('MMM DD YYYY, hh:ss a')}</div>
 					<div>Source</div>
 					<div class="col-span-2">{source}</div>

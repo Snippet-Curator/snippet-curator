@@ -158,8 +158,8 @@ export class NoteState {
   constructor() {
   }
 
-  async getByPage(sort = '-updated') {
-
+  async getByPage(sort = '-created') {
+    console.log('getbypage ', this.clickedPage)
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       sort: sort,
     }))
@@ -175,7 +175,8 @@ export class NoteState {
   async getByNotebook(notebookID: string) {
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 25, {
       filter: `notebook="${notebookID}"`,
-      expand: 'tags,notebook'
+      expand: 'tags,notebook',
+      sort: '-created',
     }))
 
     if (error) {
