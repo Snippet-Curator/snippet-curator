@@ -186,6 +186,20 @@ export class NoteState {
     return this.notes
   }
 
+  async getByTag(tagID: string) {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 25, {
+      filter: `tags~"${tagID}"`,
+      expand: 'tags,notebook',
+      sort: '-created',
+    }))
+
+    if (error) {
+      console.error('Error getting notes: ', error)
+    }
+    this.notes = data
+    return this.notes
+  }
+
   async getByFilter(sort = '-updated', customFilters) {
     console.log('getbyfilter ', this.clickedPage)
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {

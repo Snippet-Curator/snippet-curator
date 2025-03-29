@@ -1,53 +1,43 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { page } from '$app/state';
-
-	import pb from '$lib/db.svelte';
-	import { getCorrectPage } from '$lib/utils.svelte';
-	import { Pagination, NoteList, Search } from '$lib/components/';
-	import type { NoteRecord } from '$lib/types';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
-	let tag = $state();
-	let notes = $state<NoteRecord>();
-	let clickedPage = $state(1);
-	let noteContainer: HTMLDivElement;
-	let tagID: string;
+	import { signalPageState } from '$lib/utils.svelte';
+	import { getNoteState, setNoteState } from '$lib/db.svelte';
+	import { Pagination, NoteList } from '$lib/components/';
 
-	async function getNotesByPage() {
-		notes = await pb.collection('notes').getList(clickedPage, 25, {
-			filter: `tags~"${tag?.id}"`,
-			expand: 'tags,notebook'
-		});
-		noteContainer.scrollTo({ top: 0 });
-	}
+	import { page } from '$app/state';
+
+	let tagID = $derived(page.params.slug);
+	setNoteState(tagID);
+	const noteState = getNoteState(tagID);
+	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
+	console.log(tagID);
 
 	async function updatePage() {
-		tagID = page.params.slug;
-		tag = await pb.collection('tags').getOne(tagID);
-		clickedPage = await getCorrectPage();
-		await getNotesByPage();
+		await noteState.getByTag(tagID);
+		signalPageState.updatePageData(page.url.hash, noteState.clickedPage);
+		console.log(noteState.notes);
 	}
 
-	onMount(async () => await updatePage());
+	let initialLoading = $state();
 
-	$effect(async () => await updatePage());
+	$effect(async () => {
+		console.log('Slug changed:', page.params.slug);
+		noteState.clickedPage = savedPage ? savedPage : 1;
+		initialLoading = updatePage();
+	});
 </script>
 
-<ScrollArea bind:this={noteContainer} class="h-[calc(100vh-60px)] overflow-y-auto">
-	<Pagination
-		totalPages={notes?.totalPages}
-		bind:clickedPage
-		currentPage={notes?.page}
-		changePage={getNotesByPage}
-		pageType="tags"
-		url={page.url.hash}
-		currentID={tag?.id}
-	/>
-	{#if notes?.totalItems > 0}
-		<NoteList {notes} />
-	{:else}
-		<br />
-	{/if}
-	<div class="pt-20"></div>
+<ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
+	{#await initialLoading}
+		Loading Notes...
+	{:then}
+		<Pagination {noteState} changePage={updatePage} currentID={tagID} />
+		{#if noteState.notes.totalItems > 0}
+			<NoteList notes={noteState.notes} />
+		{:else}
+			<br />
+		{/if}
+		<div class="pt-20"></div>
+	{/await}
 </ScrollArea>
