@@ -43,7 +43,7 @@ export type Tag = {
   expand: {
     notes_via_tags: Note[]
   },
-  parent?: Tag
+  parent?: string
 }
 
 export type NoteList = {

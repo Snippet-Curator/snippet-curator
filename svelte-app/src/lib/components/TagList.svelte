@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Tag as TagIcon } from 'lucide-svelte';
-
 	import { page } from '$app/state';
+
+	import { Tag as TagIcon } from 'lucide-svelte';
 
 	import * as ContextMenu from '$lib/components/ui/context-menu/index';
 	import * as Dialog from '$lib/components/ui/dialog/index';
@@ -25,9 +25,9 @@
 	let isChangeParentOpen = $state(false);
 	let selectedTag = $state<Tag>();
 	let newTagName = $state<string>('');
-	let tagSearchTerm = $state<string>();
+	let tagSearchTerm = $state<string>('');
 	let filteredTags = $state(tagState.tags);
-	let selectedParentTag = $state<string>('');
+	let selectedParentTagID = $state<string>();
 
 	function filterTag(ownTag: Tag) {
 		if (!tagSearchTerm) {
@@ -63,6 +63,7 @@
 			<ContextMenu.Item
 				onSelect={() => {
 					selectedTag = tag;
+					selectedParentTagID = tag.parent;
 					filterTag(selectedTag);
 					isChangeParentOpen = true;
 				}}>Change Parent</ContextMenu.Item
@@ -153,7 +154,12 @@
 			<Dialog.Title>Change Parent Tag</Dialog.Title>
 			<Dialog.Description>Select parent tag to change</Dialog.Description>
 		</Dialog.Header>
-		<input type="text" bind:value={tagSearchTerm} class="input w-full" />
+		<input
+			type="text"
+			bind:value={tagSearchTerm}
+			class="input w-full"
+			oninput={() => filterTag(selectedTag)}
+		/>
 		<ScrollArea class="bg-base-200/30 h-[30vh] rounded-lg">
 			{#each filteredTags as tag}
 				<ul class="list">
@@ -163,8 +169,8 @@
 								type="radio"
 								class="radio radio-sm mx-2"
 								name="radio-1"
-								bind:group={selectedParentTag}
-								value={tag}
+								bind:group={selectedParentTagID}
+								value={tag.id}
 							/>
 							{tag.name}
 						</label>
@@ -172,14 +178,12 @@
 				</ul>
 			{/each}
 		</ScrollArea>
-		{selectedParentTag}
 
 		<div class="flex justify-end gap-x-2">
 			<button onclick={() => (isChangeParentOpen = false)} class="btn">Close</button>
 			<button
 				onclick={() => {
-					console.log(selectedTag?.id, selectedTag?.name, selectedParentTag);
-					tagState.updateOnebyParent(selectedTag?.id, selectedParentTag);
+					tagState.updateOnebyParent(selectedTag?.id, selectedParentTagID);
 					tagSearchTerm = '';
 					isChangeParentOpen = false;
 				}}

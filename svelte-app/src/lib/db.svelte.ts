@@ -68,13 +68,16 @@ export class TagState {
     await this.getAll()
   }
 
-  async updateOnebyParent(recordID: string, parentTag: string) {
+  async updateOnebyParent(recordID: string, parentTagID: string) {
+    console.log('tagID: ', recordID)
+    console.log('parentTag: ', parentTagID)
     const { data, error } = await tryCatch(pb.collection(this.collectionName).update(recordID, {
-      'parent': parentTag
+      'parent': parentTagID
     }))
     if (error) {
       console.error('Error while updating parent tag: ', error)
     }
+    console.log('updated parent: ', data)
     await this.getAll()
   }
 }
@@ -119,26 +122,33 @@ export class NotebookState {
   }
 
   async delete(recordID: string) {
-    await pb.collection(this.collectionName).delete(recordID)
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).delete(recordID))
+
+    if (error) {
+      console.error('Error while deleting notebook: ', error)
+    }
+
     await this.getAll()
   }
 
-  async updateOne(recordID: string, newName: string, parentNotebook: string) {
-    if (parentNotebook && newName) {
-      await pb.collection(this.collectionName).update(recordID, {
-        'name': newName,
-        'parent': parentNotebook
-      })
-    }
-    else if (newName) {
-      await pb.collection(this.collectionName).update(recordID, {
+  async updateOnebyName(recordID: string, newName: string) {
+    const { data, error } = await tryCatch(
+      pb.collection(this.collectionName).update(recordID, {
         'name': newName
       })
+    )
+    if (error) {
+      console.error('Error while updating notebook name: ', error)
     }
-    else if (parentNotebook) {
-      await pb.collection(this.collectionName).update(recordID, {
-        'parent': parentNotebook
-      })
+    await this.getAll()
+  }
+
+  async updateOnebyParent(recordID: string, parentNotebook: string) {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(recordID, {
+      'parent': parentNotebook
+    }))
+    if (error) {
+      console.error('Error while updating parent notebook: ', error)
     }
     await this.getAll()
   }
@@ -159,7 +169,6 @@ export class NoteState {
   }
 
   async getByPage(sort = '-created') {
-    console.log('getbypage ', this.clickedPage)
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       sort: sort,
     }))
