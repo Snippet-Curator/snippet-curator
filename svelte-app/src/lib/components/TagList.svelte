@@ -6,7 +6,7 @@
 	import * as ContextMenu from '$lib/components/ui/context-menu/index';
 
 	import type { Tag } from '$lib/types';
-	import { ChangeParent, Delete, Rename, TagList } from '$lib/components/';
+	import { ChangeParent, Delete, Rename, TagList, New } from '$lib/components/';
 	import { getTagState } from '$lib/db.svelte';
 
 	type Props = {
@@ -21,8 +21,10 @@
 	let isEditOpen = $state(false);
 	let isDeleteOpen = $state(false);
 	let isChangeParentOpen = $state(false);
+	let isNewTagOpen = $state(false);
 	let selectedTag = $state<Tag>();
 	let newTagName = $state<string>('');
+	let renameTagName = $state<string>('');
 	let tagSearchTerm = $state<string>('');
 	let filteredTags = $state(tagState.tags);
 	let selectedParentTagID = $state<string>();
@@ -72,6 +74,12 @@
 					isDeleteOpen = true;
 				}}>Delete</ContextMenu.Item
 			>
+			<ContextMenu.Separator />
+			<ContextMenu.Item
+				onSelect={() => {
+					isNewTagOpen = true;
+				}}>New</ContextMenu.Item
+			>
 		</ContextMenu.Content>
 	</ContextMenu.Root>
 {/snippet}
@@ -102,8 +110,8 @@
 	bind:isOpen={isEditOpen}
 	renameType="Tag"
 	currentName={selectedTag.name}
-	bind:newName={newTagName}
-	action={() => tagState.updateOnebyName(selectedTag.id, newTagName)}
+	bind:newName={renameTagName}
+	action={() => tagState.updateOnebyName(selectedTag.id, renameTagName)}
 />
 
 <Delete bind:isOpen={isDeleteOpen} name="Tag" action={() => tagState.delete(selectedTag.id)} />
@@ -117,4 +125,11 @@
 	filter={() => filterTag(selectedTag)}
 	cancel={() => tagState.updateOnebyParent(selectedTag?.id, '')}
 	action={() => tagState.updateOnebyParent(selectedTag?.id, selectedParentTagID)}
+/>
+
+<New
+	bind:isOpen={isNewTagOpen}
+	newType="Tag"
+	bind:name={newTagName}
+	action={() => tagState.createOnebyName(newTagName)}
 />

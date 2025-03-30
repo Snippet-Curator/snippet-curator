@@ -6,7 +6,7 @@
 	import * as ContextMenu from '$lib/components/ui/context-menu/index';
 
 	import type { Notebook } from '$lib/types';
-	import { ChangeParent, Delete, Rename } from '$lib/components/';
+	import { ChangeParent, Delete, Rename, New } from '$lib/components/';
 	import NotebookList from './NotebookList.svelte';
 	import { getNotebookState } from '$lib/db.svelte';
 
@@ -22,8 +22,10 @@
 	let isEditOpen = $state(false);
 	let isDeleteOpen = $state(false);
 	let isChangeParentOpen = $state(false);
+	let isNewNotebookOpen = $state(false);
 	let selectedNotebook = $state<Notebook>();
-	let newNotebookName = $state<string>('');
+	let newNotebookName = $state('');
+	let renameNotebookName = $state<string>('');
 	let notebookSearchTerm = $state<string>('');
 	let filteredNotebooks = $state(notebookState.notebooks);
 	let selectedParentNotebookID = $state<string>();
@@ -77,6 +79,12 @@
 					isDeleteOpen = true;
 				}}>Delete</ContextMenu.Item
 			>
+			<ContextMenu.Separator />
+			<ContextMenu.Item
+				onSelect={() => {
+					isNewNotebookOpen = true;
+				}}>New</ContextMenu.Item
+			>
 		</ContextMenu.Content>
 	</ContextMenu.Root>
 {/snippet}
@@ -107,8 +115,8 @@
 	bind:isOpen={isEditOpen}
 	renameType="Notebook"
 	currentName={selectedNotebook.name}
-	bind:newName={newNotebookName}
-	action={() => notebookState.updateOnebyName(selectedNotebook.id, newNotebookName)}
+	bind:newName={renameNotebookName}
+	action={() => notebookState.updateOnebyName(selectedNotebook.id, renameNotebookName)}
 />
 
 <Delete
@@ -126,4 +134,11 @@
 	filter={() => filterNotebook(selectedNotebook)}
 	cancel={() => notebookState.updateOnebyParent(selectedNotebook?.id, '')}
 	action={() => notebookState.updateOnebyParent(selectedNotebook?.id, selectedParentNotebookID)}
+/>
+
+<New
+	bind:isOpen={isNewNotebookOpen}
+	newType="Notebook"
+	bind:name={newNotebookName}
+	action={() => notebookState.createOnebyName(newNotebookName)}
 />

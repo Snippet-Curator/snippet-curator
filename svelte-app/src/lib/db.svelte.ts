@@ -57,10 +57,20 @@ export class TagState {
     await this.getAll()
   }
 
-  async updateOnebyName(recordID: string, newName: string) {
-    console.log('rename ID:', recordID)
-    console.log('rename name:', newName)
+  async createOnebyName(newName: string) {
+    const { data, error } = await tryCatch(
+      pb.collection(this.collectionName).create({
+        'name': newName
+      })
+    )
+    if (error) {
+      console.error('Error while creating new tag: ', error)
+    }
+    console.log('new tag: ', data)
+    await this.getAll()
+  }
 
+  async updateOnebyName(recordID: string, newName: string) {
     const { data, error } = await tryCatch(
       pb.collection(this.collectionName).update(recordID, {
         'name': newName
@@ -121,6 +131,20 @@ export class NotebookState {
 
     this.notebooks = rootNotebooks
   }
+
+  async createOnebyName(newName: string) {
+    const { data, error } = await tryCatch(
+      pb.collection(this.collectionName).create({
+        'name': newName
+      })
+    )
+    if (error) {
+      console.error('Error while creating new notebook: ', error)
+    }
+    console.log('new notebook: ', data)
+    await this.getAll()
+  }
+
 
   async getOneByName() {
     return await pb.collection(this.collectionName).getFirstListItem(`name='${name}'`)

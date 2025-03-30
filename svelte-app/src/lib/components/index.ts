@@ -1,18 +1,18 @@
-export { default as Dock } from './Dock.svelte'
-export { default as Note } from './Note.svelte'
-export { default as NoteLoading } from './NoteLoading.svelte'
-export { default as PaginationBackup } from './PaginationBackup.svelte'
+// layout
+export { default as Dock } from './layout/Dock.svelte'
+export { default as Topbar } from './layout/Topbar.svelte'
+export { default as Search } from './layout/Search.svelte'
+
+// notes
 export { default as Pagination } from './Pagination.svelte'
-export { default as Search } from './Search.svelte'
-export { default as Topbar } from './Topbar.svelte'
+export { default as Note } from './Note.svelte'
 export { default as NoteList } from './NoteList.svelte'
-export { default as Modal } from './Dialogs/Modal.svelte'
-export { default as TagEdit } from './Dialogs/TagEdit.svelte'
 export { default as TagList } from './TagList.svelte'
 export { default as NotebookList } from './NotebookList.svelte'
+export { default as NoteLoading } from './NoteLoading.svelte'
 
 // dialogs
-export { default as Dialog } from './Dialogs/Dialog.svelte'
-export { default as Rename } from './Dialogs/Rename.svelte'
-export { default as Delete } from './Dialogs/Delete.svelte'
-export { default as ChangeParent } from './Dialogs/ChangeParent.svelte'
+export { default as New } from './dialogs/New.svelte'
+export { default as Rename } from './dialogs/Rename.svelte'
+export { default as Delete } from './dialogs/Delete.svelte'
+export { default as ChangeParent } from './dialogs/ChangeParent.svelte'

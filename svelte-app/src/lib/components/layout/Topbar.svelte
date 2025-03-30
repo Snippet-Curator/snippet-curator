@@ -1,21 +1,22 @@
 <script lang="ts">
 	import dayjs from 'dayjs';
 
-	import { Modal } from '$lib/components';
 	import { ArrowLeft, Info, Notebook, Pencil, Trash2 } from 'lucide-svelte';
 
-	let { deleteNote, added, updated, created, expand, source, sourceURL } = $props();
+	let {
+		deleteNote,
+		isDeleteOpen = $bindable(),
+		added,
+		updated,
+		created,
+		expand,
+		source,
+		sourceURL
+	} = $props();
 
 	let notebook = $state(expand.notebook);
 	let tags = $state(expand.tags);
-	let isModalOpen = $state(false);
 
-	function openModal() {
-		isModalOpen = true;
-	}
-	function closeModal() {
-		isModalOpen = false;
-	}
 	function openURL(e: MouseEvent) {
 		const target = e.currentTarget as HTMLAnchorElement;
 		e.preventDefault();
@@ -85,7 +86,8 @@
 		<button class="btn btn-ghost">
 			<Pencil size={18} />
 		</button>
-		<button onclick={openModal} class="btn btn-ghost"><Trash2 size={18} /></button>
+		<button onclick={() => (isDeleteOpen = true)} class="btn btn-ghost"><Trash2 size={18} /></button
+		>
 		<div class="divider divider-horizontal"></div>
 
 		<div class="dropdown dropdown-end">
@@ -108,20 +110,7 @@
 						<a class="link" href={sourceURL} onclick={openURL}>{sourceURL}</a>
 					</div>
 				</div>
-
-				<!-- <ul class="list">
-					<li class="list-row">Created: {dayjs(created).format('MMM DD YYYY, hh:ss a')}</li>
-					<li class="list-row">Modified: {dayjs(updated).format('MMM DD YYYY, hh:ss a')}</li>
-					<li class="list-row items-center">Source: {source}</li>
-					<li class="list-row items-center">
-						URL: <a href={sourceURL} onclick={openURL}>{sourceURL}</a>
-					</li>
-				</ul> -->
 			</div>
 		</div>
 	</div>
 </div>
-
-<Modal isOpen={isModalOpen} close={closeModal} action={deleteNote}
-	>Are you sure you want to delete this note?</Modal
->
