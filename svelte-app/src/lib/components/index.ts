@@ -1,5 +1,6 @@
 export { default as Dock } from './Dock.svelte'
 export { default as Note } from './Note.svelte'
+export { default as NoteLoading } from './NoteLoading.svelte'
 export { default as PaginationBackup } from './PaginationBackup.svelte'
 export { default as Pagination } from './Pagination.svelte'
 export { default as Search } from './Search.svelte'
@@ -9,5 +10,9 @@ export { default as Modal } from './Dialogs/Modal.svelte'
 export { default as TagEdit } from './Dialogs/TagEdit.svelte'
 export { default as TagList } from './TagList.svelte'
 export { default as NotebookList } from './NotebookList.svelte'
+
+// dialogs
 export { default as Dialog } from './Dialogs/Dialog.svelte'
+export { default as Rename } from './Dialogs/Rename.svelte'
 export { default as Delete } from './Dialogs/Delete.svelte'
+export { default as ChangeParent } from './Dialogs/ChangeParent.svelte'

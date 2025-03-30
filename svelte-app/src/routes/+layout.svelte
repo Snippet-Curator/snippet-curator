@@ -71,11 +71,11 @@
 				>
 			</li>
 
-			<li>
+			<!-- <li>
 				<a class={page.url.hash == '#/test' ? 'menu-active' : ''} href="#/test"
 					><Settings size={18} />Test</a
 				>
-			</li>
+			</li> -->
 		</ul>
 	</div>
 </div>

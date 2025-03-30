@@ -34,6 +34,8 @@ export type Notebook = {
   id: string
   name: string
   children?: Notebook
+  parent?: string
+  note_count: number
 }
 
 export type Tag = {
@@ -44,6 +46,7 @@ export type Tag = {
     notes_via_tags: Note[]
   },
   parent?: string
+  note_count: number
 }
 
 export type NoteList = {

@@ -58,6 +58,9 @@ export class TagState {
   }
 
   async updateOnebyName(recordID: string, newName: string) {
+    console.log('rename ID:', recordID)
+    console.log('rename name:', newName)
+
     const { data, error } = await tryCatch(
       pb.collection(this.collectionName).update(recordID, {
         'name': newName
@@ -87,6 +90,7 @@ export class TagState {
 export class NotebookState {
   notebooks = $state<Notebook[]>([])
   collectionName = 'notebooks'
+  viewCollectionName = 'notebooks_with_note_counts'
 
   constructor() {
     $effect(() => {
@@ -95,7 +99,7 @@ export class NotebookState {
   }
 
   async getAll() {
-    const records = await pb.collection(this.collectionName).getFullList({
+    const records = await pb.collection(this.viewCollectionName).getFullList({
       sort: 'name',
       expand: 'parent'
     });

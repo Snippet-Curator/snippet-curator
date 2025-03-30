@@ -7,7 +7,7 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import pb, { getNoteState, setNoteState } from '$lib/db.svelte';
-	import { Pagination, NoteList, Search } from '$lib/components/';
+	import { Pagination, NoteList, Search, NoteLoading } from '$lib/components/';
 	import { searchState, signalPageState } from '$lib/utils.svelte';
 
 	const query = PocketbaseQuery.getInstance<{ title: string; content: string; tags: string }>();
@@ -79,7 +79,7 @@
 
 <ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
 	{#await initialLoading}
-		Loading Notes...
+		<br />
 	{:then}
 		<Pagination {noteState} changePage={updatePage} currentID={notebookID} />
 		{#if noteState.notes.totalItems > 0}
