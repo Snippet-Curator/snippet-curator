@@ -51,7 +51,7 @@
 				><TagIcon size={18} />{tag.name}
 			</a>
 
-			<span class="text-right">{tag.expand.notes_via_tags.length}</span>
+			<span class="text-right">{tag.note_count}</span>
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
 			<ContextMenu.Item

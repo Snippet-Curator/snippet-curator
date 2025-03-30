@@ -15,6 +15,7 @@ export async function getAuth() {
 export class TagState {
   tags = $state<Tag[]>([])
   collectionName = 'tags'
+  viewCollectionName = 'tags_with_note_counts'
 
   constructor() {
     $effect(() => {
@@ -23,10 +24,10 @@ export class TagState {
   }
 
   async getAll() {
-    const records = await pb.collection(this.collectionName).getFullList({
+    const records = await pb.collection(this.viewCollectionName).getFullList({
       sort: 'name',
-      expand: 'parent,notes_via_tags'
-    });
+      expand: 'parent'
+    })
 
     const tagMap = new Map()
     records.forEach(tag => {
