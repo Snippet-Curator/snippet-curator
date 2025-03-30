@@ -183,6 +183,14 @@
 			<button onclick={() => (isChangeParentOpen = false)} class="btn">Close</button>
 			<button
 				onclick={() => {
+					tagState.updateOnebyParent(selectedTag?.id, '');
+					tagSearchTerm = '';
+					isChangeParentOpen = false;
+				}}
+				class="btn">Clear Parent Tag</button
+			>
+			<button
+				onclick={() => {
 					tagState.updateOnebyParent(selectedTag?.id, selectedParentTagID);
 					tagSearchTerm = '';
 					isChangeParentOpen = false;
