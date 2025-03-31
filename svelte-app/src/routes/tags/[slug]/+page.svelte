@@ -3,7 +3,7 @@
 
 	import { signalPageState } from '$lib/utils.svelte';
 	import { getNoteState, setNoteState } from '$lib/db.svelte';
-	import { Pagination, NoteList } from '$lib/components/';
+	import { Pagination, NoteList, Topbar, TopbarBack } from '$lib/components/';
 
 	import { page } from '$app/state';
 
@@ -26,9 +26,13 @@
 	});
 </script>
 
+<Topbar>
+	<TopbarBack />
+</Topbar>
+
 <ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
 	{#await initialLoading}
-		Loading Notes...
+		<br />
 	{:then}
 		<Pagination {noteState} changePage={updatePage} currentID={tagID} />
 		{#if noteState.notes.totalItems > 0}

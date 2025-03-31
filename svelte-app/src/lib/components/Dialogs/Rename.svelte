@@ -19,7 +19,10 @@
 </script>
 
 <Dialog.Root open={isOpen}>
-	<Dialog.Content onCloseAutoFocus={(e) => e.preventDefault()}>
+	<Dialog.Content
+		onInteractOutside={() => (isOpen = false)}
+		onCloseAutoFocus={(e) => e.preventDefault()}
+	>
 		<Dialog.Header>
 			<Dialog.Title>Rename {renameType}</Dialog.Title>
 			<Dialog.Description>Change {renameType.toLowerCase()} to new name</Dialog.Description>

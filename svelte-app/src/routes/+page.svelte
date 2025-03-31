@@ -1,5 +1,6 @@
 <script lang="ts">
 	import PocketbaseQuery from '@emresandikci/pocketbase-query';
+	import { Pencil } from 'lucide-svelte';
 
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -7,12 +8,13 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import pb, { getNoteState, setNoteState } from '$lib/db.svelte';
-	import { Pagination, NoteList, Search, NoteLoading } from '$lib/components/';
+	import { Pagination, NoteList, Search, Topbar } from '$lib/components/';
 	import { searchState, signalPageState } from '$lib/utils.svelte';
 
 	const query = PocketbaseQuery.getInstance<{ title: string; content: string; tags: string }>();
 
 	let searchInput = $state('');
+	let isBulkEdit = $state(false);
 
 	let notebookID = 'homepage';
 	setNoteState(notebookID);
@@ -75,7 +77,12 @@
 	});
 </script>
 
-<Search bind:searchInput />
+<Topbar>
+	<Search bind:searchInput />
+	<button class="btn btn-ghost" onclick={() => (isBulkEdit = !isBulkEdit)}>
+		<Pencil size={18} />
+	</button>
+</Topbar>
 
 <ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
 	{#await initialLoading}
@@ -83,7 +90,7 @@
 	{:then}
 		<Pagination {noteState} changePage={updatePage} currentID={notebookID} />
 		{#if noteState.notes.totalItems > 0}
-			<NoteList notes={noteState.notes} />
+			<NoteList {isBulkEdit} notes={noteState.notes} />
 		{:else}
 			<br />
 		{/if}

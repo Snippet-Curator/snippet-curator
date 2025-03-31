@@ -11,7 +11,10 @@
 </script>
 
 <Dialog.Root open={isOpen}>
-	<Dialog.Content onCloseAutoFocus={(e) => e.preventDefault()}>
+	<Dialog.Content
+		onInteractOutside={() => (isOpen = false)}
+		onCloseAutoFocus={(e) => e.preventDefault()}
+	>
 		<Dialog.Header>
 			<Dialog.Title>Delete {name}</Dialog.Title>
 			<Dialog.Description

@@ -1,7 +1,15 @@
 // layout
 export { default as Dock } from './layout/Dock.svelte'
-export { default as Topbar } from './layout/Topbar.svelte'
 export { default as Search } from './layout/Search.svelte'
+
+// Topbar
+export { default as Topbar } from './layout/Topbar/Topbar.svelte'
+export { default as TopbarTags } from './layout/Topbar/tag-list.svelte'
+export { default as TopbarDelete } from './layout/Topbar/topbar-delete.svelte'
+export { default as TopbarNoteInfo } from './layout/Topbar/topbar-note-info.svelte'
+export { default as TopbarBack } from './layout/Topbar/topbar-back.svelte'
+export { default as TopbarNotebook } from './layout/Topbar/topbar-notebook.svelte'
+export { default as Rating } from './layout/Topbar/note-rating.svelte'
 
 // notes
 export { default as Pagination } from './Pagination.svelte'

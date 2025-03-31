@@ -3,13 +3,12 @@
 
 	type Props = {
 		searchInput: string;
-		// getNotesByPage: () => void;
 	};
 
 	let { searchInput = $bindable() }: Props = $props();
 </script>
 
-<div class="border-base-300 bg-base-200 relative w-full border-b px-2 py-2">
+<div class="relative w-full px-2">
 	<input type="text" bind:value={searchInput} placeholder="Search..." class="input w-full pr-10" />
 	{#if searchInput && searchInput.trim() != ''}
 		<button

@@ -32,7 +32,10 @@
 </script>
 
 <Dialog.Root open={isOpen}>
-	<Dialog.Content onCloseAutoFocus={(e) => e.preventDefault()}>
+	<Dialog.Content
+		onInteractOutside={() => (isOpen = false)}
+		onCloseAutoFocus={(e) => e.preventDefault()}
+	>
 		<Dialog.Header>
 			<Dialog.Title>Change Parent {renameType}</Dialog.Title>
 			<Dialog.Description>Select parent {renameType.toLowerCase()} to change</Dialog.Description>
