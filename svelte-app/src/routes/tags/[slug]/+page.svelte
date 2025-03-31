@@ -30,7 +30,7 @@
 	<TopbarBack />
 </Topbar>
 
-<ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
+<ScrollArea class="mb-20 h-[calc(100vh-60px)] overflow-y-auto">
 	{#await initialLoading}
 		<br />
 	{:then}
@@ -40,6 +40,5 @@
 		{:else}
 			<br />
 		{/if}
-		<div class="pt-20"></div>
 	{/await}
 </ScrollArea>
