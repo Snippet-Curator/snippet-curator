@@ -120,6 +120,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@4.0.9)
+      tw-animate-css:
+        specifier: ^1.2.5
+        version: 1.2.5
       typescript:
         specifier: ^5.0.0
         version: 5.8.2
@@ -1495,6 +1498,9 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
+  tw-animate-css@1.2.5:
+    resolution: {integrity: sha512-ABzjfgVo+fDbhRREGL4KQZUqqdPgvc5zVrLyeW9/6mVqvaDepXc7EvedA+pYmMnIOsUAQMwcWzNvom26J2qYvQ==}
+
   tw-golden-spacing@4.0.0:
     resolution: {integrity: sha512-qC0VnOhf1TsLL37dzAIZ6veBuWeIMLFOD4dTv8fN+ZnzNgB3JwSDVM53q/1OxRBqeO6xX/8CoUV03gRfHJO7sw==}
 
@@ -2796,6 +2802,8 @@ snapshots:
       typescript: 5.8.2
 
   tslib@2.8.1: {}
+
+  tw-animate-css@1.2.5: {}
 
   tw-golden-spacing@4.0.0: {}
 

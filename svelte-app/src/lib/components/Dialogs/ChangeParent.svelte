@@ -33,8 +33,11 @@
 
 <Dialog.Root open={isOpen}>
 	<Dialog.Content
-		onInteractOutside={() => (isOpen = false)}
-		onCloseAutoFocus={(e) => e.preventDefault()}
+		onCloseAutoFocus={(e) => {
+			e.preventDefault();
+			searchTerm = '';
+			isOpen = false;
+		}}
 	>
 		<Dialog.Header>
 			<Dialog.Title>Change Parent {renameType}</Dialog.Title>

@@ -20,6 +20,7 @@ export type Note = {
     notebook?: Notebook,
     tags?: Tag
   }
+  desciption: string
 }
 
 export type NoteRecord = {

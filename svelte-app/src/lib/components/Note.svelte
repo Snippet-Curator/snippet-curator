@@ -89,7 +89,7 @@
 	});
 </script>
 
-<div class="bg-base-100/90 top-15 fixed z-20 flex w-full px-8 py-4 backdrop-blur-2xl">
+<div class="bg-base-100/90 sticky top-0 z-20 flex w-full px-8 py-4 backdrop-blur-2xl">
 	<div class="flex w-full">
 		<h2 class="card-title grow">{note.title}</h2>
 		<div
@@ -108,7 +108,7 @@
 	</div>
 </div>
 
-<ScrollArea type="scroll" class="pt-15 h-full pb-20">
+<ScrollArea type="scroll" class=" h-full pb-20">
 	<div class="card mx-auto mt-10 max-w-3xl px-10 lg:max-w-5xl">
 		<div class="card-body z-0 text-lg">
 			<div class="relative" bind:this={container}></div>

@@ -79,6 +79,21 @@ export function sanitizeContent(content: string) {
   return cleanContent
 }
 
+export function createDescription(htmlContent: string, maxLength = 300) {
+  const strippedText = htmlContent
+    .replace(/<[^>]+>/g, '') // Remove HTML tags
+    .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
+    .replace(/\s+/g, ' '); // Normalize whitespace
+
+  const trimmedText = strippedText.trim();
+
+  if (trimmedText.length <= maxLength) {
+    return trimmedText;
+  }
+
+  return trimmedText.substring(0, maxLength);
+}
+
 export class htmlImport {
   title: string
   content: string
@@ -87,6 +102,7 @@ export class htmlImport {
   sourceUrl: string
   recordID: string
   added: string
+  description: string
 
   constructor(fileContent: string) {
     this.recordID = ''
@@ -98,6 +114,7 @@ export class htmlImport {
     this.source = 'SingleFile clip'
     this.sourceUrl = this.parseURL(this.parsedHTML)
     this.added = new Date().toISOString()
+    this.description = ''
   }
 
   parseHTML(fileContent: string) {
@@ -187,7 +204,7 @@ export class htmlImport {
       'title': this.title,
       'source': this.source,
       'added': this.added,
-      'sourceURL': this.sourceUrl,
+      'source_url': this.sourceUrl,
       'notebook': defaultNotebook.id
     }
 
@@ -203,9 +220,12 @@ export class htmlImport {
 
     await this.uploadImg()
     this.content = sanitizeContent(this.content)
+    this.description = createDescription(this.content)
 
     const data = {
       'content': this.content,
+      'original_content': this.content,
+      'description': this.description
     }
 
     await pb.collection('notes').update(this.recordID, data)
@@ -226,6 +246,7 @@ export class EnImport {
   sourceUrl: string
   tags: string[]
   recordID: string
+  description: string
 
   constructor(fileContent: string) {
 
@@ -246,6 +267,7 @@ export class EnImport {
     this.source = this.enNote['en-export'].note['note-attributes'].source
     this.sourceUrl = this.enNote['en-export'].note['note-attributes']['source-url']
     this.tags = Array.isArray(tags) ? tags : [tags]
+    this.description = ''
   }
 
 
@@ -449,7 +471,7 @@ export class EnImport {
       'title': this.title,
       'added': this.added,
       'source': this.source,
-      'sourceURL': this.sourceUrl,
+      'source_url': this.sourceUrl,
       'tags': tags,
       'notebook': defaultNotebook.id
     }
@@ -465,9 +487,12 @@ export class EnImport {
     await this.uploadResources()
     this.replaceEnMedia()
     this.content = sanitizeContent(this.content)
+    this.description = createDescription(this.content)
 
     const data = {
       'content': this.content,
+      'original_content': this.content,
+      'description': this.description
     }
 
     await pb.collection('notes').update(this.recordID, data)

@@ -2,7 +2,7 @@
 	import dayjs from 'dayjs';
 	import { Info } from 'lucide-svelte';
 
-	let { added, updated, created, source, sourceURL } = $props();
+	let { added, updated, created, source, source_url } = $props();
 
 	function openURL(e: MouseEvent) {
 		const target = e.currentTarget as HTMLAnchorElement;
@@ -31,7 +31,7 @@
 
 			<div>URL</div>
 			<div class="col-span-2 break-all">
-				<a class="link" href={sourceURL} onclick={openURL}>{sourceURL}</a>
+				<a class="link" href={source_url} onclick={openURL}>{source_url}</a>
 			</div>
 		</div>
 	</div>

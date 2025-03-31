@@ -14,7 +14,7 @@
 	let isDeleteOpen = $state(false);
 	async function deleteNote(noteID) {
 		await pb.collection('notes').delete(noteID);
-		goto('#/');
+		window.history.back();
 	}
 </script>
 
@@ -29,7 +29,7 @@
 	<TopbarNoteInfo {...note} />
 </Topbar>
 
-<div class="relative h-[calc(100vh-60px)]">
+<div class="h-[calc(100vh-60px)]">
 	<Note {note} />
 </div>
 

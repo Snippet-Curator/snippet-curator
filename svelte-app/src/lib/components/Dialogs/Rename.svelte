@@ -20,8 +20,10 @@
 
 <Dialog.Root open={isOpen}>
 	<Dialog.Content
-		onInteractOutside={() => (isOpen = false)}
-		onCloseAutoFocus={(e) => e.preventDefault()}
+		onCloseAutoFocus={(e) => {
+			e.preventDefault();
+			isOpen = false;
+		}}
 	>
 		<Dialog.Header>
 			<Dialog.Title>Rename {renameType}</Dialog.Title>

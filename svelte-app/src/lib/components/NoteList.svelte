@@ -21,8 +21,11 @@
 			<div class="card-title text-pretty break-all text-left">
 				{note.title}
 			</div>
-			{#if note.attachments.length == 0}
-				<div class="text-left">{@html note.content.slice(0, 200)}</div>
+
+			{#if !note.thumbnail}
+				<p class="line-clamp-3 text-left">
+					{note.description}
+				</p>
 			{/if}
 			<div></div>
 		</div>
