@@ -13,7 +13,9 @@
 
 <div class="dropdown dropdown-end">
 	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-	<div tabindex="0" class="btn btn-ghost"><Info size={18} /></div>
+	<div class="tooltip tooltip-bottom z-30" data-tip="Info">
+		<div tabindex="0" class="btn btn-ghost"><Info size={18} /></div>
+	</div>
 	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 	<div
 		tabindex="0"

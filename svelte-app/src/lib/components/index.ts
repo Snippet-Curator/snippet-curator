@@ -1,6 +1,7 @@
 // layout
 export { default as Dock } from './layout/Dock.svelte'
 export { default as Search } from './layout/Search.svelte'
+export { default as BulkToolbar } from './layout/BulkToolbar.svelte'
 
 // Topbar
 export { default as Topbar } from './layout/Topbar/Topbar.svelte'

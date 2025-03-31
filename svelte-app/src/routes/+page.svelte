@@ -8,7 +8,7 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import pb, { getNoteState, setNoteState } from '$lib/db.svelte';
-	import { Pagination, NoteList, Search, Topbar } from '$lib/components/';
+	import { Pagination, NoteList, Search, Topbar, BulkToolbar } from '$lib/components/';
 	import { searchState, signalPageState } from '$lib/utils.svelte';
 
 	const query = PocketbaseQuery.getInstance<{ title: string; content: string; tags: string }>();
@@ -79,21 +79,26 @@
 
 <Topbar>
 	<Search bind:searchInput />
-	<button class="btn btn-ghost" onclick={() => (isBulkEdit = !isBulkEdit)}>
-		<Pencil size={18} />
-	</button>
+	<div class="tooltip tooltip-bottom z-30" data-tip="Bulk Edit">
+		<button class="btn btn-ghost" onclick={() => (isBulkEdit = !isBulkEdit)}>
+			<Pencil size={18} />
+		</button>
+	</div>
 </Topbar>
 
-<ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
+<ScrollArea class="relative mb-20 h-[calc(100vh-60px)] overflow-y-auto">
 	{#await initialLoading}
 		<br />
 	{:then}
 		<Pagination {noteState} changePage={updatePage} currentID={notebookID} />
+		{#if isBulkEdit}
+			<BulkToolbar />
+		{/if}
 		{#if noteState.notes.totalItems > 0}
 			<NoteList {isBulkEdit} notes={noteState.notes} />
 		{:else}
 			<br />
 		{/if}
-		<div class="pt-20"></div>
+		<!-- <div class="pt-20"></div> -->
 	{/await}
 </ScrollArea>

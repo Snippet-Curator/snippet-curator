@@ -10,6 +10,8 @@
 	let { notebook }: Props = $props();
 </script>
 
-<button class="btn btn-ghost flex items-center gap-x-2"
-	><NotebookIcon size={18} />{notebook.name}</button
->
+<div class="tooltip tooltip-bottom z-30" data-tip="Change Notebook">
+	<button class="btn btn-ghost flex items-center gap-x-2"
+		><NotebookIcon size={18} />{notebook.name}</button
+	>
+</div>
