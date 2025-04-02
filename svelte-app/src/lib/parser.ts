@@ -6,10 +6,13 @@ import customParseFormat from 'dayjs/plugin/customParseFormat'
 
 import type { EnNote, EnMedia, EnResource } from './types';
 import pb from '$lib/db.svelte'
+import { tryCatch } from './utils.svelte';
 
 dayjs.extend(customParseFormat)
 
-const collectionID = 'notes'
+const notesCollection = 'notes'
+const notebookCollection = 'notebooks'
+const inboxNotebook = 'Inbox'
 const baseURL = 'http://127.0.0.1:8090/api/files'
 
 const parser = new XMLParser({
@@ -17,9 +20,28 @@ const parser = new XMLParser({
   attributeNamePrefix: "",
 })
 
-async function getDefaultNotebook() {
-  return await pb.collection('notebooks').getFirstListItem('name="Inbox"')
+async function makeDefaultNotebook() {
+  const { data, error } = await tryCatch(pb.collection(notebookCollection).create({
+    name: inboxNotebook
+  }))
+
+  if (error) {
+    console.error('Error making Inbox Notebook: ', error)
+  }
+  return data
 }
+
+async function getDefaultNotebook() {
+  const { data, error } = await tryCatch(pb.collection(notebookCollection).getFirstListItem(`name="${inboxNotebook}"`))
+
+  if (error) {
+    console.error('Inbox notebook not found: ', error)
+    return await makeDefaultNotebook()
+  }
+  return data
+}
+
+
 
 export function sanitizeContent(content: string) {
   const cleanContent = sanitizeHTML(content, {
@@ -175,9 +197,9 @@ export class htmlImport {
 
         // make thumbnail based on type of resource file
         if (mimeType == 'image/gif') {
-          thumbnailURL = `${baseURL}/${collectionID}/${this.recordID}/${record.attachments[0]}`
+          thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
         } else {
-          thumbnailURL = `${baseURL}/${collectionID}/${this.recordID}/${record.attachments[0]}?thumb=500x0`
+          thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}?thumb=500x0`
         }
 
         // update thumbnail
@@ -188,7 +210,7 @@ export class htmlImport {
 
       // get new filename and url
       const newName = record.attachments[index]
-      const newURL = `${baseURL}/${collectionID}/${this.recordID}/${newName}`
+      const newURL = `${baseURL}/${notesCollection}/${this.recordID}/${newName}`
 
       // replace img src
       img.setAttribute('src', newURL)
@@ -283,8 +305,6 @@ export class EnImport {
     }
   }
 
-
-
   convertResourceToFile(resource: EnResource) {
     const binaryStr = atob(resource.data['#text']);
     const byteArray = new Uint8Array(binaryStr.length)
@@ -363,7 +383,6 @@ export class EnImport {
     })
   }
 
-
   async uploadResources() {
     for (const [index, resource] of this.enResources.entries()) {
       if (!resource) return
@@ -388,17 +407,17 @@ export class EnImport {
 
         // make thumbnail based on type of resource file
         if (resource.mime == 'image/gif') {
-          thumbnailURL = `${baseURL}/${collectionID}/${this.recordID}/${record.attachments[0]}`
+          thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
         } else if (resource.mime == 'video/mp4') {
-          const videoURL = `${baseURL}/${collectionID}/${this.recordID}/${record.attachments[0]}`
+          const videoURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
           const thumbnailFile = await this.getVideoThumb(videoURL)
           const thumbedRecord = await pb.collection('notes').update(this.recordID, {
             'attachments+': [thumbnailFile]
           })
-          thumbnailURL = `${baseURL}/${collectionID}/${this.recordID}/${thumbedRecord.attachments[1]}?thumb=500x0`
+          thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${thumbedRecord.attachments[1]}?thumb=500x0`
         }
         else {
-          thumbnailURL = `${baseURL}/${collectionID}/${this.recordID}/${record.attachments[0]}?thumb=500x0`
+          thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}?thumb=500x0`
         }
 
         // update thumbnail
@@ -409,7 +428,7 @@ export class EnImport {
 
       // get new filename and url
       const newName = record.attachments[index]
-      const newURL = `${baseURL}/${collectionID}/${this.recordID}/${newName}`
+      const newURL = `${baseURL}/${notesCollection}/${this.recordID}/${newName}`
       resource.fileURL = newURL
     }
 
@@ -496,5 +515,167 @@ export class EnImport {
     }
 
     await pb.collection('notes').update(this.recordID, data)
+  }
+}
+
+export class fileImport {
+  title: string
+  file: File
+  mimeType: string
+  content: string
+  fileURL: string
+  recordID: string
+
+  constructor(file: File) {
+    this.file = file
+    this.mimeType = file.type
+    this.recordID = ''
+    this.fileURL = ''
+    this.title = `${file.name} ${dayjs(Date()).format('MM-DD-YYYY')}`
+  }
+
+  async getVideoThumb(videoUrl: string): Promise<File> {
+
+    return new Promise((resolve, reject) => {
+
+      if (!videoUrl || videoUrl.trim() == '') {
+        return reject(new Error('Video URL is empty'))
+      }
+
+      const video = document.createElement("video");
+
+      // setting up properties
+      video.src = videoUrl;
+      video.crossOrigin = "anonymous"; // Prevent CORS issues
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'metadata'
+
+      // add error handling
+      video.onerror = (e) => {
+        reject(new Error(`Video loading error: ${video.error?.message} || 'Unknown error'`))
+      }
+
+      // make sure metadata loaded before seeking
+      video.onloadedmetadata = () => {
+        // now seek
+        video.onloadeddata = () => {
+          video.currentTime = 1; // Capture at 1 second
+        };
+      }
+
+      video.onseeked = async () => {
+        // small delay
+        await new Promise((res) => setTimeout(res, 200));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // draw the current video frame to the canvas
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'))
+          return
+        }
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas to Blob and create a File
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const thumbnailFile = new File([blob], "thumbnail.png", { type: "image/png" });
+            resolve(thumbnailFile)
+          } else {
+            reject(new Error('Failed to create thumbnail blob'))
+          }
+        }, "image/png");
+      };
+
+
+    })
+  }
+
+  async uploadResources() {
+    const record = await pb.collection(notesCollection).update(this.recordID, {
+      'attachments+': [this.file]
+    })
+
+    // update attachment URL
+    this.fileURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
+
+    // if not images or not videos, skip thumbnail creation
+    if (!this.mimeType.includes('image') && !this.mimeType.includes('video')) {
+      return
+    }
+
+    // fill in thumbnail
+    else if (record.thumbnail == '') {
+      let thumbnailURL = ''
+
+      // make thumbnail based on type of resource file
+      if (this.mimeType == 'image/gif') {
+        thumbnailURL = `${this.fileURL}`
+      } else if (this.mimeType == 'video/mp4') {
+        const thumbnailFile = await this.getVideoThumb(this.fileURL)
+        const thumbedRecord = await pb.collection(notesCollection).update(this.recordID, {
+          'attachments+': [thumbnailFile]
+        })
+        thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${thumbedRecord.attachments[1]}?thumb=500x0`
+      }
+      else {
+        thumbnailURL = `${this.fileURL}?thumb=500x0`
+      }
+
+      console.log('thumbnailURL', thumbnailURL)
+
+      // update thumbnail
+      await pb.collection(notesCollection).update(this.recordID, {
+        'thumbnail': thumbnailURL
+      })
+    }
+  }
+
+
+  makeContent() {
+    if (this.mimeType.includes('image')) {
+      return `<img style='max-width: 100%; height: auto' src=${this.fileURL} type=${this.mimeType}>`;
+    }
+
+    if (this.mimeType == 'video/mp4') {
+      return `<video style='width:100%' controls><source src=${this.fileURL} type=${this.mimeType} />Your browser does not support the video tag.</video>`
+    }
+
+    else {
+      return `<a href=${this.fileURL} type=${this.mimeType}/>${this.file.name}</a>`
+    }
+  }
+
+
+  async uploadToDB() {
+    const defaultNotebook = await getDefaultNotebook()
+    const skeletonData = {
+      'title': this.title,
+      'notebook': defaultNotebook.id
+    }
+
+    let record
+    try {
+      record = await pb.collection(notesCollection).create(skeletonData)
+    } catch (e) {
+      console.log(e, 'Possible duplicate note')
+    }
+    this.recordID = record.id
+
+    await this.uploadResources()
+    this.content = this.makeContent()
+
+    const data = {
+      'content': this.content,
+      'original_content': this.content,
+    }
+
+    await pb.collection(notesCollection).update(this.recordID, data)
   }
 }

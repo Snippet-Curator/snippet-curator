@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { EnImport, htmlImport } from '$lib/parser';
+	import { EnImport, fileImport, htmlImport } from '$lib/parser';
 	import * as Tabs from '$lib/components/ui/tabs/index';
 
 	let enexFiles: File[] = [];
@@ -24,18 +24,26 @@
 		const decoder = new TextDecoder('utf-8');
 		for (const [index, file] of enexFiles.entries()) {
 			progress = Math.round(((index + 1) / totalFiles) * 100);
-			currentFile = file.name;
+
 			const decodedText = decoder.decode(await file.arrayBuffer());
+
+			console.log('filetype: ', file.type);
 
 			if (file.type == 'text/html') {
 				const parsedHTML = new htmlImport(decodedText);
 				await parsedHTML.uploadToDB();
-			}
-
-			if (file.name.includes('.enex')) {
+			} else if (file.name.includes('.enex')) {
 				const parsedXML = new EnImport(decodedText);
 				try {
 					await parsedXML.uploadToDB();
+					listofSuccesses.push(file.name);
+				} catch (e) {
+					console.log(e);
+				}
+			} else {
+				const imageFile = new fileImport(file);
+				try {
+					await imageFile.uploadToDB();
 					listofSuccesses.push(file.name);
 				} catch (e) {
 					console.log(e);
@@ -49,15 +57,7 @@
 <div class="flex pl-5 pt-20 md:pl-20">
 	<fieldset class="fieldset">
 		<legend class="fieldset-legend">Upload Evernote Enex File</legend>
-		<input
-			onchange={handleFileUpload}
-			type="file"
-			multiple
-			accept=".enex, .html"
-			id="file"
-			required
-			class="file-input"
-		/>
+		<input onchange={handleFileUpload} type="file" multiple id="file" required class="file-input" />
 		<label for="file" class="fieldset-label">Max size 5GB</label>
 		<button onclick={parseUploadedEnex} class="btn btn-neutral">Import</button>
 	</fieldset>
