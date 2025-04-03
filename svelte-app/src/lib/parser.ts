@@ -42,6 +42,31 @@ async function getDefaultNotebook() {
 }
 
 
+function makeContent(mimeType: string, fileURL: string, fileName: string) {
+  console.log('mimeType: ', mimeType)
+  if (mimeType.includes('image')) {
+    return `<img style='max-width: 100%; height: auto' src=${fileURL} type=${mimeType}>`;
+  }
+
+  if (mimeType == 'video/mp4') {
+    return `<video style='width:100%' controls><source src=${fileURL} type=${mimeType} />Your browser does not support the video tag.</video>`
+  }
+
+  if (mimeType == 'audio/mpeg') {
+    return `<div style="text-align: center;"><audio class="audio-player" controls style="width: 80vw; max-width: 400px;"><source src=${fileURL} type=${mimeType}><a href=${fileURL} target="_blank">${fileName}</a>.</audio></div>`
+  }
+
+  if (mimeType == 'application/pdf') {
+    return `<iframe src=${fileURL} style="width: 80vw; height: 100vh; max-width: 900px; margin: auto; display: block;" frameborder="0" > </iframe> <a href=${fileURL} target="_blank">${fileName}</a>`
+
+
+  }
+
+  else {
+    return `<a href=${fileURL} type=${mimeType}/>${fileName}</a>`
+  }
+}
+
 
 export function sanitizeContent(content: string) {
   const cleanContent = sanitizeHTML(content, {
@@ -53,7 +78,8 @@ export function sanitizeContent(content: string) {
       'code',
       'style',
       'video',
-      'source'
+      'source',
+      'iframe'
     ]),
     // allowedTags: false,
     allowVulnerableTags: true,
@@ -446,13 +472,7 @@ export class EnImport {
 
       if (resource.length == 0) return
 
-      if (resource[0].mime.includes('image')) {
-        return `<img style='max-width: 100%; height: auto' src=${resource[0].fileURL} type=${resource[0].mime}>`;
-      }
-
-      if (resource[0].mime == 'video/mp4') {
-        return `<video style='width:100%' controls><source src=${resource[0].fileURL} type=${resource[0].mime} />Your browser does not support the video tag.</video>`
-      }
+      return makeContent(resource[0].mime, resource[0].fileURL, resource[0]["resource-attributes"]['file-name'])
     }
 
     this.content = this.content.replace(mediaMatch, replaceMedia);
@@ -638,20 +658,6 @@ export class fileImport {
   }
 
 
-  makeContent() {
-    if (this.mimeType.includes('image')) {
-      return `<img style='max-width: 100%; height: auto' src=${this.fileURL} type=${this.mimeType}>`;
-    }
-
-    if (this.mimeType == 'video/mp4') {
-      return `<video style='width:100%' controls><source src=${this.fileURL} type=${this.mimeType} />Your browser does not support the video tag.</video>`
-    }
-
-    else {
-      return `<a href=${this.fileURL} type=${this.mimeType}/>${this.file.name}</a>`
-    }
-  }
-
 
   async uploadToDB() {
     const defaultNotebook = await getDefaultNotebook()
@@ -669,7 +675,7 @@ export class fileImport {
     this.recordID = record.id
 
     await this.uploadResources()
-    this.content = this.makeContent()
+    this.content = makeContent(this.mimeType, this.fileURL, this.file.name)
 
     const data = {
       'content': this.content,
