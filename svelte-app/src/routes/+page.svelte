@@ -7,7 +7,7 @@
 
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
-	import pb, { getNoteState, setNoteState } from '$lib/db.svelte';
+	import pb, { getNoteState, setNoteState, type NoteType } from '$lib/db.svelte';
 	import { Pagination, NoteList, Search, Topbar, BulkToolbar } from '$lib/components/';
 	import { searchState, signalPageState } from '$lib/utils.svelte';
 
@@ -18,7 +18,10 @@
 	let selectedNotesID = $state<string[]>([]);
 
 	let notebookID = 'homepage';
-	setNoteState(notebookID);
+	const noteType: NoteType = {
+		type: 'default'
+	};
+	setNoteState(notebookID, noteType);
 	const noteState = getNoteState(notebookID);
 
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
@@ -27,9 +30,9 @@
 		if (searchInput == '') {
 			if (searchState.searchTerm != searchInput) {
 				noteState.clickedPage = 1;
-				await noteState.getByPage();
+				await noteState.getDefault();
 			}
-			await noteState.getByPage();
+			await noteState.getDefault();
 			searchState.searchTerm = '';
 			// saves current page
 			signalPageState.updatePageData(page.url.hash, noteState.clickedPage);
@@ -99,7 +102,7 @@
 	{:then}
 		<Pagination {noteState} changePage={updatePage} currentID={notebookID} />
 		{#if isBulkEdit}
-			<BulkToolbar {selectedNotesID} />
+			<BulkToolbar bind:isBulkEdit {selectedNotesID} {noteState} />
 		{/if}
 		{#if noteState.notes.totalItems > 0}
 			<NoteList {isBulkEdit} bind:selectedNotesID notes={noteState.notes} />

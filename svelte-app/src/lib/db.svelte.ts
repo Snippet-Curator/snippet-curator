@@ -2,10 +2,14 @@ import PocketBase from 'pocketbase'
 import type { Notebook, Tag, Note, NoteRecord } from './types'
 import { getContext, setContext } from 'svelte'
 import { tryCatch } from './utils.svelte'
-import { goto } from '$app/navigation'
 
 const pb = new PocketBase('http://127.0.0.1:8090')
 
+
+export type NoteType = {
+  type: 'tags' | 'notebooks' | 'default',
+  id?: string
+}
 
 export async function getAuth() {
   await pb.collection('_superusers').authWithPassword('admin@pocketbase.com', 'amiodarone')
@@ -20,6 +24,9 @@ export class TagState {
   constructor() {
     $effect(() => {
       this.getAll()
+      pb.collection('notes').subscribe('*', async () => {
+        this.getAll()
+      });
     })
   }
 
@@ -105,6 +112,12 @@ export class NotebookState {
   constructor() {
     $effect(() => {
       this.getAll()
+      pb.collection('notebooks').subscribe('*', async () => {
+        this.getAll()
+      });
+      pb.collection('notes').subscribe('*', async () => {
+        this.getAll()
+      });
     })
   }
 
@@ -144,7 +157,6 @@ export class NotebookState {
     console.log('new notebook: ', data)
     await this.getAll()
   }
-
 
   async getOneByName() {
     return await pb.collection(this.collectionName).getFirstListItem(`name='${name}'`)
@@ -193,13 +205,46 @@ export class NoteState {
   })
   clickedPage = 1
   collectionName = 'notes'
+  notebookID = $state<string>()
+  tagID = $state<string>()
+  noteType = $state<'tags' | 'notebooks' | 'default'>()
 
-  constructor() {
+  constructor(noteType: NoteType) {
+    this.noteType = noteType.type
+    if (this.noteType == 'notebooks') {
+      this.notebookID = noteType.id
+    } else if (this.noteType == 'tags') {
+      this.tagID = noteType.id
+    }
+  }
+
+  async getArchiveNotebook() {
+    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Archive"'))
+
+    if (error) {
+      console.error('Error getting Archive Notebook: ', error)
+      return pb.collection('notebooks').create({
+        name: 'Archive'
+      })
+    }
+    return data
+  }
+
+  async getDefault() {
+    if (this.noteType == 'default') {
+      this.getByPage()
+    } else if (this.noteType == 'notebooks') {
+      this.getByNotebook(this.notebookID)
+    } else if (this.noteType == 'tags') {
+      this.getByTag(this.tagID)
+    }
   }
 
   async getByPage(sort = '-created') {
+    const archiveNotebook = await this.getArchiveNotebook()
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       sort: sort,
+      filter: `notebook!="${archiveNotebook.id}"`,
     }))
 
     if (error) {
@@ -211,7 +256,8 @@ export class NoteState {
   }
 
   async getByNotebook(notebookID: string) {
-    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 25, {
+    console.log('notebookID', this.notebookID)
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       filter: `notebook="${notebookID}"`,
       expand: 'tags,notebook',
       sort: '-created',
@@ -225,7 +271,7 @@ export class NoteState {
   }
 
   async getByTag(tagID: string) {
-    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 25, {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       filter: `tags~"${tagID}"`,
       expand: 'tags,notebook',
       sort: '-created',
@@ -257,10 +303,35 @@ export class NoteState {
     return await pb.collection(this.collectionName).getFirstListItem(`name='${name}'`)
   }
 
-  async delete(recordID: string) {
-    await pb.collection(this.collectionName).delete(recordID)
-    await this.getAll()
-    goto('#/');
+  async deleteMultiple(recordIDs: string[]) {
+    console.log('noteIDs ', recordIDs)
+    for (const recordID of recordIDs) {
+      const { data, error } = await tryCatch(pb.collection(this.collectionName).delete(recordID))
+
+      if (error) {
+        console.error('Unable to delete note: ', error)
+      }
+    }
+    await this.getDefault()
+  }
+
+
+
+  async archiveMultiple(recordIDs: string[]) {
+    console.log('noteIDs ', recordIDs)
+
+    const archiveNotebook = await this.getArchiveNotebook()
+
+    for (const recordID of recordIDs) {
+      const { data, error } = await tryCatch(pb.collection(this.collectionName).update(recordID, {
+        notebook: archiveNotebook.id
+      }))
+
+      if (error) {
+        console.error('Unable to archive note: ', error)
+      }
+    }
+    await this.getDefault()
   }
 
   async updateOne(recordID: string, newName: string, parentNotebook: string) {
@@ -323,8 +394,9 @@ export function getNotebookState() {
   return getContext<ReturnType<typeof setNotebookState>>(NOTEBOOK_KEY)
 }
 
-export function setNoteState(NOTE_KEY: string) {
-  return setContext(NOTE_KEY, new NoteState())
+
+export function setNoteState(NOTE_KEY: string, noteType: NoteType) {
+  return setContext(NOTE_KEY, new NoteState(noteType))
 }
 
 export function getNoteState(NOTE_KEY: string) {

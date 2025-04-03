@@ -1,11 +1,17 @@
 <script lang="ts">
+	import type { NoteState } from '$lib/db.svelte';
 	import { Archive, Merge, Trash2 } from 'lucide-svelte';
+	import { Delete } from '$lib/components/';
 
 	type Props = {
 		selectedNotesID: string[];
+		noteState: NoteState;
+		isBulkEdit: boolean;
 	};
 
-	let { selectedNotesID }: Props = $props();
+	let { selectedNotesID, noteState, isBulkEdit = $bindable() }: Props = $props();
+
+	let isDeleteOpen = $state(false);
 </script>
 
 <div
@@ -16,7 +22,27 @@
 	>
 		<div>{selectedNotesID.length} Note{selectedNotesID.length > 1 ? 's' : ''} Selected</div>
 		<button class="btn flex items-center gap-x-2"><Merge size={18} />Merge</button>
-		<button class="btn flex items-center gap-x-2"><Archive size={18} />Archive</button>
-		<button class="btn flex items-center gap-x-2"><Trash2 size={18} />Delete</button>
+		<button
+			onclick={() => {
+				noteState.archiveMultiple(selectedNotesID);
+				isBulkEdit = false;
+			}}
+			class="btn flex items-center gap-x-2"><Archive size={18} />Archive</button
+		>
+		<button
+			onclick={() => {
+				isDeleteOpen = true;
+			}}
+			class="btn flex items-center gap-x-2"><Trash2 size={18} />Delete</button
+		>
 	</div>
 </div>
+
+<Delete
+	bind:isOpen={isDeleteOpen}
+	name="Notes"
+	action={() => {
+		noteState.deleteMultiple(selectedNotesID);
+		isBulkEdit = false;
+	}}>these notes?</Delete
+>

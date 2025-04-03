@@ -41,9 +41,68 @@ async function getDefaultNotebook() {
   return data
 }
 
+async function getVideoThumb(videoUrl: string): Promise<File> {
 
-function makeContent(mimeType: string, fileURL: string, fileName: string) {
-  console.log('mimeType: ', mimeType)
+  return new Promise((resolve, reject) => {
+
+    if (!videoUrl || videoUrl.trim() == '') {
+      return reject(new Error('Video URL is empty'))
+    }
+
+    const video = document.createElement("video");
+
+    // setting up properties
+    video.src = videoUrl;
+    video.crossOrigin = "anonymous"; // Prevent CORS issues
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = 'metadata'
+
+    // add error handling
+    video.onerror = (e) => {
+      reject(new Error(`Video loading error: ${video.error?.message} || 'Unknown error'`))
+    }
+
+    // make sure metadata loaded before seeking
+    video.onloadedmetadata = () => {
+      // now seek
+      video.onloadeddata = () => {
+        video.currentTime = 1; // Capture at 1 second
+      };
+    }
+
+    video.onseeked = async () => {
+      // small delay
+      await new Promise((res) => setTimeout(res, 200));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      // draw the current video frame to the canvas
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'))
+        return
+      }
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convert canvas to Blob and create a File
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const thumbnailFile = new File([blob], "thumbnail.png", { type: "image/png" });
+          resolve(thumbnailFile)
+        } else {
+          reject(new Error('Failed to create thumbnail blob'))
+        }
+      }, "image/png");
+    };
+  })
+}
+
+function addMediaToContent(mimeType: string, fileURL: string, fileName: string) {
   if (mimeType.includes('image')) {
     return `<img style='max-width: 100%; height: auto' src=${fileURL} type=${mimeType}>`;
   }
@@ -58,8 +117,6 @@ function makeContent(mimeType: string, fileURL: string, fileName: string) {
 
   if (mimeType == 'application/pdf') {
     return `<iframe src=${fileURL} style="width: 80vw; height: 100vh; max-width: 900px; margin: auto; display: block;" frameborder="0" > </iframe> <a href=${fileURL} target="_blank">${fileName}</a>`
-
-
   }
 
   else {
@@ -67,6 +124,20 @@ function makeContent(mimeType: string, fileURL: string, fileName: string) {
   }
 }
 
+function createDescription(htmlContent: string, maxLength = 300) {
+  const strippedText = htmlContent
+    .replace(/<[^>]+>/g, '') // Remove HTML tags
+    .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
+    .replace(/\s+/g, ' '); // Normalize whitespace
+
+  const trimmedText = strippedText.trim();
+
+  if (trimmedText.length <= maxLength) {
+    return trimmedText;
+  }
+
+  return trimmedText.substring(0, maxLength);
+}
 
 export function sanitizeContent(content: string) {
   const cleanContent = sanitizeHTML(content, {
@@ -125,21 +196,6 @@ export function sanitizeContent(content: string) {
     }
   });
   return cleanContent
-}
-
-export function createDescription(htmlContent: string, maxLength = 300) {
-  const strippedText = htmlContent
-    .replace(/<[^>]+>/g, '') // Remove HTML tags
-    .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
-    .replace(/\s+/g, ' '); // Normalize whitespace
-
-  const trimmedText = strippedText.trim();
-
-  if (trimmedText.length <= maxLength) {
-    return trimmedText;
-  }
-
-  return trimmedText.substring(0, maxLength);
 }
 
 export class htmlImport {
@@ -346,69 +402,6 @@ export class EnImport {
     });
   }
 
-  async getVideoThumb(videoUrl: string): Promise<File> {
-
-    return new Promise((resolve, reject) => {
-
-      if (!videoUrl || videoUrl.trim() == '') {
-        return reject(new Error('Video URL is empty'))
-      }
-
-      const video = document.createElement("video");
-
-      // setting up properties
-      video.src = videoUrl;
-      video.crossOrigin = "anonymous"; // Prevent CORS issues
-      video.muted = true;
-      video.playsInline = true;
-      video.preload = 'metadata'
-
-      // add error handling
-      video.onerror = (e) => {
-        reject(new Error(`Video loading error: ${video.error?.message} || 'Unknown error'`))
-      }
-
-      // make sure metadata loaded before seeking
-      video.onloadedmetadata = () => {
-        // now seek
-        video.onloadeddata = () => {
-          video.currentTime = 1; // Capture at 1 second
-        };
-      }
-
-      video.onseeked = async () => {
-        // small delay
-        await new Promise((res) => setTimeout(res, 200));
-
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        // draw the current video frame to the canvas
-        const ctx = canvas.getContext("2d");
-
-        if (!ctx) {
-          reject(new Error('Could not get canvas context'))
-          return
-        }
-
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        // Convert canvas to Blob and create a File
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const thumbnailFile = new File([blob], "thumbnail.png", { type: "image/png" });
-            resolve(thumbnailFile)
-          } else {
-            reject(new Error('Failed to create thumbnail blob'))
-          }
-        }, "image/png");
-      };
-
-
-    })
-  }
-
   async uploadResources() {
     for (const [index, resource] of this.enResources.entries()) {
       if (!resource) return
@@ -423,9 +416,14 @@ export class EnImport {
       resource.file = this.convertResourceToFile(resource)
 
       // upload to database
-      const record = await pb.collection('notes').update(this.recordID, {
+      const record = await pb.collection(notesCollection).update(this.recordID, {
         'attachments+': [resource.file]
       })
+
+      // if not images or not videos, skip thumbnail creation
+      if (!resource.mime.includes('image') && !resource.mime.includes('video')) {
+        return
+      }
 
       // fill in thumbnail
       if (record.thumbnail == '') {
@@ -436,7 +434,7 @@ export class EnImport {
           thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
         } else if (resource.mime == 'video/mp4') {
           const videoURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
-          const thumbnailFile = await this.getVideoThumb(videoURL)
+          const thumbnailFile = await getVideoThumb(videoURL)
           const thumbedRecord = await pb.collection('notes').update(this.recordID, {
             'attachments+': [thumbnailFile]
           })
@@ -461,6 +459,8 @@ export class EnImport {
   }
 
   replaceEnMedia() {
+    // replaces en-media with regular html tags within content
+
     const mediaMatch = /<en-media[^>]+?hash="([a-zA-Z0-9]+)"[^>]*\/?>/g
 
     if (this.enResources.length == 0) return
@@ -472,7 +472,7 @@ export class EnImport {
 
       if (resource.length == 0) return
 
-      return makeContent(resource[0].mime, resource[0].fileURL, resource[0]["resource-attributes"]['file-name'])
+      return addMediaToContent(resource[0].mime, resource[0].fileURL, resource[0]["resource-attributes"]['file-name'])
     }
 
     this.content = this.content.replace(mediaMatch, replaceMedia);
@@ -554,69 +554,6 @@ export class fileImport {
     this.title = `${file.name} ${dayjs(Date()).format('MM-DD-YYYY')}`
   }
 
-  async getVideoThumb(videoUrl: string): Promise<File> {
-
-    return new Promise((resolve, reject) => {
-
-      if (!videoUrl || videoUrl.trim() == '') {
-        return reject(new Error('Video URL is empty'))
-      }
-
-      const video = document.createElement("video");
-
-      // setting up properties
-      video.src = videoUrl;
-      video.crossOrigin = "anonymous"; // Prevent CORS issues
-      video.muted = true;
-      video.playsInline = true;
-      video.preload = 'metadata'
-
-      // add error handling
-      video.onerror = (e) => {
-        reject(new Error(`Video loading error: ${video.error?.message} || 'Unknown error'`))
-      }
-
-      // make sure metadata loaded before seeking
-      video.onloadedmetadata = () => {
-        // now seek
-        video.onloadeddata = () => {
-          video.currentTime = 1; // Capture at 1 second
-        };
-      }
-
-      video.onseeked = async () => {
-        // small delay
-        await new Promise((res) => setTimeout(res, 200));
-
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        // draw the current video frame to the canvas
-        const ctx = canvas.getContext("2d");
-
-        if (!ctx) {
-          reject(new Error('Could not get canvas context'))
-          return
-        }
-
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        // Convert canvas to Blob and create a File
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const thumbnailFile = new File([blob], "thumbnail.png", { type: "image/png" });
-            resolve(thumbnailFile)
-          } else {
-            reject(new Error('Failed to create thumbnail blob'))
-          }
-        }, "image/png");
-      };
-
-
-    })
-  }
-
   async uploadResources() {
     const record = await pb.collection(notesCollection).update(this.recordID, {
       'attachments+': [this.file]
@@ -638,7 +575,7 @@ export class fileImport {
       if (this.mimeType == 'image/gif') {
         thumbnailURL = `${this.fileURL}`
       } else if (this.mimeType == 'video/mp4') {
-        const thumbnailFile = await this.getVideoThumb(this.fileURL)
+        const thumbnailFile = await getVideoThumb(this.fileURL)
         const thumbedRecord = await pb.collection(notesCollection).update(this.recordID, {
           'attachments+': [thumbnailFile]
         })
@@ -647,8 +584,6 @@ export class fileImport {
       else {
         thumbnailURL = `${this.fileURL}?thumb=500x0`
       }
-
-      console.log('thumbnailURL', thumbnailURL)
 
       // update thumbnail
       await pb.collection(notesCollection).update(this.recordID, {
@@ -675,7 +610,7 @@ export class fileImport {
     this.recordID = record.id
 
     await this.uploadResources()
-    this.content = makeContent(this.mimeType, this.fileURL, this.file.name)
+    this.content = addMediaToContent(this.mimeType, this.fileURL, this.file.name)
 
     const data = {
       'content': this.content,

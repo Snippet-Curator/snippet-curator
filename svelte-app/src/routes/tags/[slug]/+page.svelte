@@ -2,13 +2,19 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import { signalPageState } from '$lib/utils.svelte';
-	import { getNoteState, setNoteState } from '$lib/db.svelte';
+	import { getNoteState, setNoteState, type NoteType } from '$lib/db.svelte';
 	import { Pagination, NoteList, Topbar, TopbarBack } from '$lib/components/';
 
 	import { page } from '$app/state';
 
 	let tagID = $derived(page.params.slug);
-	setNoteState(tagID);
+
+	const noteType: NoteType = {
+		type: 'tags',
+		id: page.params.slug
+	};
+
+	setNoteState(tagID, noteType);
 	const noteState = getNoteState(tagID);
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
 

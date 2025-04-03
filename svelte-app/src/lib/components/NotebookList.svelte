@@ -122,8 +122,8 @@
 <Delete
 	bind:isOpen={isDeleteOpen}
 	name="Notebook"
-	action={() => notebookState.delete(selectedNotebook.id)}
-/>
+	action={() => notebookState.delete(selectedNotebook.id)}>this notebook?</Delete
+>
 
 <ChangeParent
 	bind:isOpen={isChangeParentOpen}

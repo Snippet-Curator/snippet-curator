@@ -114,7 +114,9 @@
 	action={() => tagState.updateOnebyName(selectedTag.id, renameTagName)}
 />
 
-<Delete bind:isOpen={isDeleteOpen} name="Tag" action={() => tagState.delete(selectedTag.id)} />
+<Delete bind:isOpen={isDeleteOpen} name="Tag" action={() => tagState.delete(selectedTag.id)}
+	>this tag?</Delete
+>
 
 <ChangeParent
 	bind:isOpen={isChangeParentOpen}
