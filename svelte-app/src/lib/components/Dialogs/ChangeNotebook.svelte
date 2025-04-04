@@ -9,17 +9,15 @@
 	type Props = {
 		isOpen: boolean;
 		selectedNotebookID: string;
-		cancel: () => void;
+		currentNotebookID: string;
 		action: () => void;
-		filter: () => void;
 	};
 
 	let {
 		isOpen = $bindable(),
 		selectedNotebookID = $bindable(),
-		cancel,
 		action,
-		filter
+		currentNotebookID
 	}: Props = $props();
 
 	let notebooks = $state<Notebook[]>();
@@ -29,6 +27,7 @@
 	}
 
 	onMount(async () => {
+		selectedNotebookID = currentNotebookID;
 		notebooks = await getNotebooks();
 	});
 </script>

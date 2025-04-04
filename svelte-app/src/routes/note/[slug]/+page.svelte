@@ -51,6 +51,7 @@
 
 	<ChangeNotebook
 		bind:selectedNotebookID
+		currentNotebookID={note.expand?.notebook.id}
 		bind:isOpen={isChangeNotebookOpen}
 		action={async () => {
 			await noteState.changeNotebook(selectedNotebookID);
