@@ -49,6 +49,7 @@
 		:host, :host * {
 			font-size: ${newTextSize}px !important;
 			line-height: 1.4;
+			transition: font-size 0.3s ease;
 		}`;
 	}
 
