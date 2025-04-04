@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import type { Note } from '$lib/types';
+	import type { NoteList, Note } from '$lib/types';
 
 	type Props = {
 		isBulkEdit: boolean;
-		notes: Note[];
+		notes: NoteList[];
 		selectedNotesID: string[];
 	};
 
@@ -19,14 +19,16 @@
 		selectedNotesID.push(checkedNoteID);
 		console.log('added note', selectedNotesID);
 	}
+
+	console.log(notes.items[0]);
 </script>
 
-{#snippet renderNotes(note)}
+{#snippet renderNotes(note: Note)}
 	<figure class="w-full">
 		<img class="w-full" src={note.thumbnail} alt="" />
 	</figure>
-	<div class="card-body p-golden-lg w-full">
-		<div class="card-title text-pretty break-all text-left">
+	<div id="card-body" class="card-body p-golden-lg w-full">
+		<div id="card-title" class="card-title text-pretty break-all text-left">
 			{note.title}
 		</div>
 
@@ -35,7 +37,16 @@
 				{note.description}
 			</p>
 		{/if}
-		<div></div>
+		<div class="gap-golden-sm flex flex-wrap items-center">
+			{#if note.expand?.notebook}
+				<span class="badge badge-neutral badge-soft rounded-sm">{note.expand?.notebook.name}</span>
+			{/if}
+			{#if note.expand?.tags}
+				{#each note.expand?.tags as tag}
+					<span class="badge text-nowrap">{tag.name}</span>
+				{/each}
+			{/if}
+		</div>
 	</div>
 {/snippet}
 

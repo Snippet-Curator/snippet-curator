@@ -242,6 +242,7 @@ export class NotelistState {
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       sort: sort,
       filter: `notebook!="${archiveNotebook.id}"`,
+      expand: 'notebook, tags'
     }))
 
     if (error) {
@@ -369,7 +370,7 @@ export class NoteState {
 
   async getNote() {
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getOne(this.noteID, {
-      expand: 'notebook, tags'
+      expand: 'notebook,tags'
     }))
 
     if (error) {
