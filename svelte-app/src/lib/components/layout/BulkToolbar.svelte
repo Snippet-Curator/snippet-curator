@@ -1,17 +1,20 @@
 <script lang="ts">
-	import type { NoteState } from '$lib/db.svelte';
-	import { Archive, Merge, Trash2 } from 'lucide-svelte';
+	import type { NotelistState } from '$lib/db.svelte';
+	import { Archive, Merge, Trash2, Notebook as NotebookIcon } from 'lucide-svelte';
 	import { Delete } from '$lib/components/';
+	import EditNotebook from '../dialogs/EditNotebook.svelte';
 
 	type Props = {
 		selectedNotesID: string[];
-		notelistState: NoteState;
+		notelistState: NotelistState;
 		isBulkEdit: boolean;
 	};
 
 	let { selectedNotesID, notelistState, isBulkEdit = $bindable() }: Props = $props();
 
 	let isDeleteOpen = $state(false);
+	let isEditNotebookOpen = $state(false);
+	let selectedNotebookID = $state('');
 </script>
 
 <div
@@ -21,6 +24,12 @@
 		class="animate-in zoom-in-95 zoom-out-95 fade-out-0 flex flex-row items-center gap-x-4 px-3 py-2"
 	>
 		<div>{selectedNotesID.length} Note{selectedNotesID.length > 1 ? 's' : ''} Selected</div>
+		<button
+			onclick={() => {
+				isEditNotebookOpen = true;
+			}}
+			class="btn flex items-center gap-x-2"><NotebookIcon size={18} />Edit Notebook</button
+		>
 		<button class="btn flex items-center gap-x-2"><Merge size={18} />Merge</button>
 		<button
 			onclick={() => {
@@ -41,8 +50,17 @@
 <Delete
 	bind:isOpen={isDeleteOpen}
 	name="Notes"
-	action={() => {
-		notelistState.deleteMultiple(selectedNotesID);
+	action={async () => {
+		await notelistState.deleteMultiple(selectedNotesID);
 		isBulkEdit = false;
 	}}>these notes?</Delete
 >
+
+<EditNotebook
+	bind:isOpen={isEditNotebookOpen}
+	bind:selectedNotebookID
+	action={async () => {
+		await notelistState.changeNotebook(selectedNotesID, selectedNotebookID);
+		isBulkEdit = false;
+	}}
+/>

@@ -90,8 +90,6 @@ export class TagState {
   }
 
   async updateOnebyParent(recordID: string, parentTagID: string) {
-    console.log('tagID: ', recordID)
-    console.log('parentTag: ', parentTagID)
     const { data, error } = await tryCatch(pb.collection(this.collectionName).update(recordID, {
       'parent': parentTagID
     }))
@@ -154,7 +152,6 @@ export class NotebookState {
     if (error) {
       console.error('Error while creating new notebook: ', error)
     }
-    console.log('new notebook: ', data)
     await this.getAll()
   }
 
@@ -256,7 +253,6 @@ export class NotelistState {
   }
 
   async getByNotebook(notebookID: string) {
-    console.log('notebookID', this.notebookID)
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       filter: `notebook="${notebookID}"`,
       expand: 'tags,notebook',
@@ -285,7 +281,6 @@ export class NotelistState {
   }
 
   async getByFilter(sort = '-updated', customFilters) {
-    console.log('getbyfilter ', this.clickedPage)
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       sort: sort,
       filter: customFilters
@@ -324,6 +319,18 @@ export class NotelistState {
 
       if (error) {
         console.error('Unable to archive note: ', error)
+      }
+    }
+    await this.getDefault()
+  }
+
+  async changeNotebook(selectedNotesID: string[], newNotebookID: string) {
+    for (const noteID of selectedNotesID) {
+      const { data, error } = await tryCatch(pb.collection(this.collectionName).update(noteID, {
+        notebook: newNotebookID
+      }))
+      if (error) {
+        console.error('Error changing notebook: ', noteID, error)
       }
     }
     await this.getDefault()
@@ -374,7 +381,6 @@ export class NoteState {
   }
 
   async deleteNote() {
-    console.log('deleteNote', this.collectionName, this.note.id)
     const { data, error } = await tryCatch(pb.collection(this.collectionName).delete(this.note.id))
     if (error) {
       console.error('Error deleting note: ', this.note.id, error)
@@ -387,7 +393,7 @@ export class NoteState {
       notebook: newNotebookID
     }))
     if (error) {
-      console.error('Error deleting note: ', this.noteID, error)
+      console.error('Error changing notebook: ', this.noteID, error)
     }
     await this.getNote()
     return data

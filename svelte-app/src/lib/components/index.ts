@@ -2,6 +2,7 @@
 export { default as Dock } from './layout/Dock.svelte'
 export { default as Search } from './layout/Search.svelte'
 export { default as BulkToolbar } from './layout/BulkToolbar.svelte'
+export { default as BulkEditBtn } from './layout/BulkEditBtn.svelte'
 export { default as Background } from './layout/Background.svelte'
 
 // Topbar
@@ -26,4 +27,4 @@ export { default as New } from './dialogs/New.svelte'
 export { default as Rename } from './dialogs/Rename.svelte'
 export { default as Delete } from './dialogs/Delete.svelte'
 export { default as ChangeParent } from './dialogs/ChangeParent.svelte'
-export { default as ChangeNotebook } from './dialogs/ChangeNotebook.svelte'
+export { default as EditNotebook } from './dialogs/EditNotebook.svelte'

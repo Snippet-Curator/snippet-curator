@@ -1,7 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import 'tw-golden-spacing';
 
-@plugin "daisyui" {
+@plugin 'daisyui' {
 	themes:
 		fantasy --default,
 		my-dark --prefersdark;

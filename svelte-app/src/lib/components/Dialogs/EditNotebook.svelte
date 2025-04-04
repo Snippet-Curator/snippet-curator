@@ -9,7 +9,7 @@
 	type Props = {
 		isOpen: boolean;
 		selectedNotebookID: string;
-		currentNotebookID: string;
+		currentNotebookID?: string;
 		action: () => void;
 	};
 
@@ -17,7 +17,7 @@
 		isOpen = $bindable(),
 		selectedNotebookID = $bindable(),
 		action,
-		currentNotebookID
+		currentNotebookID = ''
 	}: Props = $props();
 
 	let notebooks = $state<Notebook[]>();
@@ -44,7 +44,7 @@
 			<Dialog.Description>Select Notebook to change</Dialog.Description>
 		</Dialog.Header>
 
-		<ScrollArea class="bg-base-200/30 h-[20vh] rounded-lg">
+		<ScrollArea class="bg-base-200/30 p-golden-md h-[20vh] rounded-lg">
 			{#each notebooks as notebook}
 				<ul class="list">
 					<li class="list-row flex items-center">

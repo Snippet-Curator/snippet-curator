@@ -25,7 +25,7 @@
 	<figure class="w-full">
 		<img class="w-full" src={note.thumbnail} alt="" />
 	</figure>
-	<div class="card-body w-full pb-2 pt-5">
+	<div class="card-body p-golden-lg w-full">
 		<div class="card-title text-pretty break-all text-left">
 			{note.title}
 		</div>

@@ -7,7 +7,7 @@
 		TopbarTags,
 		TopbarDelete,
 		Rating,
-		ChangeNotebook,
+		EditNotebook,
 		TopbarBack,
 		TopbarNoteInfo,
 		TopbarNotebook
@@ -18,7 +18,7 @@
 	let note = $derived(noteState.note);
 
 	let isDeleteOpen = $state(false);
-	let isChangeNotebookOpen = $state(false);
+	let isEditNotebookOpen = $state(false);
 	let selectedNotebookID = $state('');
 
 	const initialLoading = noteState.getNote();
@@ -36,7 +36,7 @@
 		{/if}
 		<div class="divider divider-horizontal"></div>
 		{#if note.expand?.notebook}
-			<TopbarNotebook bind:isOpen={isChangeNotebookOpen} notebook={note.expand.notebook} />
+			<TopbarNotebook bind:isOpen={isEditNotebookOpen} notebook={note.expand.notebook} />
 		{/if}
 		<TopbarDelete bind:isOpen={isDeleteOpen} />
 		<TopbarNoteInfo {note} />
@@ -49,12 +49,12 @@
 		>this note</Delete
 	>
 
-	<ChangeNotebook
+	<EditNotebook
 		bind:selectedNotebookID
 		currentNotebookID={note.expand?.notebook.id}
-		bind:isOpen={isChangeNotebookOpen}
+		bind:isOpen={isEditNotebookOpen}
 		action={async () => {
 			await noteState.changeNotebook(selectedNotebookID);
 		}}
-	></ChangeNotebook>
+	></EditNotebook>
 {/await}

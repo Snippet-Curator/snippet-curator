@@ -14,8 +14,8 @@
 </script>
 
 <ScrollArea class="h-[calc(100vh-60px)]">
-	<div class="mx-auto max-w-5xl p-6 pb-20">
-		<div class="flex items-center">
+	<div class="mx-auto max-w-5xl py-6 pb-20 pt-10">
+		<div class="flex items-center px-3">
 			<h1 class="grow">Notebooks</h1>
 			<button
 				onclick={() => {
@@ -25,7 +25,7 @@
 			>
 		</div>
 
-		<div class="card pt-4">
+		<div class="card">
 			<ul class="menu w-full">
 				<NotebookList allowEdit={true} notebooks={notebookState.notebooks} />
 			</ul>
@@ -33,7 +33,7 @@
 
 		<div class="divider"></div>
 
-		<div class="flex items-center">
+		<div class="flex items-center px-3">
 			<h1 class="grow">Tags</h1>
 			<button
 				onclick={() => {
