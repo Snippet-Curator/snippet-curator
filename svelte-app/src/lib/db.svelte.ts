@@ -195,7 +195,7 @@ export class NotebookState {
   }
 }
 
-export class NoteState {
+export class NotelistState {
   notes = $state<NoteRecord>({
     items: [],
     page: 1,
@@ -304,7 +304,6 @@ export class NoteState {
   }
 
   async deleteMultiple(recordIDs: string[]) {
-    console.log('noteIDs ', recordIDs)
     for (const recordID of recordIDs) {
       const { data, error } = await tryCatch(pb.collection(this.collectionName).delete(recordID))
 
@@ -315,11 +314,7 @@ export class NoteState {
     await this.getDefault()
   }
 
-
-
   async archiveMultiple(recordIDs: string[]) {
-    console.log('noteIDs ', recordIDs)
-
     const archiveNotebook = await this.getArchiveNotebook()
 
     for (const recordID of recordIDs) {
@@ -355,21 +350,48 @@ export class NoteState {
   }
 }
 
+export class NoteState {
+  note = $state<Note>({})
+  noteID: string
+  collectionName: string
 
-export async function getNotes(notebook: string) {
-  if (notebook == '') {
-    const notes = await pb.collection('notes').getList(1, 50, {
-      expand: 'notebook'
-    })
-    return notes
+  constructor(noteID: string) {
+    this.noteID = noteID
+    this.collectionName = 'notes'
   }
 
-  const notes = await pb.collection('notes').getList(1, 50, {
-    filter: `notebook == ${notebook}`,
-    expand: 'notebook'
-  })
+  async getNote() {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).getOne(this.noteID, {
+      expand: 'notebook, tags'
+    }))
 
-  return notes
+    if (error) {
+      console.error('Error getting note: ', this.noteID, error)
+      return null
+    }
+    this.note = data
+    return data
+  }
+
+  async deleteNote() {
+    console.log('deleteNote', this.collectionName, this.note.id)
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).delete(this.note.id))
+    if (error) {
+      console.error('Error deleting note: ', this.note.id, error)
+    }
+    window.history.back()
+  }
+
+  async changeNotebook(newNotebookID: string) {
+    const { data, error } = await tryCatch(pb.collection('notes').update(this.noteID, {
+      notebook: newNotebookID
+    }))
+    if (error) {
+      console.error('Error deleting note: ', this.noteID, error)
+    }
+    await this.getNote()
+    return data
+  }
 }
 
 
@@ -395,12 +417,21 @@ export function getNotebookState() {
 }
 
 
-export function setNoteState(NOTE_KEY: string, noteType: NoteType) {
-  return setContext(NOTE_KEY, new NoteState(noteType))
+export function setNotelistState(NOTE_KEY: string, noteType: NoteType) {
+  return setContext(NOTE_KEY, new NotelistState(noteType))
+}
+
+export function getNotelistState(NOTE_KEY: string) {
+  return getContext<ReturnType<typeof setNotelistState>>(NOTE_KEY)
+}
+
+export function setNoteState(NOTE_KEY: string) {
+  return setContext(NOTE_KEY, new NoteState(NOTE_KEY))
 }
 
 export function getNoteState(NOTE_KEY: string) {
   return getContext<ReturnType<typeof setNoteState>>(NOTE_KEY)
 }
+
 
 

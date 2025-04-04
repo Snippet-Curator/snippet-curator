@@ -1,13 +1,11 @@
-import pb from '$lib/db.svelte'
+import pb, { NoteState } from '$lib/db.svelte'
 import type { Note } from '$lib/types'
 
 export async function load({ params }): Promise<Note> {
   const noteID = params.slug
-  const note = await pb.collection('notes').getOne(noteID, {
-    expand: 'notebook, tags'
-  })
-
+  const noteState = new NoteState(noteID)
+  await noteState.getNote()
   return {
-    note
+    noteState
   }
 }

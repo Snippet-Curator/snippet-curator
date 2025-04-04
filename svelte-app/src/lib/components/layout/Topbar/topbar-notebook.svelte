@@ -5,13 +5,14 @@
 
 	type Props = {
 		notebook: Notebook;
+		isOpen: boolean;
 	};
 
-	let { notebook }: Props = $props();
+	let { notebook, isOpen = $bindable() }: Props = $props();
 </script>
 
 <div class="tooltip tooltip-bottom z-30" data-tip="Change Notebook">
-	<button class="btn btn-ghost flex items-center gap-x-2"
+	<button onclick={() => (isOpen = true)} class="btn btn-ghost flex items-center gap-x-2"
 		><NotebookIcon size={18} />{notebook.name}</button
 	>
 </div>

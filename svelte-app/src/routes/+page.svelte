@@ -7,7 +7,7 @@
 
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
-	import pb, { getNoteState, setNoteState, type NoteType } from '$lib/db.svelte';
+	import pb, { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
 	import { Pagination, NoteList, Search, Topbar, BulkToolbar } from '$lib/components/';
 	import { searchState, signalPageState } from '$lib/utils.svelte';
 
@@ -21,25 +21,25 @@
 	const noteType: NoteType = {
 		type: 'default'
 	};
-	setNoteState(notebookID, noteType);
-	const noteState = getNoteState(notebookID);
+	setNotelistState(notebookID, noteType);
+	const notelistState = getNotelistState(notebookID);
 
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
 
 	async function updatePage() {
 		if (searchInput == '') {
 			if (searchState.searchTerm != searchInput) {
-				noteState.clickedPage = 1;
-				await noteState.getDefault();
+				notelistState.clickedPage = 1;
+				await notelistState.getDefault();
 			}
-			await noteState.getDefault();
+			await notelistState.getDefault();
 			searchState.searchTerm = '';
 			// saves current page
-			signalPageState.updatePageData(page.url.hash, noteState.clickedPage);
+			signalPageState.updatePageData(page.url.hash, notelistState.clickedPage);
 			return;
 		}
 		await searchNotes();
-		signalPageState.updatePageData(page.url.hash, noteState.clickedPage);
+		signalPageState.updatePageData(page.url.hash, notelistState.clickedPage);
 	}
 
 	async function searchNotes() {
@@ -59,10 +59,10 @@
 			.build();
 
 		if (searchState.searchTerm != searchInput) {
-			noteState.clickedPage = 1;
+			notelistState.clickedPage = 1;
 		}
 
-		await noteState.getByFilter('-updated', customFilters);
+		await notelistState.getByFilter('-updated', customFilters);
 		searchState.searchTerm = searchInput;
 	}
 
@@ -73,7 +73,7 @@
 		if (searchState.searchTerm) {
 			searchInput = searchState.searchTerm;
 		}
-		noteState.clickedPage = savedPage ? savedPage : 1;
+		notelistState.clickedPage = savedPage ? savedPage : 1;
 	});
 
 	$effect(() => {
@@ -100,12 +100,12 @@
 	{#await initialLoading}
 		<br />
 	{:then}
-		<Pagination {noteState} changePage={updatePage} currentID={notebookID} />
+		<Pagination {notelistState} changePage={updatePage} currentID={notebookID} />
 		{#if isBulkEdit}
-			<BulkToolbar bind:isBulkEdit {selectedNotesID} {noteState} />
+			<BulkToolbar bind:isBulkEdit {selectedNotesID} {notelistState} />
 		{/if}
-		{#if noteState.notes.totalItems > 0}
-			<NoteList {isBulkEdit} bind:selectedNotesID notes={noteState.notes} />
+		{#if notelistState.notes.totalItems > 0}
+			<NoteList {isBulkEdit} bind:selectedNotesID notes={notelistState.notes} />
 		{:else}
 			<br />
 		{/if}

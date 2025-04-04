@@ -15,6 +15,11 @@ export type Note = {
   title: string
   content: string
   notebook: string
+  added: string
+  created: string
+  updated: string
+  source: string
+  source_url: string
   attachments: string[]
   expand?: {
     notebook?: Notebook,

@@ -2,6 +2,8 @@
 	let { tags } = $props();
 </script>
 
-{#each tags as tag}
-	<span class="badge">{tag.name}</span>
-{/each}
+{#if tags}
+	{#each tags as tag}
+		<span class="badge">{tag.name}</span>
+	{/each}
+{/if}

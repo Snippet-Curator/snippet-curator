@@ -5,11 +5,11 @@
 
 	type Props = {
 		selectedNotesID: string[];
-		noteState: NoteState;
+		notelistState: NoteState;
 		isBulkEdit: boolean;
 	};
 
-	let { selectedNotesID, noteState, isBulkEdit = $bindable() }: Props = $props();
+	let { selectedNotesID, notelistState, isBulkEdit = $bindable() }: Props = $props();
 
 	let isDeleteOpen = $state(false);
 </script>
@@ -24,7 +24,7 @@
 		<button class="btn flex items-center gap-x-2"><Merge size={18} />Merge</button>
 		<button
 			onclick={() => {
-				noteState.archiveMultiple(selectedNotesID);
+				notelistState.archiveMultiple(selectedNotesID);
 				isBulkEdit = false;
 			}}
 			class="btn flex items-center gap-x-2"><Archive size={18} />Archive</button
@@ -42,7 +42,7 @@
 	bind:isOpen={isDeleteOpen}
 	name="Notes"
 	action={() => {
-		noteState.deleteMultiple(selectedNotesID);
+		notelistState.deleteMultiple(selectedNotesID);
 		isBulkEdit = false;
 	}}>these notes?</Delete
 >

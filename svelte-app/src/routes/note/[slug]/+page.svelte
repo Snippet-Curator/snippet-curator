@@ -1,36 +1,59 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import {
+		Note,
+		Topbar,
+		Delete,
+		TopbarTags,
+		TopbarDelete,
+		Rating,
+		ChangeNotebook,
+		TopbarBack,
+		TopbarNoteInfo,
+		TopbarNotebook
+	} from '$lib/components/';
+	import { NoteState } from '$lib/db.svelte';
 
-	import { Note, Topbar, Delete, TopbarTags, TopbarDelete, Rating } from '$lib/components/';
-	import TopbarBack from '$lib/components/layout/Topbar/topbar-back.svelte';
-	import TopbarNoteInfo from '$lib/components/layout/Topbar/topbar-note-info.svelte';
-	import TopbarNotebook from '$lib/components/layout/Topbar/topbar-notebook.svelte';
-	import pb from '$lib/db.svelte';
+	const noteState = new NoteState(page.params.slug);
+	let note = $derived(noteState.note);
 
-	import type { Props } from '$lib/types';
-
-	let { data }: Props = $props();
-	let note = $state(data.note);
 	let isDeleteOpen = $state(false);
-	async function deleteNote(noteID) {
-		await pb.collection('notes').delete(noteID);
-		window.history.back();
-	}
+	let isChangeNotebookOpen = $state(false);
+	let selectedNotebookID = $state('');
+
+	const initialLoading = noteState.getNote();
 </script>
 
-<Topbar>
-	<TopbarBack />
-	<div class="grow"></div>
-	<Rating />
-	<TopbarTags tags={note?.expand.tags} />
-	<div class="divider divider-horizontal"></div>
-	<TopbarNotebook notebook={note?.expand.notebook} />
-	<TopbarDelete bind:isOpen={isDeleteOpen} />
-	<TopbarNoteInfo {...note} />
-</Topbar>
+{#await initialLoading}
+	<br />
+{:then}
+	<Topbar>
+		<TopbarBack />
+		<div class="grow"></div>
+		<Rating />
+		{#if note.expand?.tags}
+			<TopbarTags tags={note.expand.tags} />
+		{/if}
+		<div class="divider divider-horizontal"></div>
+		{#if note.expand?.notebook}
+			<TopbarNotebook bind:isOpen={isChangeNotebookOpen} notebook={note.expand.notebook} />
+		{/if}
+		<TopbarDelete bind:isOpen={isDeleteOpen} />
+		<TopbarNoteInfo {note} />
+	</Topbar>
+	<div class="h-[calc(100vh-60px)]">
+		<Note {note} />
+	</div>
 
-<div class="h-[calc(100vh-60px)]">
-	<Note {note} />
-</div>
+	<Delete bind:isOpen={isDeleteOpen} name="Note" action={async () => await noteState.deleteNote()}
+		>this note</Delete
+	>
 
-<Delete bind:isOpen={isDeleteOpen} name="Note" action={() => deleteNote(note.id)} />
+	<ChangeNotebook
+		bind:selectedNotebookID
+		bind:isOpen={isChangeNotebookOpen}
+		action={async () => {
+			await noteState.changeNotebook(selectedNotebookID);
+		}}
+	></ChangeNotebook>
+{/await}

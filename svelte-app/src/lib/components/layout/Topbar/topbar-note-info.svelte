@@ -1,8 +1,13 @@
 <script lang="ts">
+	import type { Note } from '$lib/types';
 	import dayjs from 'dayjs';
 	import { Info } from 'lucide-svelte';
 
-	let { added, updated, created, source, source_url } = $props();
+	type Props = {
+		note: Note;
+	};
+
+	let { note }: Props = $props();
 
 	function openURL(e: MouseEvent) {
 		const target = e.currentTarget as HTMLAnchorElement;
@@ -23,17 +28,17 @@
 	>
 		<div class="grid grid-cols-3 gap-x-2 gap-y-1 p-2">
 			<div>Original Creation Date</div>
-			<div class="col-span-2">{dayjs(added).format('MMM DD YYYY, hh:ss a')}</div>
+			<div class="col-span-2">{dayjs(note.added).format('MMM DD YYYY, hh:ss a')}</div>
 			<div>Created in Curator</div>
-			<div class="col-span-2">{dayjs(created).format('MMM DD YYYY, hh:ss a')}</div>
+			<div class="col-span-2">{dayjs(note.created).format('MMM DD YYYY, hh:ss a')}</div>
 			<div>Last Modified</div>
-			<div class="col-span-2">{dayjs(updated).format('MMM DD YYYY, hh:ss a')}</div>
+			<div class="col-span-2">{dayjs(note.updated).format('MMM DD YYYY, hh:ss a')}</div>
 			<div>Source</div>
-			<div class="col-span-2">{source}</div>
+			<div class="col-span-2">{note.source}</div>
 
 			<div>URL</div>
 			<div class="col-span-2 break-all">
-				<a class="link" href={source_url} onclick={openURL}>{source_url}</a>
+				<a class="link" href={note.source_url} onclick={openURL}>{note.source_url}</a>
 			</div>
 		</div>
 	</div>

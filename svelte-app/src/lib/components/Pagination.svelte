@@ -1,8 +1,8 @@
 <script lang="ts">
-	let { noteState, currentID = '', changePage } = $props();
+	let { notelistState, currentID = '', changePage } = $props();
 
-	let currentPage = $derived(noteState.notes.page);
-	let totalPages = $derived(noteState.notes.totalPages);
+	let currentPage = $derived(notelistState.notes.page);
+	let totalPages = $derived(notelistState.notes.totalPages);
 
 	const maxVisiblePages = 5;
 	let pages = $derived(getPages());
@@ -20,13 +20,13 @@
 	async function handleClick(clickedPage: number) {
 		// pages = getPages();
 
-		noteState.clickedPage = clickedPage;
+		notelistState.clickedPage = clickedPage;
 		changePage();
 		// if (currentID == 'homepage') {
 		// 	console.log('home page change');
-		// 	await noteState.getByPage();
+		// 	await notelistState.getByPage();
 		// } else {
-		// 	await noteState.getByNotebook(currentID);
+		// 	await notelistState.getByNotebook(currentID);
 		// }
 	}
 </script>
@@ -34,12 +34,14 @@
 <div
 	class="join bg-base-100/95 sticky top-0 z-20 flex w-full items-center justify-center pb-5 pt-5 backdrop-blur-2xl"
 >
-	<button disabled={noteState.clickedPage == 1} onclick={() => handleClick(1)} class="btn join-item"
-		>First</button
+	<button
+		disabled={notelistState.clickedPage == 1}
+		onclick={() => handleClick(1)}
+		class="btn join-item">First</button
 	>
 	<button
-		onclick={() => handleClick(noteState.clickedPage - 1)}
-		disabled={noteState.clickedPage == 1}
+		onclick={() => handleClick(notelistState.clickedPage - 1)}
+		disabled={notelistState.clickedPage == 1}
 		class="btn join-item">Previous</button
 	>
 	{#each pages as page}
@@ -48,13 +50,13 @@
 		>
 	{/each}
 	<button
-		onclick={() => handleClick(noteState.clickedPage + 1)}
-		disabled={noteState.clickedPage == noteState.notes?.totalPages}
+		onclick={() => handleClick(notelistState.clickedPage + 1)}
+		disabled={notelistState.clickedPage == notelistState.notes?.totalPages}
 		class="btn join-item">Next</button
 	>
 	<button
-		disabled={noteState.clickedPage == noteState.notes?.totalPages}
-		onclick={() => handleClick(noteState.notes?.totalPages)}
+		disabled={notelistState.clickedPage == notelistState.notes?.totalPages}
+		onclick={() => handleClick(notelistState.notes?.totalPages)}
 		class="btn join-item">Last</button
 	>
 </div>

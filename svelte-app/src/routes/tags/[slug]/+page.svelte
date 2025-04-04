@@ -2,7 +2,7 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import { signalPageState } from '$lib/utils.svelte';
-	import { getNoteState, setNoteState, type NoteType } from '$lib/db.svelte';
+	import { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
 	import { Pagination, NoteList, Topbar, TopbarBack } from '$lib/components/';
 
 	import { page } from '$app/state';
@@ -14,20 +14,20 @@
 		id: page.params.slug
 	};
 
-	setNoteState(tagID, noteType);
-	const noteState = getNoteState(tagID);
+	setNotelistState(tagID, noteType);
+	const notelistState = getNotelistState(tagID);
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
 
 	async function updatePage() {
-		await noteState.getByTag(tagID);
-		signalPageState.updatePageData(page.url.hash, noteState.clickedPage);
+		await notelistState.getByTag(tagID);
+		signalPageState.updatePageData(page.url.hash, notelistState.clickedPage);
 	}
 
 	let initialLoading = $state();
 
 	$effect(() => {
 		console.log('Slug changed:', page.params.slug);
-		noteState.clickedPage = savedPage ? savedPage : 1;
+		notelistState.clickedPage = savedPage ? savedPage : 1;
 		initialLoading = updatePage();
 	});
 </script>
@@ -40,9 +40,9 @@
 	{#await initialLoading}
 		<br />
 	{:then}
-		<Pagination {noteState} changePage={updatePage} currentID={tagID} />
-		{#if noteState.notes.totalItems > 0}
-			<NoteList notes={noteState.notes} />
+		<Pagination {notelistState} changePage={updatePage} currentID={tagID} />
+		{#if notelistState.notes.totalItems > 0}
+			<NoteList notes={notelistState.notes} />
 		{:else}
 			<br />
 		{/if}
