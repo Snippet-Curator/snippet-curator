@@ -39,7 +39,7 @@
 		{/if}
 		<div class="gap-golden-sm flex flex-wrap items-center">
 			{#if note.expand?.notebook}
-				<span class="badge badge-neutral badge-soft rounded-sm">{note.expand?.notebook.name}</span>
+				<span class="badge badge-soft rounded-sm">{note.expand?.notebook.name}</span>
 			{/if}
 			{#if note.expand?.tags}
 				{#each note.expand?.tags as tag}
@@ -58,7 +58,7 @@
 			<div class="group relative">
 				{#if !isBulkEdit}
 					<button
-						class="card hover:bg-base-200/70 bg-base-100 card-border w-full border transition-colors duration-300 hover:cursor-pointer"
+						class="card animate-in fade-in-0 slide-in-from-bottom-5 hover:bg-base-200/70 bg-base-100 card-border w-full border transition-colors duration-200 hover:cursor-pointer"
 						onclick={() => goto(`#/note/${note.id}`)}
 					>
 						{@render renderNotes(note)}
