@@ -3,11 +3,20 @@
 
 	import { signalPageState } from '$lib/utils.svelte';
 	import { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
-	import { Pagination, NoteList, Topbar, TopbarBack } from '$lib/components/';
+	import {
+		Pagination,
+		NoteList,
+		Topbar,
+		TopbarBack,
+		BulkToolbar,
+		BulkEditBtn
+	} from '$lib/components/';
 
 	import { page } from '$app/state';
 
 	let tagID = $derived(page.params.slug);
+	let isBulkEdit = $state(false);
+	let selectedNotesID = $state<string[]>([]);
 
 	const noteType: NoteType = {
 		type: 'tags',
@@ -34,6 +43,8 @@
 
 <Topbar>
 	<TopbarBack />
+	<div class="grow"></div>
+	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
 </Topbar>
 
 <ScrollArea class="mb-20 h-[calc(100vh-60px)] overflow-y-auto">
@@ -41,8 +52,11 @@
 		<br />
 	{:then}
 		<Pagination {notelistState} changePage={updatePage} currentID={tagID} />
+		{#if isBulkEdit}
+			<BulkToolbar bind:isBulkEdit {selectedNotesID} {notelistState} />
+		{/if}
 		{#if notelistState.notes.totalItems > 0}
-			<NoteList notes={notelistState.notes} />
+			<NoteList {isBulkEdit} bind:selectedNotesID notes={notelistState.notes} />
 		{:else}
 			<br />
 		{/if}

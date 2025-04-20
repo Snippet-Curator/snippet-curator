@@ -104,7 +104,7 @@ async function getVideoThumb(videoUrl: string): Promise<File> {
 
 function addMediaToContent(mimeType: string, fileURL: string, fileName: string) {
   if (mimeType.includes('image')) {
-    return `<img style='max-width: 100%; height: auto' src=${fileURL} type=${mimeType}>`;
+    return `<img  src=${fileURL} type=${mimeType}>`;
   }
 
   if (mimeType == 'video/mp4') {

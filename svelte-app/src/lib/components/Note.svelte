@@ -100,6 +100,10 @@
 		background: var(--color-base-100) !important; 
 		color: var(--color-base-content) !important;
 		}
+		img {
+			max-width: 100% !important;
+			height: auto !important;
+		}
 		`;
 		shadow.appendChild(style);
 	});
