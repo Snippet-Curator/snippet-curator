@@ -176,23 +176,23 @@ export function sanitizeContent(content: string) {
           attribs: attribs
         };
       },
-      div: function (tagName, attribs) {
-        let newStyle =
-          'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;';
-        attribs.style = attribs.style ? `${attribs.style};${newStyle}` : newStyle;
-        return {
-          tagName: 'div',
-          attribs: attribs
-        };
-      },
-      pre: sanitizeHTML.simpleTransform('pre', {
-        style:
-          'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
-      }),
-      p: sanitizeHTML.simpleTransform('p', {
-        style:
-          'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
-      })
+      // div: function (tagName, attribs) {
+      //   let newStyle =
+      //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;';
+      //   attribs.style = attribs.style ? `${attribs.style};${newStyle}` : newStyle;
+      //   return {
+      //     tagName: 'div',
+      //     attribs: attribs
+      //   };
+      // },
+      // pre: sanitizeHTML.simpleTransform('pre', {
+      //   style:
+      //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
+      // }),
+      // p: sanitizeHTML.simpleTransform('p', {
+      //   style:
+      //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
+      // })
     }
   });
   return cleanContent

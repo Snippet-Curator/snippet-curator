@@ -56,9 +56,12 @@
 	let shadow;
 	let style = document.createElement('style');
 
-	onMount(() => {
-		shadow = container.attachShadow({ mode: 'open' });
+	function changeContent() {
 		shadow.innerHTML = content;
+		manipulateContent(shadow);
+	}
+
+	function manipulateContent(shadow) {
 		// click link opens browser
 		const links = shadow.querySelectorAll('a');
 		links.forEach((link) => {
@@ -81,11 +84,23 @@
 				onImageClick(img.src);
 			});
 		});
+	}
+
+	onMount(() => {
+		shadow = container.attachShadow({ mode: 'open' });
+		shadow.innerHTML = content;
+		manipulateContent(shadow);
 		style.textContent = `
 		:host, :host * {
 			font-size: ${textSize}px !important;
 			line-height: 1.4;
-		}`;
+		}
+		p, pre, div {
+		background-color: var(--color-base-100) !important;
+		background: var(--color-base-100) !important; 
+		color: var(--color-base-content) !important;
+		}
+		`;
 		shadow.appendChild(style);
 	});
 </script>
@@ -114,6 +129,13 @@
 		<div class="card-body z-0 text-lg">
 			<div class="relative" bind:this={container}></div>
 		</div>
+
+		<textarea
+			class="textarea h-100 w-full"
+			contenteditable="true"
+			oninput={changeContent}
+			bind:value={content}
+		></textarea>
 	</div>
 </ScrollArea>
 
@@ -123,7 +145,7 @@
 		transition:fade={{ duration: 100 }}
 	>
 		<button class="right-15 absolute top-10 z-30 hover:cursor-pointer" onclick={closeModal}>
-			<CircleX size={42} class="stroke-base-content fill-base-100 drop-shadow-lg" />
+			<CircleX size={42} class="stroke-base-content fill-base-100  drop-shadow-lg " />
 		</button>
 		<button onclick={(event) => event.stopPropagation()} in:scale={{ start: 0.8, duration: 200 }}>
 			<ImageViewer src={selectedImage} />
