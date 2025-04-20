@@ -19,8 +19,6 @@
 		selectedNotesID.push(checkedNoteID);
 		console.log('added note', selectedNotesID);
 	}
-
-	console.log(notes.items[0]);
 </script>
 
 {#snippet renderNotes(note: Note)}

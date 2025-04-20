@@ -47,16 +47,22 @@
 </script>
 
 {#snippet renderNotebook(notebook: Notebook)}
+	<div class="flex w-full items-center justify-between">
+		<a
+			href="#/notebook/{notebook.id}"
+			class="{page.url.hash == `#/notebook/${notebook.id}`
+				? 'badge-neutral'
+				: ''} badge hover:badge-neutral badge-xl mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
+			><NotebookIcon size={18} />{notebook.name}
+		</a>
+		{notebook.note_count}
+	</div>
+{/snippet}
+
+{#snippet renderNotebookSection(notebook: Notebook)}
 	<ContextMenu.Root>
 		<ContextMenu.Trigger class="flex items-center justify-between p-0 pr-2">
-			<a
-				href="#/notebook/{notebook.id}"
-				class="{page.url.hash == `#/notebook/${notebook.id}`
-					? 'badge-neutral'
-					: ''} badge hover:badge-neutral badge-xl mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
-				><NotebookIcon size={18} />{notebook.name}
-			</a>
-			{notebook.note_count}
+			{@render renderNotebook(notebook)}
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
 			<ContextMenu.Item
@@ -90,25 +96,27 @@
 {/snippet}
 
 {#each notebooks as notebook}
-	<li class="group">
-		{#if notebook.children?.length > 0}
-			<details class="w-full">
-				<summary class="flex py-0 pl-0">
-					<div class="grow">
-						{@render renderNotebook(notebook)}
-					</div>
-				</summary>
+	{#if notebook.name != 'Archive' && notebook.name != 'Inbox' && notebook.name != 'Trash'}
+		<li class="group">
+			{#if notebook.children?.length > 0}
+				<details class="w-full">
+					<summary class="flex py-0 pl-0">
+						<div class="grow">
+							{@render renderNotebookSection(notebook)}
+						</div>
+					</summary>
 
-				{#if notebook.children}
-					<ul>
-						<NotebookList {allowEdit} notebooks={notebook.children} />
-					</ul>
-				{/if}
-			</details>
-		{:else}
-			{@render renderNotebook(notebook)}
-		{/if}
-	</li>
+					{#if notebook.children}
+						<ul>
+							<NotebookList {allowEdit} notebooks={notebook.children} />
+						</ul>
+					{/if}
+				</details>
+			{:else}
+				{@render renderNotebookSection(notebook)}
+			{/if}
+		</li>
+	{/if}
 {/each}
 
 <Rename

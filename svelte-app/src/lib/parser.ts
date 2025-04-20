@@ -13,6 +13,8 @@ dayjs.extend(customParseFormat)
 const notesCollection = 'notes'
 const notebookCollection = 'notebooks'
 const inboxNotebook = 'Inbox'
+const archiveNotebook = 'Archive'
+const trashNotebook = 'Trash'
 const baseURL = 'http://127.0.0.1:8090/api/files'
 
 const parser = new XMLParser({
@@ -21,12 +23,30 @@ const parser = new XMLParser({
 })
 
 async function makeDefaultNotebook() {
-  const { data, error } = await tryCatch(pb.collection(notebookCollection).create({
-    name: inboxNotebook
-  }))
+  const { data, error } = await tryCatch(
+    pb.collection(notebookCollection).create({
+      name: inboxNotebook
+    })
+  )
 
   if (error) {
     console.error('Error making Inbox Notebook: ', error)
+  }
+
+  const { data: archiveData, error: archiveError } = await tryCatch(pb.collection(notebookCollection).create({
+    name: archiveNotebook
+  }))
+
+  if (archiveError) {
+    console.error('Error making Archive Notebook: ', error)
+  }
+
+  const { data: trashData, error: trashError } = await tryCatch(pb.collection(notebookCollection).create({
+    name: trashNotebook
+  }))
+
+  if (trashError) {
+    console.error('Error making Trash Notebook: ', error)
   }
   return data
 }

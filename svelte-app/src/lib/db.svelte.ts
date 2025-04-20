@@ -155,8 +155,17 @@ export class NotebookState {
     await this.getAll()
   }
 
-  async getOneByName() {
-    return await pb.collection(this.collectionName).getFirstListItem(`name='${name}'`)
+  async getOneByName(notebookName: string) {
+
+    const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getFirstListItem(`name="${notebookName}"`))
+
+    if (error) {
+      console.error('Error while get notebook: ', notebookName, 'art', error)
+    }
+
+    console.log(data)
+
+    return data
   }
 
   async delete(recordID: string) {
