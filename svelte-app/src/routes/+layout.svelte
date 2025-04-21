@@ -21,7 +21,6 @@
 
 	async function getDefaultNotebooks() {
 		notebookInbox = await notebookState.getOneByName('Inbox');
-		notebookArchive = await notebookState.getOneByName('Archive');
 	}
 
 	let defaultNotebooks = $state();
