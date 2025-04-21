@@ -48,10 +48,11 @@
 				class="{page.url.hash == `#/tags/${tag.id}`
 					? 'badge-neutral'
 					: ''} badge hover:badge-neutral badge-xl mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
-				><TagIcon size={18} />{tag.name}
+			>
+				<span class="text-base-content/60"><TagIcon size={15} /></span>{tag.name}
 			</a>
 
-			<span class="text-right">{tag.note_count}</span>
+			<span class="text-base-content/60 text-right">{tag.note_count}</span>
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
 			<ContextMenu.Item

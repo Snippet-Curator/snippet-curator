@@ -16,11 +16,12 @@
 
 	let { note }: Props = $props();
 	let content = $state(note.content);
+	let container;
 
 	let isOpen = $state(false);
+	let isEditHTML = $state(false);
 	let selectedImage = $state('');
 	let textSize = $state(16);
-	let container;
 
 	// function handleClick(event: MouseEvent) {
 	// 	console.log('click');
@@ -128,18 +129,24 @@
 	</div>
 </div>
 
-<ScrollArea type="scroll" class=" h-full pb-20">
+<ScrollArea type="scroll" class="h-full pb-20">
 	<div class="card mx-auto mt-10 max-w-3xl px-10 lg:max-w-5xl">
 		<div class="card-body z-0 text-lg">
 			<div class="relative" bind:this={container}></div>
 		</div>
 
-		<textarea
-			class="textarea h-100 w-full"
-			contenteditable="true"
-			oninput={changeContent}
-			bind:value={content}
-		></textarea>
+		{#if isEditHTML}
+			<button class="btn" onclick={() => (isEditHTML = false)}>Cancel</button>
+
+			<textarea
+				class="textarea h-100 mb-20 mt-10 w-full"
+				contenteditable="true"
+				oninput={changeContent}
+				bind:value={content}
+			></textarea>
+		{:else}
+			<button onclick={() => (isEditHTML = true)} class="btn mb-20">Edit HTML</button>
+		{/if}
 	</div>
 </ScrollArea>
 

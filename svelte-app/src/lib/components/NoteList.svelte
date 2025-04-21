@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { NoteList, Note } from '$lib/types';
+	import { Background } from '$lib/components/';
 
 	type Props = {
 		isBulkEdit: boolean;
@@ -49,7 +50,7 @@
 {/snippet}
 
 <div
-	class="columns-1 gap-x-8 space-y-6 px-6 pb-10 pt-10 md:columns-2 md:px-10 md:pt-8 lg:columns-3 2xl:columns-4"
+	class="relative columns-1 gap-x-8 space-y-6 px-6 pb-10 pt-10 md:columns-2 md:px-10 md:pt-8 lg:columns-3 2xl:columns-4"
 >
 	{#if notes.items.length > 0}
 		{#each notes.items as note}
@@ -78,4 +79,5 @@
 	{:else}
 		<br />
 	{/if}
+	<Background />
 </div>

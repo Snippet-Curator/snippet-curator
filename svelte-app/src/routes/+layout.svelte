@@ -78,6 +78,16 @@
 
 			<div class="">
 				<li>
+					<a class={page.url.hash == '#/test' ? 'menu-active' : ''} href="#/test"
+						><Settings size={18} />Archive</a
+					>
+				</li>
+				<li>
+					<a class={page.url.hash == '#/test' ? 'menu-active' : ''} href="#/test"
+						><Settings size={18} />Trash</a
+					>
+				</li>
+				<li>
 					<a class={page.url.hash == '#/organize' ? 'menu-active' : ''} href="#/organize"
 						><WalletCards size={18} />Organize</a
 					>
@@ -92,12 +102,6 @@
 				<li>
 					<a class={page.url.hash == '#/settings' ? 'menu-active' : ''} href="#/settings"
 						><Settings size={18} />Settings</a
-					>
-				</li>
-
-				<li>
-					<a class={page.url.hash == '#/test' ? 'menu-active' : ''} href="#/test"
-						><Settings size={18} />Test</a
 					>
 				</li>
 			</div>

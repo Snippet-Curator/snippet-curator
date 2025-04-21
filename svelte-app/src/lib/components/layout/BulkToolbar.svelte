@@ -23,28 +23,43 @@
 	<div
 		class="animate-in zoom-in-95 zoom-out-95 fade-out-0 gap-golden-md flex flex-col items-center md:flex-row"
 	>
-		<div>{selectedNotesID.length} Note{selectedNotesID.length > 1 ? 's' : ''} Selected</div>
-		<div id="button-wrap" class="gap-golden-md grid grid-cols-2 sm:grid-cols-4">
+		<div class="md:mr-4">
+			{selectedNotesID.length} Note{selectedNotesID.length > 1 ? 's' : ''} Selected
+		</div>
+		<div id="button-wrap" class="gap-golden-md grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
 			<button
 				onclick={() => {
 					isEditNotebookOpen = true;
 				}}
-				class="btn flex items-center gap-x-2"><NotebookIcon size={18} />Edit Notebook</button
+				class="btn flex items-center gap-x-2"
+				><span class="text-base-content/60"><NotebookIcon size={18} /></span>Edit Notebook</button
 			>
-			<button class="btn flex items-center gap-x-2"><Merge size={18} />Merge</button>
+			<button
+				onclick={() => {
+					isEditNotebookOpen = true;
+				}}
+				class="btn flex items-center gap-x-2"
+				><span class="text-base-content/60"><NotebookIcon size={18} /></span>Edit Tags</button
+			>
+			<button class="btn flex items-center gap-x-2"
+				><span class="text-base-content/60"><Merge size={18} /></span>Merge</button
+			>
 			<button
 				onclick={() => {
 					notelistState.archiveMultiple(selectedNotesID);
 					isBulkEdit = false;
 				}}
-				class="btn flex items-center gap-x-2"><Archive size={18} />Archive</button
+				class="btn flex items-center gap-x-2"
+				><span class="text-base-content/60"><Archive size={18} /></span>Archive</button
 			>
 			<button
 				onclick={() => {
 					isDeleteOpen = true;
 				}}
-				class="btn flex items-center gap-x-2"><Trash2 size={18} />Delete</button
+				class="btn flex items-center gap-x-2"
+				><span class="text-base-content/60"><Trash2 size={18} /></span>Delete</button
 			>
+			<button onclick={() => (isBulkEdit = false)} class="btn btn-soft">Cancel</button>
 		</div>
 		<!-- button wrap -->
 	</div>

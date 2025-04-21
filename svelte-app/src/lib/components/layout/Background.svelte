@@ -1,5 +1,4 @@
-<div class="absolute inset-0 overflow-hidden">
-	/* Circuit Lines */
+<div class="absolute inset-0 -z-10 overflow-hidden">
 	<div class="absolute inset-0 overflow-hidden opacity-10 dark:opacity-20">
 		<svg width="100%" height="100%" class="absolute">
 			<pattern
