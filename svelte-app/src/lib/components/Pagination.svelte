@@ -32,7 +32,7 @@
 </script>
 
 <div
-	class="join bg-base-100/95 sticky top-0 z-20 flex w-full items-center justify-center pb-5 pt-5 backdrop-blur-2xl"
+	class="join bg-base-100/95 sticky top-0 z-20 flex w-full items-center justify-center py-3 backdrop-blur-2xl"
 >
 	<button
 		disabled={notelistState.clickedPage == 1}

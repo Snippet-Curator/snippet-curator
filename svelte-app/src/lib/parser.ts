@@ -394,7 +394,6 @@ export class EnImport {
     this.description = ''
   }
 
-
   parseEnex(fileContent: string) {
     const xmlNote: EnNote = parser.parse(fileContent)
     const xmlMedia: EnMedia = parser.parse(xmlNote['en-export']['note']['content'])['en-note']['en-media']

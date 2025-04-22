@@ -51,7 +51,17 @@
 			font-size: ${newTextSize}px !important;
 			line-height: 1.4;
 			transition: font-size 0.3s ease;
-		}`;
+		}
+			p, pre, div {
+		background-color: var(--color-base-100) !important;
+		background: var(--color-base-100) !important; 
+		color: var(--color-base-content) !important;
+		}
+		img {
+			max-width: 100% !important;
+			height: auto !important;
+		}
+		`;
 	}
 
 	let shadow;

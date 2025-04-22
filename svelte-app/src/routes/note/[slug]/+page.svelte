@@ -10,7 +10,10 @@
 		EditNotebook,
 		TopbarBack,
 		TopbarNoteInfo,
-		TopbarNotebook
+		TopbarNotebook,
+		TopbarArchive,
+		TopbarTagsBtn,
+		EditTags
 	} from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
 
@@ -18,8 +21,10 @@
 	let note = $derived(noteState.note);
 
 	let isDeleteOpen = $state(false);
+	let isEditTagsOpen = $state(false);
 	let isEditNotebookOpen = $state(false);
 	let selectedNotebookID = $state('');
+	let selectedTags = $state<string[]>([]);
 
 	const initialLoading = noteState.getNote();
 </script>
@@ -38,6 +43,13 @@
 		{#if note.expand?.notebook}
 			<TopbarNotebook bind:isOpen={isEditNotebookOpen} notebook={note.expand.notebook} />
 		{/if}
+		<TopbarTagsBtn bind:isOpen={isEditTagsOpen} />
+		<TopbarArchive
+			action={async () => {
+				await noteState.archiveNote();
+				window.history.back();
+			}}
+		/>
 		<TopbarDelete bind:isOpen={isDeleteOpen} />
 		<TopbarNoteInfo {note} />
 	</Topbar>
@@ -45,8 +57,13 @@
 		<Note {note} />
 	</div>
 
-	<Delete bind:isOpen={isDeleteOpen} name="Note" action={async () => await noteState.deleteNote()}
-		>this note</Delete
+	<Delete
+		bind:isOpen={isDeleteOpen}
+		name="Note"
+		action={async () => {
+			await noteState.deleteNote();
+			window.history.back();
+		}}>this note</Delete
 	>
 
 	<EditNotebook
@@ -57,4 +74,13 @@
 			await noteState.changeNotebook(selectedNotebookID);
 		}}
 	></EditNotebook>
+
+	<EditTags
+		bind:isOpen={isEditTagsOpen}
+		bind:selectedTags
+		currentTags={note.expand?.tags}
+		action={async () => {
+			await noteState.changeTags(selectedTags);
+		}}
+	/>
 {/await}

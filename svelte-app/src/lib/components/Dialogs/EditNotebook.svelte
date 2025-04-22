@@ -44,7 +44,7 @@
 			<Dialog.Description>Select Notebook to change</Dialog.Description>
 		</Dialog.Header>
 
-		<ScrollArea class="bg-base-200/30 p-golden-md h-[20vh] rounded-lg">
+		<ScrollArea class="bg-base-200/30 p-golden-md mt-8 min-h-[10vh] rounded-lg">
 			{#each notebooks as notebook}
 				<ul class="list">
 					<li class="list-row flex items-center">

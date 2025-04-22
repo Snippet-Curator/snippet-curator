@@ -28,11 +28,12 @@
 </script>
 
 {#snippet bar(item)}
+	{@const Icon = item.icon}
 	<button
 		class={page.url.hash == item.url ? 'dock-active' : ''}
 		onclick={() => goto(`${item.url}`)}
 	>
-		<svelte:component this={item.icon} size={22} class="text-base-content/70" />
+		<Icon size={22} class="text-base-content/70" />
 		<span class="dock-label">{item.name}</span>
 	</button>
 {/snippet}

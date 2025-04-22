@@ -3,13 +3,21 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
-	import { Import, Notebook as NotebookIcon, Settings, Tags, WalletCards } from 'lucide-svelte';
+	import {
+		Import,
+		Notebook as NotebookIcon,
+		Settings,
+		Tags,
+		WalletCards,
+		Archive,
+		Trash2
+	} from 'lucide-svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
 
 	import { getNotebookState, setNotebookState, getTagState, setTagState } from '$lib/db.svelte';
 	import type { Notebook } from '$lib/types';
 
-	import { Dock, NotebookList, TagList } from '$lib/components';
+	import { Dock, Icon, NotebookList, TagList } from '$lib/components';
 
 	let { children } = $props();
 	setTagState();
@@ -18,10 +26,36 @@
 	const notebookState = getNotebookState();
 
 	let notebookInbox = $state<Notebook>();
+	let notebookArchive = $state<Notebook>();
 
 	async function getDefaultNotebooks() {
 		notebookInbox = await notebookState.getOneByName('Inbox');
+		notebookArchive = await notebookState.getOneByName('Archive');
 	}
+
+	type LayoutPage = {
+		name: string;
+		icon: any;
+		url: string;
+	};
+
+	const bottomPages: LayoutPage[] = [
+		{
+			name: 'Organize',
+			icon: WalletCards,
+			url: '#/organize'
+		},
+		{
+			name: 'Import',
+			icon: Import,
+			url: '#/import'
+		},
+		{
+			name: 'Settings',
+			icon: Settings,
+			url: '#/settings'
+		}
+	];
 
 	let defaultNotebooks = $state();
 
@@ -40,7 +74,11 @@
 	<div class="drawer-side border-base-300 border-r">
 		<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
 
-		<ul class="menu bg-base-200 h-screen w-64 space-y-2 p-4">
+		<ul class="menu bg-base-200 min-h-screen w-64 space-y-2 p-4">
+			<div class="mb-6 ml-1 flex h-8 items-center gap-x-1">
+				<Icon /> <span class="text-xl font-semibold tracking-widest">urator</span>
+			</div>
+
 			<li>
 				<a class={page.url.hash == '#/discover' ? 'menu-active' : ''} href="#/discover">Discover</a>
 			</li>
@@ -64,7 +102,7 @@
 
 			<div class="divider my-0 py-0"></div>
 
-			<ScrollArea class="h-[calc(80%-200px)] grow">
+			<ScrollArea class="h-10 grow">
 				<span class="menu-title flex max-h-60 items-center gap-2 overflow-y-auto"
 					><NotebookIcon size={18} />Notebooks</span
 				>
@@ -76,35 +114,24 @@
 				<TagList tags={tagState.tags} />
 			</ScrollArea>
 
-			<div class="">
+			{#snippet renderBottomPages(name: string, url: string, icon: any)}
+				{@const Icon = icon}
 				<li>
-					<a class={page.url.hash == '#/test' ? 'menu-active' : ''} href="#/test"
-						><Settings size={18} />Archive</a
+					<a class={page.url.hash == url ? 'menu-active' : ''} href={url}>
+						<Icon size={18} />
+						{name}</a
 					>
 				</li>
-				<li>
-					<a class={page.url.hash == '#/test' ? 'menu-active' : ''} href="#/test"
-						><Settings size={18} />Trash</a
-					>
-				</li>
-				<li>
-					<a class={page.url.hash == '#/organize' ? 'menu-active' : ''} href="#/organize"
-						><WalletCards size={18} />Organize</a
-					>
-				</li>
+			{/snippet}
 
-				<li>
-					<a class={page.url.hash == '#/import' ? 'menu-active' : ''} href="#/import"
-						><Import size={18} />Import</a
-					>
-				</li>
-
-				<li>
-					<a class={page.url.hash == '#/settings' ? 'menu-active' : ''} href="#/settings"
-						><Settings size={18} />Settings</a
-					>
-				</li>
-			</div>
+			{#await defaultNotebooks then}
+				{#if notebookArchive}
+					{@render renderBottomPages('Archive', `#/notebook/${notebookArchive.id}`, Archive)}
+				{/if}
+			{/await}
+			{#each bottomPages as page}
+				{@render renderBottomPages(page.name, page.url, page.icon)}
+			{/each}
 		</ul>
 	</div>
 </div>

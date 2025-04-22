@@ -53,7 +53,9 @@
 			class="{page.url.hash == `#/notebook/${notebook.id}`
 				? 'badge-neutral'
 				: ''} badge hover:badge-neutral badge-xl mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
-			><span class="text-base-content/60"><NotebookIcon size={15} /></span>{notebook.name}
+		>
+			<NotebookIcon size={15} />
+			{notebook.name}
 		</a>
 		<span class="text-base-content/60">{notebook.note_count}</span>
 	</div>

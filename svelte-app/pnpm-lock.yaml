@@ -93,6 +93,9 @@ importers:
       mdsvex:
         specifier: ^0.11.2
         version: 0.11.2(svelte@5.20.5)
+      paneforge:
+        specifier: 1.0.0-next.5
+        version: 1.0.0-next.5(svelte@5.20.5)
       prettier:
         specifier: ^3.3.2
         version: 3.5.3
@@ -1203,6 +1206,11 @@ packages:
   p-locate@5.0.0:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
+
+  paneforge@1.0.0-next.5:
+    resolution: {integrity: sha512-1ArDM+GMEO+o6pixEAFobhTkWkyxUDdHyw2bKruvQIXBStJmdRP7HoV4jNBZ/2i9UHDzmczxJzA3D2tKa91phw==}
+    peerDependencies:
+      svelte: ^5.20.0
 
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -2566,6 +2574,12 @@ snapshots:
   p-locate@5.0.0:
     dependencies:
       p-limit: 3.1.0
+
+  paneforge@1.0.0-next.5(svelte@5.20.5):
+    dependencies:
+      runed: 0.23.4(svelte@5.20.5)
+      svelte: 5.20.5
+      svelte-toolbelt: 0.7.1(svelte@5.20.5)
 
   parent-module@1.0.1:
     dependencies:

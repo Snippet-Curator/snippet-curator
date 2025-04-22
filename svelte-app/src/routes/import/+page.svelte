@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { EnImport, fileImport, htmlImport } from '$lib/parser';
 	import * as Tabs from '$lib/components/ui/tabs/index';
+	import pb, { getNotebookState, getTagState } from '$lib/db.svelte';
+
+	const notebookState = getNotebookState();
+	const tagState = getTagState();
 
 	let enexFiles: File[] = [];
 	let listOfUploads;
@@ -21,6 +25,8 @@
 
 	async function parseUploadedEnex() {
 		uploadStatus = 'in progress';
+		await pb.collection('notes').unsubscribe();
+
 		const decoder = new TextDecoder('utf-8');
 		for (const [index, file] of enexFiles.entries()) {
 			progress = Math.round(((index + 1) / totalFiles) * 100);
@@ -51,6 +57,11 @@
 			}
 		}
 		uploadStatus = 'completed';
+
+		await pb.collection('notes').subscribe('*', async () => {
+			notebookState.getAll();
+			tagState.getAll();
+		});
 	}
 </script>
 

@@ -42,17 +42,17 @@
 
 {#snippet renderTag(tag: Tag)}
 	<ContextMenu.Root>
-		<ContextMenu.Trigger class="flex items-center justify-between p-0 pr-2">
+		<ContextMenu.Trigger class="flex cursor-auto items-center justify-between p-0 pr-2">
 			<a
 				href="#/tags/{tag.id}"
 				class="{page.url.hash == `#/tags/${tag.id}`
 					? 'badge-neutral'
 					: ''} badge hover:badge-neutral badge-xl mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
 			>
-				<span class="text-base-content/60"><TagIcon size={15} /></span>{tag.name}
+				<TagIcon size={15} />{tag.name}
 			</a>
 
-			<span class="text-base-content/60 text-right">{tag.note_count}</span>
+			<span class="text-base-content/80 text-right">{tag.note_count}</span>
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
 			<ContextMenu.Item
@@ -88,7 +88,7 @@
 {#each tags as tag}
 	<li class="group">
 		{#if tag.children?.length > 0}
-			<details class="w-full">
+			<details class="w-full cursor-pointer">
 				<summary class="flex py-0 pl-0">
 					<div class="grow">
 						{@render renderTag(tag)}

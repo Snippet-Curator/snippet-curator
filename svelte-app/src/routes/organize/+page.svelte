@@ -32,13 +32,13 @@
 </script>
 
 {#snippet renderNotebook(notebook: Notebook)}
-	<div class="flex w-full items-center justify-between">
+	<div class="flex w-full items-center justify-between px-2">
 		<a
 			href="#/notebook/{notebook.id}"
-			class="mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
+			class="badge hover:badge-neutral badge-xl flex items-center text-nowrap transition-colors"
 			><NotebookIcon size={18} />{notebook.name}
 		</a>
-		{notebook.note_count}
+		<span class="text-base-content/60">{notebook.note_count}</span>
 	</div>
 {/snippet}
 
@@ -59,7 +59,7 @@
 				<NotebookList allowEdit={true} notebooks={notebookState.notebooks} />
 				{#await defaultNotebooks then}
 					{#if notebookArchive}
-						<li>{@render renderNotebook(notebookArchive)}</li>
+						<li class="ml-0 pl-0">{@render renderNotebook(notebookArchive)}</li>
 					{/if}
 				{/await}
 			</ul>

@@ -31,10 +31,19 @@ export class TagState {
   }
 
   async getAll() {
-    const records = await pb.collection(this.viewCollectionName).getFullList({
+    const { data: records, error } = await tryCatch(pb.collection(this.viewCollectionName).getFullList({
       sort: 'name',
       expand: 'parent'
-    })
+    }))
+
+    if (error) {
+      console.error('Error while getting all tags: ', error)
+    }
+
+    if (!records) {
+      console.error('No tags found')
+      return
+    }
 
     const tagMap = new Map()
     records.forEach(tag => {
@@ -368,7 +377,7 @@ export class NotelistState {
 }
 
 export class NoteState {
-  note = $state<Note>({})
+  note = $state<Note>()
   noteID: string
   collectionName: string
 
@@ -390,16 +399,27 @@ export class NoteState {
     return data
   }
 
+  async getArchiveNotebook() {
+    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Archive"'))
+
+    if (error) {
+      console.error('Error getting Archive Notebook: ', error)
+      return pb.collection('notebooks').create({
+        name: 'Archive'
+      })
+    }
+    return data
+  }
+
   async deleteNote() {
     const { data, error } = await tryCatch(pb.collection(this.collectionName).delete(this.note.id))
     if (error) {
       console.error('Error deleting note: ', this.note.id, error)
     }
-    window.history.back()
   }
 
   async changeNotebook(newNotebookID: string) {
-    const { data, error } = await tryCatch(pb.collection('notes').update(this.noteID, {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.noteID, {
       notebook: newNotebookID
     }))
     if (error) {
@@ -407,6 +427,29 @@ export class NoteState {
     }
     await this.getNote()
     return data
+  }
+
+  async changeTags(selectedTags: string[]) {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.noteID, {
+      tags: selectedTags
+    }))
+    if (error) {
+      console.error('Error changing tags: ', this.noteID, error)
+    }
+    await this.getNote()
+    return data
+  }
+
+  async archiveNote() {
+    const archiveNotebook = await this.getArchiveNotebook()
+
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.note.id, {
+      notebook: archiveNotebook.id
+    }))
+
+    if (error) {
+      console.error('Unable to archive note: ', error)
+    }
   }
 }
 
