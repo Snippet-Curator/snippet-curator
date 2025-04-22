@@ -1,21 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import {
-		Note,
-		Topbar,
-		Delete,
-		TopbarTags,
-		TopbarDelete,
-		Rating,
-		EditNotebook,
-		TopbarBack,
-		TopbarNoteInfo,
-		TopbarNotebook,
-		TopbarArchive,
-		TopbarTagsBtn,
-		EditTags
-	} from '$lib/components/';
+	import { NoteContent, Delete, EditNotebook, EditTags } from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
+	import * as Topbar from '$lib/components/Topbar/index';
 
 	const noteState = new NoteState(page.params.slug);
 	let note = $derived(noteState.note);
@@ -32,29 +19,29 @@
 {#await initialLoading}
 	<br />
 {:then}
-	<Topbar>
-		<TopbarBack />
+	<Topbar.Root>
+		<Topbar.Back />
 		<div class="grow"></div>
-		<Rating />
+		<Topbar.Rating />
 		{#if note.expand?.tags}
-			<TopbarTags tags={note.expand.tags} />
+			<Topbar.Tags tags={note.expand.tags} />
 		{/if}
 		<div class="divider divider-horizontal"></div>
 		{#if note.expand?.notebook}
-			<TopbarNotebook bind:isOpen={isEditNotebookOpen} notebook={note.expand.notebook} />
+			<Topbar.Notebook bind:isOpen={isEditNotebookOpen} notebook={note.expand.notebook} />
 		{/if}
-		<TopbarTagsBtn bind:isOpen={isEditTagsOpen} />
-		<TopbarArchive
+		<Topbar.TagBtn bind:isOpen={isEditTagsOpen} />
+		<Topbar.Archive
 			action={async () => {
 				await noteState.archiveNote();
 				window.history.back();
 			}}
 		/>
-		<TopbarDelete bind:isOpen={isDeleteOpen} />
-		<TopbarNoteInfo {note} />
-	</Topbar>
+		<Topbar.Delete bind:isOpen={isDeleteOpen} />
+		<Topbar.Info {note} />
+	</Topbar.Root>
 	<div class="h-[calc(100vh-60px)]">
-		<Note {note} />
+		<NoteContent {note} />
 	</div>
 
 	<Delete

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ImageViewer } from 'svelte-image-viewer';
 	import sanitizeHTML from 'sanitize-html';
-	import { ScrollArea } from './ui/scroll-area/index';
+	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
 
 	import { fade, scale } from 'svelte/transition';
 

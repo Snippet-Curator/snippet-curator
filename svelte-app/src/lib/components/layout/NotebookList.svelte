@@ -47,7 +47,7 @@
 </script>
 
 {#snippet renderNotebook(notebook: Notebook)}
-	<div class="flex w-full items-center justify-between">
+	<div class=" flex w-full items-center justify-between">
 		<a
 			href="#/notebook/{notebook.id}"
 			class="{page.url.hash == `#/notebook/${notebook.id}`
@@ -99,10 +99,10 @@
 
 {#each notebooks as notebook}
 	{#if notebook.name != 'Archive' && notebook.name != 'Inbox' && notebook.name != 'Trash'}
-		<li class="group">
+		<li class="group mr-4">
 			{#if notebook.children?.length > 0}
 				<details class="w-full">
-					<summary class="flex py-0 pl-0">
+					<summary class="flex w-full py-0 pl-0">
 						<div class="grow">
 							{@render renderNotebookSection(notebook)}
 						</div>

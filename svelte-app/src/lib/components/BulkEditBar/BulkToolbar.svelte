@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { NotelistState } from '$lib/db.svelte';
-	import { Archive, Merge, Trash2, Notebook as NotebookIcon } from 'lucide-svelte';
-	import { Delete } from '$lib/components/';
-	import EditNotebook from '../dialogs/EditNotebook.svelte';
+	import { Archive, Merge, Trash2, Notebook as NotebookIcon, Tags } from 'lucide-svelte';
+	import { Delete, EditNotebook, EditTags } from '$lib/components/';
+	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 
 	type Props = {
 		selectedNotesID: string[];
@@ -14,7 +15,15 @@
 
 	let isDeleteOpen = $state(false);
 	let isEditNotebookOpen = $state(false);
+	let isEditTagsOpen = $state(false);
 	let selectedNotebookID = $state('');
+	let selectedTags = $state<string[]>([]);
+	let currentNotebookName = $state('');
+
+	onMount(async () => {
+		const currentNotebook = await notelistState.getCurrentNotebook(page.params.slug);
+		currentNotebookName = currentNotebook.name;
+	});
 </script>
 
 <div
@@ -36,22 +45,24 @@
 			>
 			<button
 				onclick={() => {
-					isEditNotebookOpen = true;
+					isEditTagsOpen = true;
 				}}
 				class="btn flex items-center gap-x-2"
-				><span class="text-base-content/60"><NotebookIcon size={18} /></span>Edit Tags</button
+				><span class="text-base-content/60"><Tags size={18} /></span>Edit Tags</button
 			>
 			<button class="btn flex items-center gap-x-2"
 				><span class="text-base-content/60"><Merge size={18} /></span>Merge</button
 			>
-			<button
-				onclick={() => {
-					notelistState.archiveMultiple(selectedNotesID);
-					isBulkEdit = false;
-				}}
-				class="btn flex items-center gap-x-2"
-				><span class="text-base-content/60"><Archive size={18} /></span>Archive</button
-			>
+			{#if currentNotebookName != 'Archive'}
+				<button
+					onclick={() => {
+						notelistState.archiveMultiple(selectedNotesID);
+						isBulkEdit = false;
+					}}
+					class="btn flex items-center gap-x-2"
+					><span class="text-base-content/60"><Archive size={18} /></span>Archive</button
+				>
+			{/if}
 			<button
 				onclick={() => {
 					isDeleteOpen = true;
@@ -79,6 +90,16 @@
 	bind:selectedNotebookID
 	action={async () => {
 		await notelistState.changeNotebook(selectedNotesID, selectedNotebookID);
+		isBulkEdit = false;
+	}}
+/>
+
+<EditTags
+	bind:isOpen={isEditTagsOpen}
+	bind:selectedTags
+	currentTags="[]"
+	action={async () => {
+		await notelistState.changeTags(selectedNotesID, selectedTags);
 		isBulkEdit = false;
 	}}
 />

@@ -1,7 +1,7 @@
 {
-  "name": "sveltekit-electron-pocketbase",
+  "name": "curator",
   "version": "0.0.1",
-  "description": "scaffolding project",
+  "description": "collect and discover snippets",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

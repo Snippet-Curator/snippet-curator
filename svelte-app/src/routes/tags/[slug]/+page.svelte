@@ -3,14 +3,8 @@
 
 	import { signalPageState } from '$lib/utils.svelte';
 	import { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
-	import {
-		Pagination,
-		NoteList,
-		Topbar,
-		TopbarBack,
-		BulkToolbar,
-		BulkEditBtn
-	} from '$lib/components/';
+	import { Pagination, NoteList, BulkToolbar, BulkEditBtn } from '$lib/components/';
+	import * as Topbar from '$lib/components/Topbar/index';
 
 	import { page } from '$app/state';
 
@@ -41,11 +35,11 @@
 	});
 </script>
 
-<Topbar>
-	<TopbarBack />
+<Topbar.Root>
+	<Topbar.Back />
 	<div class="grow"></div>
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
-</Topbar>
+</Topbar.Root>
 
 <ScrollArea class="mb-20 h-[calc(100vh-60px)] overflow-y-auto">
 	{#await initialLoading}

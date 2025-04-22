@@ -1,7 +1,7 @@
 {
-  "name": "electron-app",
-  "version": "1.0.0",
-  "description": "An Electron application with Svelte and TypeScript",
+  "name": "curator",
+  "version": "0.0.1",
+  "description": "collect and discover snippets",
   "main": "./out/main/index.js",
   "author": "example.com",
   "homepage": "https://electron-vite.org",

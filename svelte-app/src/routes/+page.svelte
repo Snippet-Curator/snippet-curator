@@ -1,6 +1,5 @@
 <script lang="ts">
 	import PocketbaseQuery from '@emresandikci/pocketbase-query';
-	import { Pencil } from 'lucide-svelte';
 
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -8,7 +7,8 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import pb, { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
-	import { Pagination, NoteList, Search, Topbar, BulkToolbar, BulkEditBtn } from '$lib/components/';
+	import { Pagination, NoteList, Search, BulkToolbar, BulkEditBtn } from '$lib/components/';
+	import * as Topbar from '$lib/components/Topbar/index';
 	import { searchState, signalPageState } from '$lib/utils.svelte';
 
 	const query = PocketbaseQuery.getInstance<{ title: string; content: string; tags: string }>();
@@ -81,10 +81,10 @@
 	});
 </script>
 
-<Topbar>
+<Topbar.Root>
 	<Search bind:searchInput />
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
-</Topbar>
+</Topbar.Root>
 
 <ScrollArea class="relative mb-20 h-[calc(100vh-60px)] overflow-y-auto">
 	{#await initialLoading}

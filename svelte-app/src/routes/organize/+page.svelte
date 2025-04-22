@@ -59,7 +59,7 @@
 				<NotebookList allowEdit={true} notebooks={notebookState.notebooks} />
 				{#await defaultNotebooks then}
 					{#if notebookArchive}
-						<li class="ml-0 pl-0">{@render renderNotebook(notebookArchive)}</li>
+						<li class="ml-0 mr-4 pl-0">{@render renderNotebook(notebookArchive)}</li>
 					{/if}
 				{/await}
 			</ul>

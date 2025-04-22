@@ -221,6 +221,7 @@ export class NotelistState {
   clickedPage = 1
   collectionName = 'notes'
   notebookID = $state<string>()
+  notebookName = $state<string>()
   tagID = $state<string>()
   noteType = $state<'tags' | 'notebooks' | 'default'>()
 
@@ -245,6 +246,7 @@ export class NotelistState {
     return data
   }
 
+
   async getDefault() {
     if (this.noteType == 'default') {
       this.getByPage()
@@ -253,6 +255,15 @@ export class NotelistState {
     } else if (this.noteType == 'tags') {
       this.getByTag(this.tagID)
     }
+  }
+
+  async getCurrentNotebook(notebookID: string) {
+    const { data, error } = await tryCatch(pb.collection('notebooks').getOne(notebookID))
+
+    if (error) {
+      console.error('Error getting Notebook: ', error)
+    }
+    return data
   }
 
   async getByPage(sort = '-created') {
@@ -350,6 +361,18 @@ export class NotelistState {
       }))
       if (error) {
         console.error('Error changing notebook: ', noteID, error)
+      }
+    }
+    await this.getDefault()
+  }
+
+  async changeTags(selectedNotesID: string[], selectedTags: string[]) {
+    for (const noteID of selectedNotesID) {
+      const { data, error } = await tryCatch(pb.collection(this.collectionName).update(noteID, {
+        tags: selectedTags
+      }))
+      if (error) {
+        console.error('Error changing tags: ', noteID, error)
       }
     }
     await this.getDefault()

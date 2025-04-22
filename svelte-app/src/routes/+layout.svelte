@@ -54,6 +54,11 @@
 			name: 'Settings',
 			icon: Settings,
 			url: '#/settings'
+		},
+		{
+			name: 'Test',
+			icon: Settings,
+			url: '#/test'
 		}
 	];
 
@@ -74,7 +79,7 @@
 	<div class="drawer-side border-base-300 border-r">
 		<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
 
-		<ul class="menu bg-base-200 min-h-screen w-64 space-y-2 p-4">
+		<ul class="menu bg-base-200 w-68 min-h-screen space-y-2 p-4">
 			<div class="mb-6 ml-1 flex h-8 items-center gap-x-1">
 				<Icon /> <span class="text-xl font-semibold tracking-widest">urator</span>
 			</div>

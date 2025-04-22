@@ -86,10 +86,10 @@
 {/snippet}
 
 {#each tags as tag}
-	<li class="group">
+	<li class="group mr-4">
 		{#if tag.children?.length > 0}
 			<details class="w-full cursor-pointer">
-				<summary class="flex py-0 pl-0">
+				<summary class="mr-4 flex w-full py-0 pl-0">
 					<div class="grow">
 						{@render renderTag(tag)}
 					</div>
