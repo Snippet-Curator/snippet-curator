@@ -18,7 +18,6 @@
 	let progress: number = $state(0);
 	let currentFile: string = $state('');
 	let uploadStatus: 'stopped' | 'in progress' | 'error' | 'completed' = $state('stopped');
-	let completed = 0;
 
 	function handleFileUpload(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -65,9 +64,11 @@
 		await pb.collection('notes').unsubscribe();
 
 		for (const [index, file] of files.entries()) {
+			currentFile = file.name;
 			await uploadFile(file);
 			progress = Math.round(((index + 1) / totalFiles) * 100);
 		}
+		currentFile = '';
 		uploadStatus = 'completed';
 
 		// resubscribe
@@ -135,7 +136,7 @@
 				<Tabs.Trigger value="errors">Errors</Tabs.Trigger>
 			</Tabs.List>
 			<Tabs.Content value="success">
-				<ScrollArea class="h-200">
+				<ScrollArea class="h-100">
 					<table class="table-zebra table">
 						<thead>
 							<tr>
@@ -155,7 +156,7 @@
 				</ScrollArea>
 			</Tabs.Content>
 			<Tabs.Content value="errors">
-				<ScrollArea class="h-200">
+				<ScrollArea class="h-100">
 					<table class="table-zebra table">
 						<thead>
 							<tr>

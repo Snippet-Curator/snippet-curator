@@ -115,7 +115,11 @@ export type PError = {
       title: {
         code: string,
         message: string
-      }
+      },
+      name: {
+        code: string,
+        message: string
+      },
     },
 
   },

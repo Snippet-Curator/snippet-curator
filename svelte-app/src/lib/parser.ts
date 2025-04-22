@@ -25,30 +25,39 @@ const parser = new XMLParser({
 })
 
 export async function makeDefaultNotebook() {
-  const { data, error } = await tryCatch(
-    pb.collection(notebookCollection).create({
-      name: inboxNotebook
-    })
+  const { data, error } = await tryCatch<RecordModel, PError>(pb.collection(notebookCollection).create({ name: inboxNotebook })
   )
 
   if (error) {
-    console.error('Inbox notebook already exists: ', error)
+    if (error.data.data.name.code == "validation_not_unique") {
+      console.log('Inbox already exists')
+    } else {
+      console.log('Error making Inbox: ', error.message)
+    }
   }
 
-  const { data: archiveData, error: archiveError } = await tryCatch(pb.collection(notebookCollection).create({
+  const { data: archiveData, error: archiveError } = await tryCatch<RecordModel, PError>(pb.collection(notebookCollection).create({
     name: archiveNotebook
   }))
 
   if (archiveError) {
-    console.error('Archive notebook already exists: ', error)
+    if (archiveError.data.data.name.code == "validation_not_unique") {
+      console.log('Archive already exists')
+    } else {
+      console.log('Error making Archive: ', archiveError.message)
+    }
   }
 
-  const { data: trashData, error: trashError } = await tryCatch(pb.collection(notebookCollection).create({
+  const { data: trashData, error: trashError } = await tryCatch<RecordModel, PError>(pb.collection(notebookCollection).create({
     name: trashNotebook
   }))
 
   if (trashError) {
-    console.error('Trash notebook already exists: ', error)
+    if (trashError.data.data.name.code == "validation_not_unique") {
+      console.log('Trash already exists')
+    } else {
+      console.log('Error making Trash: ', trashError.message)
+    }
   }
   return data
 }

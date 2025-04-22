@@ -11,7 +11,7 @@
 		isBulkEdit: boolean;
 	};
 
-	let { selectedNotesID, notelistState, isBulkEdit = $bindable() }: Props = $props();
+	let { selectedNotesID = $bindable(), notelistState, isBulkEdit = $bindable() }: Props = $props();
 
 	let isDeleteOpen = $state(false);
 	let isEditNotebookOpen = $state(false);

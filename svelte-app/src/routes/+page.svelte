@@ -94,7 +94,7 @@
 	{:then}
 		<Pagination {notelistState} changePage={updatePage} currentID={notebookID} />
 		{#if isBulkEdit}
-			<BulkToolbar bind:isBulkEdit {selectedNotesID} {notelistState} />
+			<BulkToolbar bind:isBulkEdit bind:selectedNotesID {notelistState} />
 		{/if}
 		{#if notelistState.notes.totalItems > 0}
 			<NoteList {isBulkEdit} bind:selectedNotesID notes={notelistState.notes} />
