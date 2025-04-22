@@ -105,3 +105,20 @@ export type EnNote = {
   }
 }
 
+export type PError = {
+  data: {
+    data: {
+      added: {
+        code: string,
+        message: string
+      },
+      title: {
+        code: string,
+        message: string
+      }
+    },
+
+  },
+  message: string,
+  status: number,
+}

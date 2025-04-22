@@ -7,6 +7,8 @@ import customParseFormat from 'dayjs/plugin/customParseFormat'
 import type { EnNote, EnMedia, EnResource } from './types';
 import pb from '$lib/db.svelte'
 import { tryCatch } from './utils.svelte';
+import { type PError } from './types';
+import type { RecordModel } from 'pocketbase';
 
 dayjs.extend(customParseFormat)
 
@@ -319,7 +321,6 @@ export class htmlImport {
     this.content = this.parseHTMLContent(this.parsedHTML)
   }
 
-
   async uploadToDB() {
     const defaultNotebook = await getDefaultNotebook()
 
@@ -331,12 +332,10 @@ export class htmlImport {
       'notebook': defaultNotebook.id
     }
 
-    let record
+    const { data: record, error } = await tryCatch(pb.collection('notes').create(skeletonData))
 
-    try {
-      record = await pb.collection('notes').create(skeletonData)
-    } catch (e) {
-      console.log(e, 'Possible duplicate note')
+    if (error) {
+      throw new Error('Possible duplicate note')
     }
 
     this.recordID = record.id
@@ -533,12 +532,15 @@ export class EnImport {
       'notebook': defaultNotebook.id
     }
 
-    let record
-    try {
-      record = await pb.collection('notes').create(skeletonData)
-    } catch (e) {
-      console.log(e, 'Possible duplicate note')
+    const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection('notes').create(skeletonData))
+
+    if (error) {
+      if (error.data.data.title.code == "validation_not_unique") {
+        throw new Error('Skipped duplicate note')
+      }
+      throw (error)
     }
+
     this.recordID = record.id
 
     await this.uploadResources()
