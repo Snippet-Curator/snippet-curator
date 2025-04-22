@@ -50,7 +50,7 @@
 {/snippet}
 
 <div
-	class="relative columns-1 gap-x-8 space-y-6 px-6 pb-10 pt-2 md:columns-2 md:px-10 md:pt-2 lg:columns-3 2xl:columns-4"
+	class="p-golden-md md:p-golden-lg lg:p-golden-xl gap-golden-lg space-y-golden-lg lg:gap-golden-xl lg:space-y-golden-xl relative columns-1 md:columns-2 lg:columns-3 2xl:columns-4"
 >
 	{#if notes.items.length > 0}
 		{#each notes.items as note}

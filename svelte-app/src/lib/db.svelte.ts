@@ -110,7 +110,6 @@ export class TagState {
   }
 }
 
-
 export class NotebookState {
   notebooks = $state<Notebook[]>([])
   collectionName = 'notebooks'
@@ -246,6 +245,17 @@ export class NotelistState {
     return data
   }
 
+  async getTrashNotebook() {
+    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Trash"'))
+
+    if (error) {
+      console.error('Error getting Trash Notebook: ', error)
+      return pb.collection('notebooks').create({
+        name: 'Trash'
+      })
+    }
+    return data
+  }
 
   async getDefault() {
     if (this.noteType == 'default') {
@@ -268,9 +278,10 @@ export class NotelistState {
 
   async getByPage(sort = '-created') {
     const archiveNotebook = await this.getArchiveNotebook()
+    const trashNotebook = await this.getTrashNotebook()
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       sort: sort,
-      filter: `notebook!="${archiveNotebook.id}"`,
+      filter: `notebook!="${archiveNotebook.id}" && notebook!="${trashNotebook.id}"`,
       expand: 'notebook, tags'
     }))
 
@@ -337,6 +348,22 @@ export class NotelistState {
       }
     }
     await this.getDefault()
+  }
+
+  async softDeleteMultiple(recordIDs: string[]) {
+    const trashNotebook = await this.getTrashNotebook()
+
+    for (const recordID of recordIDs) {
+      const { data, error } = await tryCatch(pb.collection(this.collectionName).update(recordID, {
+        notebook: trashNotebook.id
+      }))
+
+      if (error) {
+        console.error('Unable to archive note: ', error)
+      }
+    }
+    await this.getDefault()
+
   }
 
   async archiveMultiple(recordIDs: string[]) {
@@ -434,10 +461,34 @@ export class NoteState {
     return data
   }
 
+  async getTrashNotebook() {
+    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Trash"'))
+
+    if (error) {
+      console.error('Error getting Trash Notebook: ', error)
+      return pb.collection('notebooks').create({
+        name: 'Trash'
+      })
+    }
+    return data
+  }
+
   async deleteNote() {
     const { data, error } = await tryCatch(pb.collection(this.collectionName).delete(this.note.id))
     if (error) {
       console.error('Error deleting note: ', this.note.id, error)
+    }
+  }
+
+  async softDeleteNote() {
+    const trashNotebook = await this.getTrashNotebook()
+
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.note.id, {
+      notebook: trashNotebook.id
+    }))
+
+    if (error) {
+      console.error('Unable to delete note: ', error)
     }
   }
 

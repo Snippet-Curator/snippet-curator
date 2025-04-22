@@ -80,7 +80,7 @@
 	bind:isOpen={isDeleteOpen}
 	name="Notes"
 	action={async () => {
-		await notelistState.deleteMultiple(selectedNotesID);
+		await notelistState.softDeleteMultiple(selectedNotesID);
 		isBulkEdit = false;
 	}}>these notes?</Delete
 >

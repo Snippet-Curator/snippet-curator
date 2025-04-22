@@ -22,7 +22,7 @@ const parser = new XMLParser({
   attributeNamePrefix: "",
 })
 
-async function makeDefaultNotebook() {
+export async function makeDefaultNotebook() {
   const { data, error } = await tryCatch(
     pb.collection(notebookCollection).create({
       name: inboxNotebook
@@ -30,7 +30,7 @@ async function makeDefaultNotebook() {
   )
 
   if (error) {
-    console.error('Error making Inbox Notebook: ', error)
+    console.error('Inbox notebook already exists: ', error)
   }
 
   const { data: archiveData, error: archiveError } = await tryCatch(pb.collection(notebookCollection).create({
@@ -38,7 +38,7 @@ async function makeDefaultNotebook() {
   }))
 
   if (archiveError) {
-    console.error('Error making Archive Notebook: ', error)
+    console.error('Archive notebook already exists: ', error)
   }
 
   const { data: trashData, error: trashError } = await tryCatch(pb.collection(notebookCollection).create({
@@ -46,7 +46,7 @@ async function makeDefaultNotebook() {
   }))
 
   if (trashError) {
-    console.error('Error making Trash Notebook: ', error)
+    console.error('Trash notebook already exists: ', error)
   }
   return data
 }
@@ -56,7 +56,6 @@ async function getDefaultNotebook() {
 
   if (error) {
     console.error('Inbox notebook not found: ', error)
-    return await makeDefaultNotebook()
   }
   return data
 }

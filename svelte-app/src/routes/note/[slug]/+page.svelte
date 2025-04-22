@@ -48,7 +48,7 @@
 		bind:isOpen={isDeleteOpen}
 		name="Note"
 		action={async () => {
-			await noteState.deleteNote();
+			await noteState.softDeleteNote();
 			window.history.back();
 		}}>this note</Delete
 	>

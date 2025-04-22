@@ -31,32 +31,34 @@
 	}
 </script>
 
-<div
-	class="join bg-base-100/95 sticky top-0 z-20 flex w-full items-center justify-center py-3 backdrop-blur-2xl"
->
-	<button
-		disabled={notelistState.clickedPage == 1}
-		onclick={() => handleClick(1)}
-		class="btn join-item">First</button
+{#if pages.length > 1}
+	<div
+		class="join bg-base-100/95 sticky top-0 z-20 flex w-full items-center justify-center py-3 backdrop-blur-2xl"
 	>
-	<button
-		onclick={() => handleClick(notelistState.clickedPage - 1)}
-		disabled={notelistState.clickedPage == 1}
-		class="btn join-item">Previous</button
-	>
-	{#each pages as page}
-		<button onclick={() => handleClick(page)} disabled={currentPage == page} class="join-item btn"
-			>{page}</button
+		<button
+			disabled={notelistState.clickedPage == 1}
+			onclick={() => handleClick(1)}
+			class="btn join-item">First</button
 		>
-	{/each}
-	<button
-		onclick={() => handleClick(notelistState.clickedPage + 1)}
-		disabled={notelistState.clickedPage == notelistState.notes?.totalPages}
-		class="btn join-item">Next</button
-	>
-	<button
-		disabled={notelistState.clickedPage == notelistState.notes?.totalPages}
-		onclick={() => handleClick(notelistState.notes?.totalPages)}
-		class="btn join-item">Last</button
-	>
-</div>
+		<button
+			onclick={() => handleClick(notelistState.clickedPage - 1)}
+			disabled={notelistState.clickedPage == 1}
+			class="btn join-item">Previous</button
+		>
+		{#each pages as page}
+			<button onclick={() => handleClick(page)} disabled={currentPage == page} class="join-item btn"
+				>{page}</button
+			>
+		{/each}
+		<button
+			onclick={() => handleClick(notelistState.clickedPage + 1)}
+			disabled={notelistState.clickedPage == notelistState.notes?.totalPages}
+			class="btn join-item">Next</button
+		>
+		<button
+			disabled={notelistState.clickedPage == notelistState.notes?.totalPages}
+			onclick={() => handleClick(notelistState.notes?.totalPages)}
+			class="btn join-item">Last</button
+		>
+	</div>
+{/if}

@@ -63,7 +63,7 @@
 
 {#snippet renderNotebookSection(notebook: Notebook)}
 	<ContextMenu.Root>
-		<ContextMenu.Trigger class="flex items-center justify-between p-0 pr-2">
+		<ContextMenu.Trigger class="flex cursor-auto items-center justify-between p-0 pr-2">
 			{@render renderNotebook(notebook)}
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
