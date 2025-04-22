@@ -170,9 +170,6 @@ export class NotebookState {
     if (error) {
       console.error('Error while get notebook: ', notebookName, 'art', error)
     }
-
-    console.log(data)
-
     return data
   }
 
@@ -271,7 +268,7 @@ export class NotelistState {
     const { data, error } = await tryCatch(pb.collection('notebooks').getOne(notebookID))
 
     if (error) {
-      console.error('Error getting Notebook: ', error)
+      console.error('Error getting notebook: ', error)
     }
     return data
   }
@@ -339,69 +336,75 @@ export class NotelistState {
     return await pb.collection(this.collectionName).getFirstListItem(`name='${name}'`)
   }
 
-  async deleteMultiple(recordIDs: string[]) {
-    for (const recordID of recordIDs) {
-      const { data, error } = await tryCatch(pb.collection(this.collectionName).delete(recordID))
+  async emptyTrash() {
+    const trashNotebook = await this.getTrashNotebook()
 
-      if (error) {
-        console.error('Unable to delete note: ', error)
-      }
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).getFullList({
+      filter: `notebook="${trashNotebook.id}"`,
+    }))
+
+    if (error) {
+      console.error('Unable to delete note: ', error)
     }
-    await this.getDefault()
+
+    if (!data) return
+
+    await Promise.all(data.map(note => {
+      pb.collection(this.collectionName).delete(note.id)
+    }))
   }
 
   async softDeleteMultiple(recordIDs: string[]) {
     const trashNotebook = await this.getTrashNotebook()
 
-    for (const recordID of recordIDs) {
-      const { data, error } = await tryCatch(pb.collection(this.collectionName).update(recordID, {
+    await Promise.all(recordIDs.map(async recordID => {
+      const { data, error } = await pb.collection(this.collectionName).update(recordID, {
         notebook: trashNotebook.id
-      }))
+      })
 
       if (error) {
-        console.error('Unable to archive note: ', error)
+        console.error('Unable to delete note: ', error)
       }
-    }
+    }))
     await this.getDefault()
-
   }
 
   async archiveMultiple(recordIDs: string[]) {
     const archiveNotebook = await this.getArchiveNotebook()
 
-    for (const recordID of recordIDs) {
-      const { data, error } = await tryCatch(pb.collection(this.collectionName).update(recordID, {
+    await Promise.all(recordIDs.map(async recordID => {
+      const { data, error } = await pb.collection(this.collectionName).update(recordID, {
         notebook: archiveNotebook.id
-      }))
+      })
 
       if (error) {
         console.error('Unable to archive note: ', error)
       }
-    }
+    }))
     await this.getDefault()
   }
 
   async changeNotebook(selectedNotesID: string[], newNotebookID: string) {
-    for (const noteID of selectedNotesID) {
+    await Promise.all(selectedNotesID.map(async noteID => {
       const { data, error } = await tryCatch(pb.collection(this.collectionName).update(noteID, {
         notebook: newNotebookID
       }))
       if (error) {
         console.error('Error changing notebook: ', noteID, error)
       }
-    }
+    }))
     await this.getDefault()
   }
 
   async changeTags(selectedNotesID: string[], selectedTags: string[]) {
-    for (const noteID of selectedNotesID) {
+    await Promise.all(selectedNotesID.map(async noteID => {
       const { data, error } = await tryCatch(pb.collection(this.collectionName).update(noteID, {
         tags: selectedTags
       }))
       if (error) {
         console.error('Error changing tags: ', noteID, error)
       }
-    }
+    }))
     await this.getDefault()
   }
 

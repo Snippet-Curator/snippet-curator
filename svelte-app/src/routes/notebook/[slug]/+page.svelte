@@ -3,13 +3,14 @@
 
 	import { signalPageState } from '$lib/utils.svelte';
 	import { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
-	import { Pagination, NoteList, BulkToolbar, BulkEditBtn } from '$lib/components/';
+	import { Pagination, NoteList, BulkToolbar, BulkEditBtn, Delete } from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
 
 	import { page } from '$app/state';
 
 	let notebookID = $derived(page.params.slug);
 	let isBulkEdit = $state(false);
+	let isEmptyTrashOpen = $state(false);
 	let selectedNotesID = $state<string[]>([]);
 
 	const noteType: NoteType = {
@@ -29,7 +30,8 @@
 	let initialLoading = $state();
 
 	$effect(() => {
-		console.log('Slug changed:', page.params.slug);
+		// console.log('Slug changed:', page.params.slug);
+		notelistState.notebookID = page.params.slug;
 		notelistState.clickedPage = savedPage ? savedPage : 1;
 		initialLoading = updatePage();
 	});
@@ -38,6 +40,7 @@
 <Topbar.Root>
 	<Topbar.Back />
 	<div class="grow"></div>
+	<Topbar.Empty bind:isOpen={isEmptyTrashOpen} />
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
 </Topbar.Root>
 
@@ -56,3 +59,12 @@
 		{/if}
 	{/await}
 </ScrollArea>
+
+<Delete
+	bind:isOpen={isEmptyTrashOpen}
+	name="Notes Permanently"
+	action={async () => {
+		await notelistState.emptyTrash();
+		window.history.back();
+	}}>these notes</Delete
+>

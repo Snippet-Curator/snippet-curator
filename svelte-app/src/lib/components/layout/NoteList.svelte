@@ -14,11 +14,9 @@
 	function checkListNote(checkedNoteID: string) {
 		if (selectedNotesID.includes(checkedNoteID)) {
 			selectedNotesID = selectedNotesID.filter((noteID: string) => noteID != checkedNoteID);
-			console.log('removed note', selectedNotesID);
 			return;
 		}
 		selectedNotesID.push(checkedNoteID);
-		console.log('added note', selectedNotesID);
 	}
 </script>
 

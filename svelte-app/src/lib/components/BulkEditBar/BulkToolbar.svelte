@@ -53,7 +53,7 @@
 			<button class="btn flex items-center gap-x-2"
 				><span class="text-base-content/60"><Merge size={18} /></span>Merge</button
 			>
-			{#if currentNotebookName != 'Archive'}
+			{#if currentNotebookName != 'Archive' && currentNotebookName != 'Trash'}
 				<button
 					onclick={() => {
 						notelistState.archiveMultiple(selectedNotesID);
@@ -63,13 +63,15 @@
 					><span class="text-base-content/60"><Archive size={18} /></span>Archive</button
 				>
 			{/if}
-			<button
-				onclick={() => {
-					isDeleteOpen = true;
-				}}
-				class="btn flex items-center gap-x-2"
-				><span class="text-base-content/60"><Trash2 size={18} /></span>Delete</button
-			>
+			{#if currentNotebookName != 'Trash'}
+				<button
+					onclick={() => {
+						isDeleteOpen = true;
+					}}
+					class="btn flex items-center gap-x-2"
+					><span class="text-base-content/60"><Trash2 size={18} /></span>Delete</button
+				>
+			{/if}
 			<button onclick={() => (isBulkEdit = false)} class="btn btn-soft">Cancel</button>
 		</div>
 		<!-- button wrap -->

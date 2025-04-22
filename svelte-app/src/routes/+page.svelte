@@ -16,6 +16,7 @@
 	let searchInput = $state('');
 	let isBulkEdit = $state(false);
 	let selectedNotesID = $state<string[]>([]);
+	// let scrollElement;
 
 	let notebookID = 'homepage';
 	const noteType: NoteType = {
@@ -40,6 +41,7 @@
 		}
 		await searchNotes();
 		signalPageState.updatePageData(page.url.hash, notelistState.clickedPage);
+		// scrollElement.scrollTo({ top: 0 });
 	}
 
 	async function searchNotes() {

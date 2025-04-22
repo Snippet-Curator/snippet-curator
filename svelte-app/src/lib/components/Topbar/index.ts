@@ -3,6 +3,7 @@ import Topbar from './Topbar.svelte'
 import Archive from './topbar-archive.svelte'
 import Back from './topbar-back.svelte'
 import Delete from './topbar-delete.svelte'
+import Empty from './topbar-empty-trash.svelte'
 import Info from './topbar-note-info.svelte'
 import Notebook from './topbar-notebook.svelte'
 import TagBtn from './topbar-tags.svelte'
@@ -13,6 +14,7 @@ export {
   Archive,
   Back,
   Delete,
+  Empty,
   Info,
   Notebook,
   TagBtn,

@@ -23,7 +23,9 @@
 	let notebooks = $state<Notebook[]>();
 
 	async function getNotebooks() {
-		return await pb.collection('notebooks').getFullList();
+		return await pb.collection('notebooks').getFullList({
+			filter: 'name != "Archive" && name != "Trash"'
+		});
 	}
 
 	onMount(async () => {
