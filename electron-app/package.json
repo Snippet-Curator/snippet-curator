@@ -18,6 +18,10 @@
         "to": "db/pb_migrations"
       }, 
       {
+        "from": "./db/pb_hooks",
+        "to": "db/pb_hooks"
+      }, 
+      {
         "from": "./db/pocketbase.exe",
         "to": "./db/pocketbase.exe"
       }
