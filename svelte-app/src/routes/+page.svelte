@@ -7,7 +7,7 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import pb, { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
-	import { Pagination, NoteList, Search, BulkToolbar, BulkEditBtn } from '$lib/components/';
+	import { Pagination, NoteList, Search, BulkToolbar, BulkEditBtn, Blank } from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { searchState, signalPageState } from '$lib/utils.svelte';
 
@@ -99,7 +99,7 @@
 		{#if notelistState.notes.totalItems > 0}
 			<NoteList {isBulkEdit} bind:selectedNotesID notes={notelistState.notes} />
 		{:else}
-			<br />
+			<Blank />
 		{/if}
 	{/await}
 </ScrollArea>

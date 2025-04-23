@@ -9,12 +9,18 @@
 		Settings,
 		Tags,
 		WalletCards,
-		Archive,
-		Trash2
+		Archive
 	} from 'lucide-svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
 
-	import { getNotebookState, setNotebookState, getTagState, setTagState } from '$lib/db.svelte';
+	import pb, {
+		getNotebookState,
+		setNotebookState,
+		getTagState,
+		setTagState,
+		getDefaultNotebooksState,
+		setDefaultNotebooksState
+	} from '$lib/db.svelte';
 	import type { Notebook } from '$lib/types';
 
 	import { Dock, Icon, NotebookList, TagList } from '$lib/components';
@@ -22,15 +28,13 @@
 	let { children } = $props();
 	setTagState();
 	setNotebookState();
+	setDefaultNotebooksState();
 	const tagState = getTagState();
 	const notebookState = getNotebookState();
-
-	let notebookInbox = $state<Notebook>();
-	let notebookArchive = $state<Notebook>();
+	const defaultNotebooksState = getDefaultNotebooksState();
 
 	async function getDefaultNotebooks() {
-		notebookInbox = await notebookState.getOneByName('Inbox');
-		notebookArchive = await notebookState.getOneByName('Archive');
+		await defaultNotebooksState.getAll();
 	}
 
 	type LayoutPage = {
@@ -93,16 +97,15 @@
 				>
 			</li>
 			{#await defaultNotebooks then}
-				{#if notebookInbox}
-					<li>
-						<a
-							class="{page.url.hash == `#/notebook/${notebookInbox.id}`
-								? 'menu-active'
-								: ''} flex w-full justify-between"
-							href="#/notebook/{notebookInbox.id}"><span>Inbox</span> {notebookInbox.note_count}</a
-						>
-					</li>
-				{/if}
+				<li>
+					<a
+						class="{page.url.hash == `#/notebook/${defaultNotebooksState.inboxID}`
+							? 'menu-active'
+							: ''} flex w-full justify-between"
+						href="#/notebook/{defaultNotebooksState.inboxID}"
+						><span>Inbox</span> {defaultNotebooksState.inboxCount}</a
+					>
+				</li>
 			{/await}
 
 			<div class="divider my-0 py-0"></div>
@@ -130,9 +133,11 @@
 			{/snippet}
 
 			{#await defaultNotebooks then}
-				{#if notebookArchive}
-					{@render renderBottomPages('Archive', `#/notebook/${notebookArchive.id}`, Archive)}
-				{/if}
+				{@render renderBottomPages(
+					'Archive',
+					`#/notebook/${defaultNotebooksState.archiveID}`,
+					Archive
+				)}
 			{/await}
 			{#each bottomPages as page}
 				{@render renderBottomPages(page.name, page.url, page.icon)}

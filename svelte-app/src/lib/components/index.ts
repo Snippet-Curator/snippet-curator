@@ -5,6 +5,7 @@ export { default as BulkToolbar } from './BulkEditBar/BulkToolbar.svelte'
 export { default as BulkEditBtn } from './BulkEditBar/BulkEditBtn.svelte'
 export { default as Background } from './Layout/Background.svelte'
 export { default as Icon } from './Layout/Icon.svelte'
+export { default as Blank } from './Layout/Blank.svelte'
 
 // notes
 export { default as Pagination } from './Layout/Pagination.svelte'

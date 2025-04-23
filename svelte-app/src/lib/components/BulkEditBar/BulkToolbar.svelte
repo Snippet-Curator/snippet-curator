@@ -40,27 +40,24 @@
 				onclick={() => {
 					isEditNotebookOpen = true;
 				}}
-				class="btn flex items-center gap-x-2"
-				><span class="text-base-content/60"><NotebookIcon size={18} /></span>Edit Notebook</button
+				class="btn"
+			>
+				<NotebookIcon size={18} class="text-base-content/60" />Edit Notebook</button
 			>
 			<button
 				onclick={() => {
 					isEditTagsOpen = true;
 				}}
-				class="btn flex items-center gap-x-2"
-				><span class="text-base-content/60"><Tags size={18} /></span>Edit Tags</button
+				class="btn"><Tags size={18} class="text-base-content/60" />Edit Tags</button
 			>
-			<button class="btn flex items-center gap-x-2"
-				><span class="text-base-content/60"><Merge size={18} /></span>Merge</button
-			>
+			<button class="btn"><Merge size={18} class="text-base-content/60" />Merge</button>
 			{#if currentNotebookName != 'Archive' && currentNotebookName != 'Trash'}
 				<button
 					onclick={() => {
 						notelistState.archiveMultiple(selectedNotesID);
 						isBulkEdit = false;
 					}}
-					class="btn flex items-center gap-x-2"
-					><span class="text-base-content/60"><Archive size={18} /></span>Archive</button
+					class="btn"><Archive size={18} class="text-base-content/60" />Archive</button
 				>
 			{/if}
 			{#if currentNotebookName != 'Trash'}
@@ -68,8 +65,7 @@
 					onclick={() => {
 						isDeleteOpen = true;
 					}}
-					class="btn flex items-center gap-x-2"
-					><span class="text-base-content/60"><Trash2 size={18} /></span>Delete</button
+					class="btn"><Trash2 size={18} class="text-base-content/60" />Delete</button
 				>
 			{/if}
 			<button onclick={() => (isBulkEdit = false)} class="btn btn-soft">Cancel</button>

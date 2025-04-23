@@ -111,9 +111,9 @@ export class TagState {
 }
 
 export class NotebookState {
-  notebooks = $state<Notebook[]>([])
   collectionName = 'notebooks'
   viewCollectionName = 'notebooks_with_note_counts'
+  notebooks = $state<Notebook[]>([])
 
   constructor() {
     $effect(() => {
@@ -147,7 +147,6 @@ export class NotebookState {
         rootNotebooks.push(notebook)
       }
     })
-
     this.notebooks = rootNotebooks
   }
 
@@ -168,7 +167,7 @@ export class NotebookState {
     const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getFirstListItem(`name="${notebookName}"`))
 
     if (error) {
-      console.error('Error while get notebook: ', notebookName, 'art', error)
+      console.error('Error while get notebook: ', notebookName, error.data)
     }
     return data
   }
@@ -205,6 +204,67 @@ export class NotebookState {
     await this.getAll()
   }
 }
+
+export class defaultNotebooksState {
+  inbox = $state<Note>()
+  inboxID = $state<string>('')
+  inboxCount = $state<number>(0)
+  archive = $state<Note>()
+  archiveID = $state<string>('')
+  archiveCount = $state<number>(0)
+  trash = $state<Note>()
+  trashID = $state<string>('')
+  trashCount = $state<number>(0)
+  viewCollectionName = 'notebooks_with_note_counts'
+
+  constructor() {
+    $effect(() => {
+      pb.collection('notebooks').subscribe('*', async () => {
+        this.getAll()
+      });
+      pb.collection('notes').subscribe('*', async () => {
+        this.getAll()
+      });
+    })
+  }
+
+  async getAll() {
+
+    const { data: inbox, error } = await tryCatch(pb.collection(this.viewCollectionName).getFirstListItem(`name="Inbox"`))
+
+    if (error) {
+      console.error('Error while getting inbox: ', error.data)
+    }
+
+    const { data: archive, error: archiveError } = await tryCatch(pb.collection(this.viewCollectionName).getFirstListItem(`name="Archive"`))
+
+    if (archiveError) {
+      console.error('Error while getting inbox: ', archiveError.data)
+    }
+
+    const { data: trash, error: trashError } = await tryCatch(pb.collection(this.viewCollectionName).getFirstListItem(`name="Trash"`))
+
+    if (trashError) {
+      console.error('Error while getting inbox: ', trashError.data)
+    }
+
+
+    this.inbox = inbox
+    this.inboxCount = inbox.note_count
+    this.inboxID = inbox.id
+
+    this.archive = archive
+    this.archiveCount = archive.note_count
+    this.archiveID = archive.id
+
+    this.trash = trash
+    this.trashCount = trash.note_count
+    this.trashID = trash.id
+
+    // console.log(this.archive, this.trash)
+  }
+}
+
 
 export class NotelistState {
   notes = $state<NoteRecord>({
@@ -305,8 +365,10 @@ export class NotelistState {
   }
 
   async getByTag(tagID: string) {
+    const archiveNotebook = await this.getArchiveNotebook()
+    const trashNotebook = await this.getTrashNotebook()
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
-      filter: `tags~"${tagID}"`,
+      filter: `tags~"${tagID}" && notebook!="${archiveNotebook.id}" && notebook!="${trashNotebook.id}"`,
       expand: 'tags,notebook',
       sort: '-created',
     }))
@@ -531,10 +593,12 @@ export class NoteState {
 }
 
 
+
 export default pb
 
 const TAG_KEY = Symbol('TAG')
 const NOTEBOOK_KEY = Symbol('NOTEBOOK')
+const INBOX_KEY = Symbol('INBOX')
 
 export function setTagState() {
   return setContext(TAG_KEY, new TagState())
@@ -569,5 +633,12 @@ export function getNoteState(NOTE_KEY: string) {
   return getContext<ReturnType<typeof setNoteState>>(NOTE_KEY)
 }
 
+export function setDefaultNotebooksState() {
+  return setContext(INBOX_KEY, new defaultNotebooksState())
+}
+
+export function getDefaultNotebooksState() {
+  return getContext<ReturnType<typeof setDefaultNotebooksState>>(INBOX_KEY)
+}
 
 

@@ -1,34 +1,22 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import { Archive, Notebook as NotebookIcon, Trash2 } from 'lucide-svelte';
+	import { Archive, Trash2 } from 'lucide-svelte';
 
 	import { New, NotebookList, TagList } from '$lib/components';
-	import { getNotebookState, getTagState } from '$lib/db.svelte';
+	import { getDefaultNotebooksState, getNotebookState, getTagState } from '$lib/db.svelte';
 	import type { Notebook } from '$lib/types';
 
 	const notebookState = getNotebookState();
 	const tagState = getTagState();
+	const defaultNotebooksState = getDefaultNotebooksState();
 
-	let notebookArchive = $state<Notebook>();
-	let notebookTrash = $state<Notebook>();
+	let notebookArchive = $derived(defaultNotebooksState.archive);
+	let notebookTrash = $derived(defaultNotebooksState.trash);
 
 	let isNewNotebookOpen = $state(false);
 	let isNewTagOpen = $state(false);
 	let newNotebookName = $state('');
 	let newTagName = $state('');
-
-	async function getDefaultNotebooks() {
-		notebookArchive = await notebookState.getOneByName('Archive');
-		notebookTrash = await notebookState.getOneByName('Trash');
-	}
-
-	let defaultNotebooks = $state();
-
-	onMount(() => {
-		defaultNotebooks = getDefaultNotebooks();
-	});
 </script>
 
 {#snippet renderNotebook(notebook: Notebook, NotebookIcon)}
@@ -57,14 +45,16 @@
 		<div class="card">
 			<ul class="menu w-full">
 				<NotebookList allowEdit={true} notebooks={notebookState.notebooks} />
-				{#await defaultNotebooks then}
-					{#if notebookArchive}
-						<li class="ml-0 mr-4 pl-0">{@render renderNotebook(notebookArchive, Archive)}</li>
-					{/if}
-					{#if notebookTrash}
-						<li class="ml-0 mr-4 pl-0">{@render renderNotebook(notebookTrash, Trash2)}</li>
-					{/if}
-				{/await}
+				{#if notebookArchive}
+					<li class="ml-0 mr-4 pl-0">
+						{@render renderNotebook(notebookArchive, Archive)}
+					</li>
+				{/if}
+				{#if notebookTrash}
+					<li class="ml-0 mr-4 pl-0">
+						{@render renderNotebook(notebookTrash, Trash2)}
+					</li>
+				{/if}
 			</ul>
 		</div>
 

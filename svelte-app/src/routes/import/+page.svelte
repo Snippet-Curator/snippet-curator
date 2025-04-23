@@ -3,12 +3,13 @@
 	import * as Tabs from '$lib/components/ui/tabs/index';
 
 	import { EnImport, fileImport, htmlImport } from '$lib/parser';
-	import pb, { getNotebookState, getTagState } from '$lib/db.svelte';
+	import pb, { getDefaultNotebooksState, getNotebookState, getTagState } from '$lib/db.svelte';
 
 	const decoder = new TextDecoder('utf-8');
 
 	const notebookState = getNotebookState();
 	const tagState = getTagState();
+	const defaultNotebookState = getDefaultNotebooksState();
 
 	let files: File[] = [];
 	let listOfUploads;
@@ -71,10 +72,15 @@
 		currentFile = '';
 		uploadStatus = 'completed';
 
+		await notebookState.getAll();
+		await tagState.getAll();
+		await defaultNotebookState.getAll();
+
 		// resubscribe
 		await pb.collection('notes').subscribe('*', async () => {
 			notebookState.getAll();
 			tagState.getAll();
+			defaultNotebookState.getAll();
 		});
 	}
 </script>
@@ -108,77 +114,76 @@
 				<button onclick={importFiles} class="btn btn-neutral">Import</button>
 			</fieldset>
 
-			<div class="divider"></div>
+			{#if uploadStatus == 'in progress' || uploadStatus == 'completed'}
+				<div class="divider"></div>
 
-			<div class="flex w-full">
-				<!-- {#if uploadStatus == 'in progress' || uploadStatus == 'completed'} -->
-				<div class="card card-border grid w-full grid-cols-3 items-center p-4">
-					<div>Progress</div>
-					<div class="col-span-2 flex items-center gap-x-2">
-						<progress class="progress h-4" value={progress} max="100"></progress>
-						{progress}%
+				<div class="flex w-full">
+					<div class="card card-border grid w-full grid-cols-3 items-center p-4">
+						<div>Progress</div>
+						<div class="col-span-2 flex items-center gap-x-2">
+							<progress class="progress h-4" value={progress} max="100"></progress>
+							{progress}%
+						</div>
+
+						<div>Status</div>
+						<div class="col-span-2 text-right">{uploadStatus}</div>
+						<div>Current File</div>
+						<div class="col-span-2 text-right">{currentFile}</div>
 					</div>
-
-					<div>Status</div>
-					<div class="col-span-2 text-right">{uploadStatus}</div>
-					<div>Current File</div>
-					<div class="col-span-2 text-right">{currentFile}</div>
 				</div>
-				<!-- {/if} -->
-			</div>
+			{/if}
 		</div>
-		<!-- div left -->
+		<!-- flex div -->
 
-		<!-- {#if uploadStatus == 'in progress' || uploadStatus == 'completed'} -->
-		<Tabs.Root value="success">
-			<Tabs.List class="grid w-full grid-cols-2">
-				<Tabs.Trigger value="success">Success</Tabs.Trigger>
-				<Tabs.Trigger value="errors">Errors</Tabs.Trigger>
-			</Tabs.List>
-			<Tabs.Content value="success">
-				<ScrollArea class="h-100">
-					<table class="table-zebra table">
-						<thead>
-							<tr>
-								<th></th>
-								<th>File name</th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each listofSuccesses as item, index}
+		{#if uploadStatus == 'in progress' || uploadStatus == 'completed'}
+			<Tabs.Root value="success">
+				<Tabs.List class="grid w-full grid-cols-2">
+					<Tabs.Trigger value="success">Success</Tabs.Trigger>
+					<Tabs.Trigger value="errors">Errors</Tabs.Trigger>
+				</Tabs.List>
+				<Tabs.Content value="success">
+					<ScrollArea class="h-100">
+						<table class="table-zebra table">
+							<thead>
 								<tr>
-									<th>{index + 1}</th>
-									<td>{item.name}</td>
+									<th></th>
+									<th>File</th>
 								</tr>
-							{/each}
-						</tbody>
-					</table>
-				</ScrollArea>
-			</Tabs.Content>
-			<Tabs.Content value="errors">
-				<ScrollArea class="h-100">
-					<table class="table-zebra table">
-						<thead>
-							<tr>
-								<th></th>
-								<th>File name</th>
-								<th>Error Message</th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each listOfErrors as item, index}
+							</thead>
+							<tbody>
+								{#each listofSuccesses as item, index}
+									<tr>
+										<th>{index + 1}</th>
+										<td>{item}</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</ScrollArea>
+				</Tabs.Content>
+				<Tabs.Content value="errors">
+					<ScrollArea class="h-100">
+						<table class="table-zebra table">
+							<thead>
 								<tr>
-									<th>{index + 1}</th>
-									<td>{item.name}</td>
-									<td>{item.error}</td>
+									<th></th>
+									<th>File name</th>
+									<th>Error Message</th>
 								</tr>
-							{/each}
-						</tbody>
-					</table>
-				</ScrollArea>
-			</Tabs.Content>
-
-			<!-- {/if} -->
-		</Tabs.Root>
+							</thead>
+							<tbody>
+								{#each listOfErrors as item, index}
+									<tr>
+										<th>{index + 1}</th>
+										<td>{item.name}</td>
+										<td>{item.error}</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</ScrollArea>
+				</Tabs.Content>
+			</Tabs.Root>
+		{/if}
 	</section>
 </ScrollArea>

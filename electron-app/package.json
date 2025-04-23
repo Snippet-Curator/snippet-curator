@@ -6,7 +6,22 @@
   "author": "example.com",
   "homepage": "https://electron-vite.org",
   "build": {
-    "extraResources": ["./db/pb_migrations", "./db/pocketbase.exe"]
+    "files": [
+      "!db/pb_data/",
+      "!.db/pb_data/",
+      "!.db/pb_data/**",
+      "!db/pb_data/**"
+    ],
+    "extraResources": [
+      {
+        "from": "./db/pb_migrations",
+        "to": "db/pb_migrations"
+      }, 
+      {
+        "from": "./db/pocketbase.exe",
+        "to": "./db/pocketbase.exe"
+      }
+    ]
   },
   "scripts": {
     "format": "prettier --plugin prettier-plugin-svelte --write .",
