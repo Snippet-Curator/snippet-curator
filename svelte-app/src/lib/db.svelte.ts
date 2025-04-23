@@ -16,6 +16,30 @@ export async function getAuth() {
   console.log("Logged in to Pocket client: ", pb.authStore.isValid)
 }
 
+async function getArchiveNotebook() {
+  const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Archive"'))
+
+  if (error) {
+    console.log('Error getting Archive Notebook: ', error.message)
+    // return pb.collection('notebooks').create({
+    //   name: 'Archive'
+    // })
+  }
+  return data
+}
+
+async function getTrashNotebook() {
+  const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Trash"'))
+
+  if (error) {
+    console.error('Error getting Trash Notebook: ', error.message)
+    // return pb.collection('notebooks').create({
+    //   name: 'Trash'
+    // })
+  }
+  return data
+}
+
 export class TagState {
   tags = $state<Tag[]>([])
   collectionName = 'tags'
@@ -30,37 +54,10 @@ export class TagState {
     })
   }
 
-  async getArchiveNotebook() {
-    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Archive"'))
-
-    if (error) {
-      console.error('Error getting Archive Notebook: ', error)
-      return pb.collection('notebooks').create({
-        name: 'Archive'
-      })
-    }
-    return data
-  }
-
-  async getTrashNotebook() {
-    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Trash"'))
-
-    if (error) {
-      console.error('Error getting Trash Notebook: ', error)
-      return pb.collection('notebooks').create({
-        name: 'Trash'
-      })
-    }
-    return data
-  }
-
   async getAll() {
-    const archiveNotebook = await this.getArchiveNotebook()
-    const trashNotebook = await this.getTrashNotebook()
-
     const { data: records, error } = await tryCatch(pb.collection(this.viewCollectionName).getFullList({
       sort: 'name',
-      expand: 'parent, note'
+      expand: 'parent'
     }))
 
     if (error) {
@@ -74,7 +71,6 @@ export class TagState {
 
     const tagMap = new Map()
     records.forEach(tag => {
-      console.log(tag)
       tagMap.set(tag.id, { ...tag, children: [] })
     })
 
@@ -316,30 +312,6 @@ export class NotelistState {
     }
   }
 
-  async getArchiveNotebook() {
-    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Archive"'))
-
-    if (error) {
-      console.error('Error getting Archive Notebook: ', error)
-      return pb.collection('notebooks').create({
-        name: 'Archive'
-      })
-    }
-    return data
-  }
-
-  async getTrashNotebook() {
-    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Trash"'))
-
-    if (error) {
-      console.error('Error getting Trash Notebook: ', error)
-      return pb.collection('notebooks').create({
-        name: 'Trash'
-      })
-    }
-    return data
-  }
-
   async getDefault() {
     if (this.noteType == 'default') {
       this.getByPage()
@@ -360,8 +332,11 @@ export class NotelistState {
   }
 
   async getByPage(sort = '-created') {
-    const archiveNotebook = await this.getArchiveNotebook()
-    const trashNotebook = await this.getTrashNotebook()
+    const archiveNotebook = await getArchiveNotebook()
+    const trashNotebook = await getTrashNotebook()
+
+    console.log('archivenotebook', archiveNotebook)
+
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       sort: sort,
       filter: `notebook!="${archiveNotebook.id}" && notebook!="${trashNotebook.id}"`,
@@ -391,8 +366,8 @@ export class NotelistState {
   }
 
   async getByTag(tagID: string) {
-    const archiveNotebook = await this.getArchiveNotebook()
-    const trashNotebook = await this.getTrashNotebook()
+    const archiveNotebook = await getArchiveNotebook()
+    const trashNotebook = await getTrashNotebook()
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       filter: `tags~"${tagID}" && notebook!="${archiveNotebook.id}" && notebook!="${trashNotebook.id}"`,
       expand: 'tags,notebook',
@@ -425,7 +400,7 @@ export class NotelistState {
   }
 
   async emptyTrash() {
-    const trashNotebook = await this.getTrashNotebook()
+    const trashNotebook = await getTrashNotebook()
 
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getFullList({
       filter: `notebook="${trashNotebook.id}"`,
@@ -443,7 +418,7 @@ export class NotelistState {
   }
 
   async softDeleteMultiple(recordIDs: string[]) {
-    const trashNotebook = await this.getTrashNotebook()
+    const trashNotebook = await getTrashNotebook()
 
     await Promise.all(recordIDs.map(async recordID => {
       const { data, error } = await pb.collection(this.collectionName).update(recordID, {
@@ -458,7 +433,7 @@ export class NotelistState {
   }
 
   async archiveMultiple(recordIDs: string[]) {
-    const archiveNotebook = await this.getArchiveNotebook()
+    const archiveNotebook = await getArchiveNotebook()
 
     await Promise.all(recordIDs.map(async recordID => {
       const { data, error } = await pb.collection(this.collectionName).update(recordID, {
@@ -540,30 +515,6 @@ export class NoteState {
     return data
   }
 
-  async getArchiveNotebook() {
-    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Archive"'))
-
-    if (error) {
-      console.error('Error getting Archive Notebook: ', error)
-      return pb.collection('notebooks').create({
-        name: 'Archive'
-      })
-    }
-    return data
-  }
-
-  async getTrashNotebook() {
-    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Trash"'))
-
-    if (error) {
-      console.error('Error getting Trash Notebook: ', error)
-      return pb.collection('notebooks').create({
-        name: 'Trash'
-      })
-    }
-    return data
-  }
-
   async deleteNote() {
     const { data, error } = await tryCatch(pb.collection(this.collectionName).delete(this.note.id))
     if (error) {
@@ -572,7 +523,7 @@ export class NoteState {
   }
 
   async softDeleteNote() {
-    const trashNotebook = await this.getTrashNotebook()
+    const trashNotebook = await getTrashNotebook()
 
     const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.note.id, {
       notebook: trashNotebook.id
@@ -606,7 +557,7 @@ export class NoteState {
   }
 
   async archiveNote() {
-    const archiveNotebook = await this.getArchiveNotebook()
+    const archiveNotebook = await getArchiveNotebook()
 
     const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.note.id, {
       notebook: archiveNotebook.id

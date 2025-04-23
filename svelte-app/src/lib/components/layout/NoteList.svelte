@@ -55,7 +55,7 @@
 			<div class="group relative">
 				{#if !isBulkEdit}
 					<button
-						class="card animate-in fade-in-50 slide-in-from-bottom-5 hover:bg-base-200/70 bg-base-100 card-border w-full border transition-colors duration-200 hover:cursor-pointer"
+						class="card animate-in fade-in-0 hover:bg-base-200/70 bg-base-100 card-border w-full border transition-colors duration-200 hover:cursor-pointer"
 						onclick={() => goto(`#/note/${note.id}`)}
 					>
 						{@render renderNotes(note)}
