@@ -29,7 +29,7 @@
 	let initialLoading = $state();
 
 	$effect(() => {
-		console.log('Slug changed:', page.params.slug);
+		// console.log('Slug changed:', page.params.slug);
 		notelistState.clickedPage = savedPage ? savedPage : 1;
 		notelistState.tagID = page.params.slug;
 		initialLoading = updatePage();

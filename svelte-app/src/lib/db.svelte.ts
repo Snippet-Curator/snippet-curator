@@ -30,10 +30,37 @@ export class TagState {
     })
   }
 
+  async getArchiveNotebook() {
+    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Archive"'))
+
+    if (error) {
+      console.error('Error getting Archive Notebook: ', error)
+      return pb.collection('notebooks').create({
+        name: 'Archive'
+      })
+    }
+    return data
+  }
+
+  async getTrashNotebook() {
+    const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Trash"'))
+
+    if (error) {
+      console.error('Error getting Trash Notebook: ', error)
+      return pb.collection('notebooks').create({
+        name: 'Trash'
+      })
+    }
+    return data
+  }
+
   async getAll() {
+    const archiveNotebook = await this.getArchiveNotebook()
+    const trashNotebook = await this.getTrashNotebook()
+
     const { data: records, error } = await tryCatch(pb.collection(this.viewCollectionName).getFullList({
       sort: 'name',
-      expand: 'parent'
+      expand: 'parent, note'
     }))
 
     if (error) {
@@ -47,6 +74,7 @@ export class TagState {
 
     const tagMap = new Map()
     records.forEach(tag => {
+      console.log(tag)
       tagMap.set(tag.id, { ...tag, children: [] })
     })
 
@@ -248,7 +276,6 @@ export class defaultNotebooksState {
       console.error('Error while getting inbox: ', trashError.data)
     }
 
-
     this.inbox = inbox
     this.inboxCount = inbox.note_count
     this.inboxID = inbox.id
@@ -261,7 +288,6 @@ export class defaultNotebooksState {
     this.trashCount = trash.note_count
     this.trashID = trash.id
 
-    // console.log(this.archive, this.trash)
   }
 }
 
