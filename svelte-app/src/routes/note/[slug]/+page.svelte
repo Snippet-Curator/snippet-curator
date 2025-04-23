@@ -22,7 +22,7 @@
 	<Topbar.Root>
 		<Topbar.Back />
 		<div class="grow"></div>
-		<Topbar.Rating />
+		<Topbar.Rating rating={note.rating} />
 		{#if note.expand?.tags}
 			<Topbar.Tags tags={note.expand.tags} />
 		{/if}
