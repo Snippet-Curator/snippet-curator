@@ -12,12 +12,17 @@
 	const defaultNotebookState = getDefaultNotebooksState();
 
 	let files: File[] = [];
-	let listOfUploads;
-	let listOfErrors = $state([]);
-	let listofSuccesses: string[] = $state([]);
-	let totalFiles: number = $state(0);
-	let progress: number = $state(0);
-	let currentFile: string = $state('');
+	let listOfErrors = $state<
+		{
+			name: string;
+			error: string;
+		}[]
+	>([]);
+	let listofSuccesses = $state<string[]>([]);
+	let totalFiles = $state(0);
+	let progress = $state(0);
+	let currentFile = $state('');
+	let selectedNotebookID = $state<string>();
 	let uploadStatus: 'stopped' | 'in progress' | 'error' | 'completed' = $state('stopped');
 
 	function handleFileUpload(event: Event) {
@@ -29,15 +34,17 @@
 	}
 
 	async function uploadFile(file: File) {
+		if (selectedNotebookID?.startsWith('Import') || !selectedNotebookID) {
+			selectedNotebookID = defaultNotebookState.inboxID;
+		}
+
 		const decodedText = decoder.decode(await file.arrayBuffer());
 
-		console.log('filetype: ', file.type);
-
 		if (file.type == 'text/html') {
-			const parsedHTML = new htmlImport(decodedText);
+			const parsedHTML = new htmlImport(decodedText, selectedNotebookID);
 			await parsedHTML.uploadToDB();
 		} else if (file.name.includes('.enex')) {
-			const parsedXML = new EnImport(decodedText);
+			const parsedXML = new EnImport(decodedText, selectedNotebookID);
 			try {
 				await parsedXML.uploadToDB();
 				listofSuccesses.push(file.name);
@@ -48,7 +55,7 @@
 				});
 			}
 		} else {
-			const imageFile = new fileImport(file);
+			const imageFile = new fileImport(file, selectedNotebookID);
 			try {
 				await imageFile.uploadToDB();
 				listofSuccesses.push(file.name);
@@ -112,8 +119,8 @@
 					required
 					class="file-input"
 				/>
-				<select class="select">
-					<option disabled selected>Pick a Notebook</option>
+				<select class="select" bind:value={selectedNotebookID}>
+					<option disabled selected>Import into Notebook</option>
 					{#each notebooks as notebook}
 						<option value={notebook.id}>{notebook.name}</option>
 					{/each}

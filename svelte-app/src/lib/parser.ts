@@ -237,9 +237,11 @@ export class htmlImport {
   recordID: string
   added: string
   description: string
+  selectedNotebookdID: string
 
-  constructor(fileContent: string) {
+  constructor(fileContent: string, selectedNotebookID: string) {
     this.recordID = ''
+    this.selectedNotebookdID = selectedNotebookID
 
     const { parsedHTML, title } = this.parseHTML(fileContent)
     this.title = title
@@ -338,7 +340,7 @@ export class htmlImport {
       'source': this.source,
       'added': this.added,
       'source_url': this.sourceUrl,
-      'notebook': defaultNotebook.id
+      'notebook': this.selectedNotebookdID
     }
 
     const { data: record, error } = await tryCatch(pb.collection('notes').create(skeletonData))
@@ -378,10 +380,12 @@ export class EnImport {
   tags: string[]
   recordID: string
   description: string
+  selectedNotebookdID: string
 
-  constructor(fileContent: string) {
+  constructor(fileContent: string, selectedNotebookID: string) {
 
     this.recordID = ''
+    this.selectedNotebookdID = selectedNotebookID
 
     const { xmlNote, xmlMedia, xmlContent } = this.parseEnex(fileContent)
 
@@ -538,7 +542,7 @@ export class EnImport {
       'source': this.source,
       'source_url': this.sourceUrl,
       'tags': tags,
-      'notebook': defaultNotebook.id
+      'notebook': this.selectedNotebookdID
     }
 
     const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection('notes').create(skeletonData))
@@ -574,13 +578,15 @@ export class fileImport {
   content: string
   fileURL: string
   recordID: string
+  selectedNotebookdID: string
 
-  constructor(file: File) {
+  constructor(file: File, selectedNotebookID: string) {
     this.file = file
     this.mimeType = file.type
     this.recordID = ''
     this.fileURL = ''
     this.title = `${file.name} ${dayjs(Date()).format('MM-DD-YYYY')}`
+    this.selectedNotebookdID = selectedNotebookID
   }
 
   async uploadResources() {
@@ -621,13 +627,11 @@ export class fileImport {
     }
   }
 
-
-
   async uploadToDB() {
     const defaultNotebook = await getDefaultNotebook()
     const skeletonData = {
       'title': this.title,
-      'notebook': defaultNotebook.id
+      'notebook': this.selectedNotebookdID
     }
 
     let record
