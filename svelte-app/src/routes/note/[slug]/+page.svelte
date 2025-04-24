@@ -23,6 +23,14 @@
 	<Topbar.Root>
 		<Topbar.Back />
 		<div class="grow"></div>
+		{#if note.expand?.tags}
+			<Topbar.Tags tags={note.expand.tags} />
+		{/if}
+		<Topbar.TagBtn bind:isOpen={isEditTagsOpen} />
+		{#if note.expand?.notebook}
+			<Topbar.Notebook bind:isOpen={isEditNotebookOpen} notebook={note.expand.notebook} />
+		{/if}
+
 		<Topbar.Rating
 			rating={note.rating}
 			bind:newRating
@@ -30,14 +38,9 @@
 				noteState.changeRating(newRating);
 			}}
 		/>
-		{#if note.expand?.tags}
-			<Topbar.Tags tags={note.expand.tags} />
-		{/if}
+
 		<div class="divider divider-horizontal"></div>
-		{#if note.expand?.notebook}
-			<Topbar.Notebook bind:isOpen={isEditNotebookOpen} notebook={note.expand.notebook} />
-		{/if}
-		<Topbar.TagBtn bind:isOpen={isEditTagsOpen} />
+
 		<Topbar.Archive
 			action={async () => {
 				await noteState.archiveNote();

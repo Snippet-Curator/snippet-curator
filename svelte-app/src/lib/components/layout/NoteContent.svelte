@@ -46,22 +46,22 @@
 	function changeTextSize(event: Event) {
 		const target = event.target as HTMLInputElement;
 		let newTextSize = Number(target.value);
-		style.textContent = `
-		:host, :host * {
-			font-size: ${newTextSize}px !important;
-			line-height: 1.4;
-			transition: font-size 0.3s ease;
-		}
-			p, pre, div {
-		background-color: var(--color-base-100) !important;
-		background: var(--color-base-100) !important; 
-		color: var(--color-base-content) !important;
-		}
-		img {
-			max-width: 100% !important;
-			height: auto !important;
-		}
-		`;
+		// style.textContent = `
+		// :host, :host * {
+		// 	font-size: ${newTextSize}px !important;
+		// 	line-height: 1.4;
+		// 	transition: font-size 0.3s ease;
+		// }
+		// 	p, pre, div {
+		// background-color: var(--color-base-100) !important;
+		// background: var(--color-base-100) !important;
+		// color: var(--color-base-content) !important;
+		// }
+		// img {
+		// 	max-width: 100% !important;
+		// 	height: auto !important;
+		// }
+		// `;
 	}
 
 	let shadow;
@@ -97,8 +97,14 @@
 		});
 	}
 
-	onMount(() => {
-		shadow = container.attachShadow({ mode: 'open' });
+	$effect(() => {
+		content = note.content;
+		if (!container.shadowRoot) {
+			shadow = container.attachShadow({ mode: 'open' });
+		} else {
+			shadow = container.shadowRoot;
+		}
+
 		shadow.innerHTML = content;
 		manipulateContent(shadow);
 		style.textContent = `

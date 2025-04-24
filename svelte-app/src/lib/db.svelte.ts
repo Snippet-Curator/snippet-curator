@@ -494,6 +494,7 @@ export class NotelistState {
 
 export class NoteState {
   note = $state<Note>()
+  noteList = $state()
   noteID: string
   collectionName: string
 
@@ -513,6 +514,24 @@ export class NoteState {
     }
     this.note = data
     return data
+  }
+
+  async getDiscoverNoteList(page = 1) {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(page, 10, {
+      expand: 'notebook,tags',
+      sort: '-score'
+    }))
+
+    if (error) {
+      console.error('Error getting discover note: ', error.data)
+    }
+
+    this.noteList = data
+    return data
+  }
+
+  async getDiscoverNote(index = 0) {
+    this.note = this.noteList.items[index]
   }
 
   async deleteNote() {
