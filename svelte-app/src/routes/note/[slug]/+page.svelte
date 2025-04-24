@@ -12,6 +12,7 @@
 	let isEditNotebookOpen = $state(false);
 	let selectedNotebookID = $state('');
 	let selectedTags = $state<string[]>([]);
+	let newRating = $state(0);
 
 	const initialLoading = noteState.getNote();
 </script>
@@ -22,7 +23,13 @@
 	<Topbar.Root>
 		<Topbar.Back />
 		<div class="grow"></div>
-		<Topbar.Rating rating={note.rating} />
+		<Topbar.Rating
+			rating={note.rating}
+			bind:newRating
+			action={() => {
+				noteState.changeRating(newRating);
+			}}
+		/>
 		{#if note.expand?.tags}
 			<Topbar.Tags tags={note.expand.tags} />
 		{/if}

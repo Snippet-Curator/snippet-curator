@@ -335,7 +335,7 @@ export class NotelistState {
     const archiveNotebook = await getArchiveNotebook()
     const trashNotebook = await getTrashNotebook()
 
-    console.log('archivenotebook', archiveNotebook)
+    if (!archiveNotebook || !trashNotebook) return
 
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       sort: sort,
@@ -551,6 +551,17 @@ export class NoteState {
     }))
     if (error) {
       console.error('Error changing tags: ', this.noteID, error)
+    }
+    await this.getNote()
+    return data
+  }
+
+  async changeRating(newRating: number) {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.noteID, {
+      rating: newRating
+    }))
+    if (error) {
+      console.error('Error changing rating: ', this.noteID, error.message)
     }
     await this.getNote()
     return data
