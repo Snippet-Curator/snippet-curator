@@ -83,6 +83,8 @@
 			defaultNotebookState.getAll();
 		});
 	}
+
+	const notebooks = notebookState.notebooks;
 </script>
 
 <ScrollArea class="mx-auto max-h-screen max-w-6xl">
@@ -110,6 +112,12 @@
 					required
 					class="file-input"
 				/>
+				<select class="select">
+					<option disabled selected>Pick a Notebook</option>
+					{#each notebooks as notebook}
+						<option value={notebook.id}>{notebook.name}</option>
+					{/each}
+				</select>
 				<label for="file" class="fieldset-label">Max size 5GB</label>
 				<button onclick={importFiles} class="btn btn-neutral">Import</button>
 			</fieldset>

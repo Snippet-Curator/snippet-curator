@@ -154,6 +154,7 @@ export class NotebookState {
   async getAll() {
     const records = await pb.collection(this.viewCollectionName).getFullList({
       sort: 'name',
+      filter: 'name != "Archive" && name != "Trash"',
       expand: 'parent'
     });
 
@@ -532,6 +533,7 @@ export class NoteState {
 
   async getDiscoverNote(index = 0) {
     this.note = this.noteList.items[index]
+    this.noteID = this.note.id
     const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.note.id, {
       last_opened: new Date(),
     }))
@@ -539,6 +541,7 @@ export class NoteState {
     if (error) {
       console.error('Error putting new dates: ', error.data)
     }
+
   }
 
   async deleteNote() {

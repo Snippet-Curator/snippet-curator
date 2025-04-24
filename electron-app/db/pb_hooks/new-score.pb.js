@@ -1,6 +1,6 @@
 onRecordCreate((e) => {
   function normalize(val, min, max) {
-    return (val - min) / (max - min)
+    return Math.max(0, Math.min(1, (val - min) / (max - min)))
   }
 
   function recencyScore(lastOpened) {
@@ -20,7 +20,7 @@ onRecordCreate((e) => {
     const weightNorm = normalize(weight ?? 0, 0, 10)
     const randomFactor = Math.random()
 
-    const score = 0.4 * ratingNorm + 0.6 * recencyNorm + 0.2 * weightNorm + 0.2 * randomFactor
+    const score = 0.3 * ratingNorm + 0.3 * recencyNorm + 0.3 * weightNorm + 0.1 * randomFactor
 
     return score
   }

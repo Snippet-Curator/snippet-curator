@@ -8,16 +8,17 @@
 
 	let note = $derived(noteState.note);
 
-	let isDeleteOpen = $state(false);
-	let isEditTagsOpen = $state(false);
-	let isEditNotebookOpen = $state(false);
-	let selectedNotebookID = $state('');
-	let selectedTags = $state<string[]>([]);
 	let newRating = $state(0);
 	let totalPages = $state(0);
 	let currentPage = $state(1);
 	let currentIndex = $state(0);
 	let lastItemIndex = $state();
+
+	let isDeleteOpen = $state(false);
+	let isEditTagsOpen = $state(false);
+	let isEditNotebookOpen = $state(false);
+	let selectedNotebookID = $state('');
+	let selectedTags = $state<string[]>([]);
 
 	async function getNextNote() {
 		currentIndex++;
@@ -104,31 +105,33 @@ last item: {lastItemIndex} -->
 	{/if}
 {/await}
 
-{#if note}
-	<Delete
-		bind:isOpen={isDeleteOpen}
-		name="Note"
-		action={async () => {
-			await noteState.softDeleteNote();
-			window.history.back();
-		}}>this note</Delete
-	>
+{#await initialLoading then}
+	{#if note}
+		<Delete
+			bind:isOpen={isDeleteOpen}
+			name="Note"
+			action={async () => {
+				await noteState.softDeleteNote();
+				window.history.back();
+			}}>this note</Delete
+		>
 
-	<EditNotebook
-		bind:selectedNotebookID
-		currentNotebookID={note.expand?.notebook.id}
-		bind:isOpen={isEditNotebookOpen}
-		action={async () => {
-			await noteState.changeNotebook(selectedNotebookID);
-		}}
-	></EditNotebook>
+		<EditNotebook
+			bind:selectedNotebookID
+			currentNotebookID={note.expand?.notebook.id}
+			bind:isOpen={isEditNotebookOpen}
+			action={async () => {
+				await noteState.changeNotebook(selectedNotebookID);
+			}}
+		></EditNotebook>
 
-	<EditTags
-		bind:isOpen={isEditTagsOpen}
-		bind:selectedTags
-		currentTags={note.expand?.tags}
-		action={async () => {
-			await noteState.changeTags(selectedTags);
-		}}
-	/>
-{/if}
+		<EditTags
+			bind:isOpen={isEditTagsOpen}
+			bind:selectedTags
+			currentTags={note.expand?.tags}
+			action={async () => {
+				await noteState.changeTags(selectedTags);
+			}}
+		/>
+	{/if}
+{/await}
