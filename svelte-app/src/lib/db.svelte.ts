@@ -532,6 +532,13 @@ export class NoteState {
 
   async getDiscoverNote(index = 0) {
     this.note = this.noteList.items[index]
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.note.id, {
+      last_opened: new Date(),
+    }))
+
+    if (error) {
+      console.error('Error putting new dates: ', error.data)
+    }
   }
 
   async deleteNote() {

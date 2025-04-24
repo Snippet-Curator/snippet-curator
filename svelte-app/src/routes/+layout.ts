@@ -3,5 +3,5 @@ import { makeDefaultNotebook } from '$lib/parser'
 
 export async function load() {
   await getAuth()
-  // await makeDefaultNotebook()
+  await makeDefaultNotebook()
 }

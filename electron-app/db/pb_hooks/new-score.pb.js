@@ -6,10 +6,12 @@ onRecordCreate((e) => {
   function recencyScore(lastOpened) {
     const openedDate = new Date(lastOpened)
     if (isNaN(openedDate.getTime())) {
-      return 0.4
+      return 1
     }
-    const days = (Date.now() - openedDate.getTime()) / (1000 * 60 * 60 * 24)
-    return 1 / (1 + days)
+    const daysAgo = (Date.now() - openedDate.getTime()) / (1000 * 60 * 60 * 24)
+
+    // normalize with 7 such that notes older than 1,000 days will give 0.99
+    return Math.min(1, Math.log(1 + daysAgo) / 7)
   }
 
   function calculateNoteScore(rating, weight, lastOpened) {
@@ -18,7 +20,7 @@ onRecordCreate((e) => {
     const weightNorm = normalize(weight ?? 0, 0, 10)
     const randomFactor = Math.random()
 
-    const score = 0.4 * ratingNorm + 0.4 * recencyNorm + 0.2 * weightNorm + 0.2 * randomFactor
+    const score = 0.4 * ratingNorm + 0.6 * recencyNorm + 0.2 * weightNorm + 0.2 * randomFactor
 
     return score
   }

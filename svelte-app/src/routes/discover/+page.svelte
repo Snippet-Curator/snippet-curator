@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { NoteContent, Delete, EditNotebook, EditTags } from '$lib/components/';
+	import { NoteContent, Delete, EditNotebook, EditTags, Blank } from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { onMount } from 'svelte';
-	import { NotepadText } from 'lucide-svelte';
 
 	const noteState = new NoteState('discovery');
 
@@ -20,26 +18,6 @@
 	let currentPage = $state(1);
 	let currentIndex = $state(0);
 	let lastItemIndex = $state();
-
-	async function loadNote(page = 1) {
-		const result = await noteState.getDiscoverNote(page);
-
-		if (!result) {
-			console.log('no notes found');
-			return;
-		}
-
-		// notes = result.items;
-		// note = result.items[0];
-		totalPages = result.totalPages;
-		currentPage = result.page;
-		// currentIndex = 0;
-		// note = notes[currentIndex];
-
-		return result;
-	}
-
-	const notes = $derived(loadNote());
 
 	async function getNextNote() {
 		currentIndex++;
@@ -79,6 +57,7 @@ last item: {lastItemIndex} -->
 {#await initialLoading then}
 	{#if note}
 		<Topbar.Root>
+			{note.score}
 			<div class="grow"></div>
 
 			{#if note?.expand?.tags}
@@ -107,7 +86,6 @@ last item: {lastItemIndex} -->
 			<Topbar.Info {note} />
 		</Topbar.Root>
 		<div class="h-[calc(100vh-60px)]">
-			{note.score}
 			<button disabled={currentIndex == 0 && currentPage == 1} class="btn" onclick={getPreviousNote}
 				>Previous</button
 			>
@@ -119,32 +97,38 @@ last item: {lastItemIndex} -->
 
 			<NoteContent {note} />
 		</div>
-
-		<Delete
-			bind:isOpen={isDeleteOpen}
-			name="Note"
-			action={async () => {
-				await noteState.softDeleteNote();
-				window.history.back();
-			}}>this note</Delete
-		>
-
-		<EditNotebook
-			bind:selectedNotebookID
-			currentNotebookID={note.expand?.notebook.id}
-			bind:isOpen={isEditNotebookOpen}
-			action={async () => {
-				await noteState.changeNotebook(selectedNotebookID);
-			}}
-		></EditNotebook>
-
-		<EditTags
-			bind:isOpen={isEditTagsOpen}
-			bind:selectedTags
-			currentTags={note.expand?.tags}
-			action={async () => {
-				await noteState.changeTags(selectedTags);
-			}}
-		/>
+	{:else}
+		<div class="h-screen">
+			<Blank />
+		</div>
 	{/if}
 {/await}
+
+{#if note}
+	<Delete
+		bind:isOpen={isDeleteOpen}
+		name="Note"
+		action={async () => {
+			await noteState.softDeleteNote();
+			window.history.back();
+		}}>this note</Delete
+	>
+
+	<EditNotebook
+		bind:selectedNotebookID
+		currentNotebookID={note.expand?.notebook.id}
+		bind:isOpen={isEditNotebookOpen}
+		action={async () => {
+			await noteState.changeNotebook(selectedNotebookID);
+		}}
+	></EditNotebook>
+
+	<EditTags
+		bind:isOpen={isEditTagsOpen}
+		bind:selectedTags
+		currentTags={note.expand?.tags}
+		action={async () => {
+			await noteState.changeTags(selectedTags);
+		}}
+	/>
+{/if}
