@@ -22,6 +22,8 @@ onRecordUpdateRequest((e) => {
 
     const score = 0.25 * ratingNorm + 0.6 * recencyNorm + 0.25 * weightNorm + 0.2 * randomFactor
 
+    console.log('updated score')
+
     return score
   }
 
