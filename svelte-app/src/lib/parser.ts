@@ -340,7 +340,8 @@ export class htmlImport {
       'source': this.source,
       'added': this.added,
       'source_url': this.sourceUrl,
-      'notebook': this.selectedNotebookdID
+      'notebook': this.selectedNotebookdID,
+      'last_score_updated': new Date().toISOString()
     }
 
     const { data: record, error } = await tryCatch(pb.collection('notes').create(skeletonData))
@@ -542,7 +543,8 @@ export class EnImport {
       'source': this.source,
       'source_url': this.sourceUrl,
       'tags': tags,
-      'notebook': this.selectedNotebookdID
+      'notebook': this.selectedNotebookdID,
+      'last_score_updated': new Date().toISOString()
     }
 
     const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection('notes').create(skeletonData))
@@ -631,7 +633,8 @@ export class fileImport {
     const defaultNotebook = await getDefaultNotebook()
     const skeletonData = {
       'title': this.title,
-      'notebook': this.selectedNotebookdID
+      'notebook': this.selectedNotebookdID,
+      'last_score_updated': new Date().toISOString(),
     }
 
     let record

@@ -6,7 +6,12 @@
 
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
-	import pb, { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
+	import pb, {
+		getNotelistState,
+		refreshStaleScores,
+		setNotelistState,
+		type NoteType
+	} from '$lib/db.svelte';
 	import { Pagination, NoteList, Search, BulkToolbar, BulkEditBtn, Blank } from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { searchState, signalPageState } from '$lib/utils.svelte';

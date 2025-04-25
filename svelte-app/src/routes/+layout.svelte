@@ -19,7 +19,8 @@
 		getTagState,
 		setTagState,
 		getDefaultNotebooksState,
-		setDefaultNotebooksState
+		setDefaultNotebooksState,
+		refreshStaleScores
 	} from '$lib/db.svelte';
 	import type { Notebook } from '$lib/types';
 
@@ -68,8 +69,28 @@
 
 	let defaultNotebooks = $state();
 
-	onMount(() => {
+	onMount(async () => {
 		defaultNotebooks = getDefaultNotebooks();
+
+		// update note scores. First unsubscribe real time
+		await pb.collection('notes').unsubscribe();
+
+		// update note score
+		await refreshStaleScores(5);
+
+		// update UI
+		Promise.all([
+			await notebookState.getAll(),
+			await tagState.getAll(),
+			await defaultNotebooksState.getAll()
+		]);
+
+		// resubscribe
+		await pb.collection('notes').subscribe('*', async () => {
+			notebookState.getAll();
+			tagState.getAll();
+			defaultNotebooksState.getAll();
+		});
 	});
 </script>
 

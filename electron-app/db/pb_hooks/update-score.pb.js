@@ -1,4 +1,4 @@
-onRecordUpdate((e) => {
+onRecordUpdateRequest((e) => {
   function normalize(val, min, max) {
     return Math.max(0, Math.min(1, (val - min) / (max - min)))
   }
@@ -6,7 +6,7 @@ onRecordUpdate((e) => {
   function recencyScore(lastOpened) {
     const openedDate = new Date(lastOpened)
     if (isNaN(openedDate.getTime())) {
-      return 1
+      return 0.5
     }
     const daysAgo = (Date.now() - openedDate.getTime()) / (1000 * 60 * 60 * 24)
 
@@ -20,7 +20,7 @@ onRecordUpdate((e) => {
     const weightNorm = normalize(weight ?? 0, 0, 10)
     const randomFactor = Math.random()
 
-    const score = 0.3 * ratingNorm + 0.3 * recencyNorm + 0.3 * weightNorm + 0.1 * randomFactor
+    const score = 0.25 * ratingNorm + 0.6 * recencyNorm + 0.25 * weightNorm + 0.2 * randomFactor
 
     return score
   }

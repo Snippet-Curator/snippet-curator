@@ -98,25 +98,27 @@
 {/snippet}
 
 {#each notebooks as notebook}
-	<li class="group mr-4">
-		{#if notebook.children?.length > 0}
-			<details class="w-full">
-				<summary class="flex w-full py-0 pl-0">
-					<div class="grow">
-						{@render renderNotebookSection(notebook)}
-					</div>
-				</summary>
+	{#if notebook.name != 'Inbox'}
+		<li class="group mr-4">
+			{#if notebook.children?.length > 0}
+				<details class="w-full">
+					<summary class="flex w-full py-0 pl-0">
+						<div class="grow">
+							{@render renderNotebookSection(notebook)}
+						</div>
+					</summary>
 
-				{#if notebook.children}
-					<ul>
-						<NotebookList {allowEdit} notebooks={notebook.children} />
-					</ul>
-				{/if}
-			</details>
-		{:else}
-			{@render renderNotebookSection(notebook)}
-		{/if}
-	</li>
+					{#if notebook.children}
+						<ul>
+							<NotebookList {allowEdit} notebooks={notebook.children} />
+						</ul>
+					{/if}
+				</details>
+			{:else}
+				{@render renderNotebookSection(notebook)}
+			{/if}
+		</li>
+	{/if}
 {/each}
 
 <Rename

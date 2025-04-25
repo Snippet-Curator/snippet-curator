@@ -22,7 +22,7 @@
 
 	async function getNextNote() {
 		currentIndex++;
-		if (currentIndex == 10) {
+		if (currentIndex == 100) {
 			currentPage++;
 			await noteState.getDiscoverNoteList(currentPage);
 			currentIndex = 0;
@@ -36,7 +36,7 @@
 		if (currentIndex < 0 && currentPage > 1) {
 			currentPage--;
 			await noteState.getDiscoverNoteList(currentPage);
-			currentIndex = 9;
+			currentIndex = 99;
 		}
 		await noteState.getDiscoverNote(currentIndex);
 	}
