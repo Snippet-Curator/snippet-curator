@@ -58,7 +58,8 @@ last item: {lastItemIndex} -->
 {#await initialLoading then}
 	{#if note}
 		<Topbar.Root>
-			{note.score}
+			{note.score.toFixed(4)}
+			<Topbar.Keyboard onLeft={getPreviousNote} onRight={getNextNote}></Topbar.Keyboard>
 			<div class="grow"></div>
 
 			{#if note?.expand?.tags}

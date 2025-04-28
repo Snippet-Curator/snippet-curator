@@ -9,6 +9,7 @@ import Notebook from './topbar-notebook.svelte'
 import TagBtn from './topbar-tags.svelte'
 import Rating from './note-rating.svelte'
 import Tags from './tag-list.svelte'
+import Keyboard from './topbar-keys.svelte'
 
 export {
   Archive,
@@ -20,5 +21,6 @@ export {
   TagBtn,
   Tags,
   Rating,
+  Keyboard,
   Topbar as Root,
 }
