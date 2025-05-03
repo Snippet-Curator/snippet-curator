@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { toast } from 'svelte-sonner';
 	import { NoteContent, Delete, EditNotebook, EditTags, Blank } from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { onMount } from 'svelte';
+	import { ArrowDown, ArrowUp } from 'lucide-svelte';
 
 	const noteState = new NoteState('discovery');
 
@@ -22,6 +22,7 @@
 	let selectedTags = $state<string[]>([]);
 
 	async function getNextNote() {
+		if (currentIndex == lastItemIndex && currentPage == totalPages) return;
 		currentIndex++;
 		if (currentIndex == 100) {
 			currentPage++;
@@ -33,6 +34,7 @@
 	}
 
 	async function getPreviousNote() {
+		if (currentIndex == 0 && currentPage == 1) return;
 		currentIndex--;
 		if (currentIndex < 0 && currentPage > 1) {
 			currentPage--;
@@ -44,12 +46,10 @@
 
 	async function upvote() {
 		await noteState.upvoteWeight();
-		toast('Upvoted');
 	}
 
 	async function downvote() {
 		await noteState.downvoteWeight();
-		toast('Downvoted');
 	}
 
 	let initialLoading = $state();
@@ -64,8 +64,8 @@
 {#await initialLoading then}
 	{#if note}
 		<Topbar.Root>
-			{note.score.toFixed(2)} |
-			{note.weight}
+			{note.score.toFixed(2)}
+
 			<Topbar.Keyboard
 				onLeft={getPreviousNote}
 				onRight={getNextNote}
@@ -81,6 +81,9 @@
 			{#if note?.expand?.notebook}
 				<Topbar.Notebook bind:isOpen={isEditNotebookOpen} notebook={note.expand.notebook} />
 			{/if}
+			<ArrowUp size={15} />
+			{note.weight}
+			<ArrowDown size={15} />
 			<Topbar.Rating
 				rating={note.rating}
 				bind:newRating
@@ -100,14 +103,14 @@
 			<Topbar.Info {note} />
 		</Topbar.Root>
 		<div class="h-[calc(100vh-60px)]">
-			<button disabled={currentIndex == 0 && currentPage == 1} class="btn" onclick={getPreviousNote}
+			<!-- <button disabled={currentIndex == 0 && currentPage == 1} class="btn" onclick={getPreviousNote}
 				>Previous</button
 			>
 			<button
 				disabled={currentIndex == lastItemIndex && currentPage == totalPages}
 				class="btn"
 				onclick={getNextNote}>Next</button
-			>
+			> -->
 
 			<NoteContent {note} />
 		</div>

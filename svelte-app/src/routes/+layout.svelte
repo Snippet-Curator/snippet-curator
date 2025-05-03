@@ -12,7 +12,7 @@
 		Archive
 	} from 'lucide-svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
-	import { Toaster } from '$lib/components/ui/sonner/index';
+	// import { Toaster } from '$lib/components/ui/sonner/index';
 
 	import {
 		getNotebookState,
@@ -98,7 +98,7 @@
 	<div class="drawer-content">
 		<div>
 			{@render children()}
-			<Toaster duration={1000} position="top-right" visibleToasts={1} />
+			<!-- <Toaster duration={1000} position="top-right" visibleToasts={1} /> -->
 		</div>
 	</div>
 	<div class="drawer-side border-base-300 border-r">

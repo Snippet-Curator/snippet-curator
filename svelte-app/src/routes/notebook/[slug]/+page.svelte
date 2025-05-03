@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import { toast } from 'svelte-sonner';
 
 	import { signalPageState } from '$lib/utils.svelte';
 	import { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
@@ -66,7 +65,6 @@
 	name="Notes Permanently"
 	action={async () => {
 		await notelistState.emptyTrash();
-		toast('Deleted Note');
 		window.history.back();
 	}}>these notes</Delete
 >

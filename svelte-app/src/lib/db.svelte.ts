@@ -108,11 +108,10 @@ export class TagState {
     }))
 
     if (error) {
-      console.error('Error while getting all tags: ', error)
+      console.error('Error while getting all tags: ', error.message)
     }
 
     if (!records) {
-      console.error('No tags found')
       return
     }
 
@@ -199,11 +198,19 @@ export class NotebookState {
   }
 
   async getAll() {
-    const records = await pb.collection(this.viewCollectionName).getFullList({
+    const { data: records, error } = await tryCatch(pb.collection(this.viewCollectionName).getFullList({
       sort: 'name',
       filter: 'name != "Archive" && name != "Trash"',
       expand: 'parent'
-    });
+    }))
+
+    if (error) {
+      console.error('Error while get all notebooks: ', error.message)
+    }
+
+    if (!records) {
+      return
+    }
 
     const notebookMap = new Map()
     records.forEach(notebook => {
@@ -305,19 +312,23 @@ export class defaultNotebooksState {
     const { data: inbox, error } = await tryCatch(pb.collection(this.viewCollectionName).getFirstListItem(`name="Inbox"`))
 
     if (error) {
-      console.error('Error while getting inbox: ', error.data)
+      console.error('Error while getting inbox: ', error.message)
     }
 
     const { data: archive, error: archiveError } = await tryCatch(pb.collection(this.viewCollectionName).getFirstListItem(`name="Archive"`))
 
     if (archiveError) {
-      console.error('Error while getting inbox: ', archiveError.data)
+      console.error('Error while getting Archive: ', archiveError.message)
     }
 
     const { data: trash, error: trashError } = await tryCatch(pb.collection(this.viewCollectionName).getFirstListItem(`name="Trash"`))
 
     if (trashError) {
-      console.error('Error while getting inbox: ', trashError.data)
+      console.error('Error while getting Trash: ', trashError.message)
+    }
+
+    if (!inbox || !archive || !trash) {
+      return
     }
 
     this.inbox = inbox
@@ -587,7 +598,7 @@ export class NoteState {
     }))
 
     if (error) {
-      console.error('Error putting new dates: ', error.data)
+      console.error('Error updating note last opened date: ', error.message)
     }
 
   }

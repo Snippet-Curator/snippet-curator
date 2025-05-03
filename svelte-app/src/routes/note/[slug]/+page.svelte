@@ -3,7 +3,6 @@
 	import { NoteContent, Delete, EditNotebook, EditTags } from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
 	import * as Topbar from '$lib/components/Topbar/index';
-	import { toast } from 'svelte-sonner';
 
 	const noteState = new NoteState(page.params.slug);
 	let note = $derived(noteState.note);
@@ -45,7 +44,6 @@
 		<Topbar.Archive
 			action={async () => {
 				await noteState.archiveNote();
-				toast('Archived Note');
 				window.history.back();
 			}}
 		/>
@@ -61,7 +59,6 @@
 		name="Note"
 		action={async () => {
 			await noteState.softDeleteNote();
-			toast('Deleted Note');
 			window.history.back();
 		}}>this note</Delete
 	>
