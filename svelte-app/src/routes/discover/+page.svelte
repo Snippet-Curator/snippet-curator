@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { toast } from 'svelte-sonner';
 	import { NoteContent, Delete, EditNotebook, EditTags, Blank } from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
 	import * as Topbar from '$lib/components/Topbar/index';
@@ -41,6 +42,16 @@
 		await noteState.getDiscoverNote(currentIndex);
 	}
 
+	async function upvote() {
+		await noteState.upvoteWeight();
+		toast('Upvoted');
+	}
+
+	async function downvote() {
+		await noteState.downvoteWeight();
+		toast('Downvoted');
+	}
+
 	let initialLoading = $state();
 
 	onMount(async () => {
@@ -50,16 +61,17 @@
 	});
 </script>
 
-<!-- currentPage: {currentPage}
-currentIndex: {currentIndex}
-totalPages: {totalPages}
-last item: {lastItemIndex} -->
-
 {#await initialLoading then}
 	{#if note}
 		<Topbar.Root>
-			{note.score.toFixed(4)}
-			<Topbar.Keyboard onLeft={getPreviousNote} onRight={getNextNote}></Topbar.Keyboard>
+			{note.score.toFixed(2)} |
+			{note.weight}
+			<Topbar.Keyboard
+				onLeft={getPreviousNote}
+				onRight={getNextNote}
+				onUp={upvote}
+				onDown={downvote}
+			></Topbar.Keyboard>
 			<div class="grow"></div>
 
 			{#if note?.expand?.tags}

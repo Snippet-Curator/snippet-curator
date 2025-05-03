@@ -581,6 +581,7 @@ export class NoteState {
   async getDiscoverNote(index = 0) {
     this.note = this.noteList.items[index]
     this.noteID = this.note.id
+
     const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.note.id, {
       last_opened: new Date(),
     }))
@@ -638,6 +639,32 @@ export class NoteState {
     }))
     if (error) {
       console.error('Error changing rating: ', this.noteID, error.message)
+    }
+    await this.getNote()
+    return data
+  }
+
+  async upvoteWeight() {
+    const newWeight = this.note.weight + 1
+
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.noteID, {
+      weight: newWeight
+    }))
+    if (error) {
+      console.error('Error changing weight: ', this.noteID, error.message)
+    }
+    await this.getNote()
+    return data
+  }
+
+  async downvoteWeight() {
+    const newWeight = this.note.weight - 1
+
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.noteID, {
+      weight: newWeight
+    }))
+    if (error) {
+      console.error('Error changing weight: ', this.noteID, error.message)
     }
     await this.getNote()
     return data

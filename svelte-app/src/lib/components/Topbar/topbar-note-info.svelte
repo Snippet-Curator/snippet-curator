@@ -27,6 +27,8 @@
 		class="dropdown-content border-base-content/20 bg-base-100 rounded-box w-76 border px-4 py-2 shadow-sm"
 	>
 		<div class="grid grid-cols-3 gap-x-2 gap-y-1 p-2">
+			<div>Last Opened</div>
+			<div class="col-span-2">{dayjs(note.last_opened).format('MMM DD YYYY, hh:ss a')}</div>
 			<div>Original Creation Date</div>
 			<div class="col-span-2">{dayjs(note.added).format('MMM DD YYYY, hh:ss a')}</div>
 			<div>Created in Curator</div>

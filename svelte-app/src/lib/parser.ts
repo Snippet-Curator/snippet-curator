@@ -340,6 +340,7 @@ export class htmlImport {
       'source': this.source,
       'added': this.added,
       'source_url': this.sourceUrl,
+      'weight': 5,
       'notebook': this.selectedNotebookdID,
       'last_score_updated': new Date().toISOString()
     }
@@ -543,6 +544,7 @@ export class EnImport {
       'source': this.source,
       'source_url': this.sourceUrl,
       'tags': tags,
+      'weight': 5,
       'notebook': this.selectedNotebookdID,
       'last_score_updated': new Date().toISOString()
     }
@@ -635,6 +637,7 @@ export class fileImport {
       'title': this.title,
       'notebook': this.selectedNotebookdID,
       'last_score_updated': new Date().toISOString(),
+      'weight': 5,
     }
 
     let record

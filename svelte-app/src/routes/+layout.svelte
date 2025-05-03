@@ -12,17 +12,16 @@
 		Archive
 	} from 'lucide-svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
+	import { Toaster } from '$lib/components/ui/sonner/index';
 
-	import pb, {
+	import {
 		getNotebookState,
 		setNotebookState,
 		getTagState,
 		setTagState,
 		getDefaultNotebooksState,
-		setDefaultNotebooksState,
-		refreshStaleScores
+		setDefaultNotebooksState
 	} from '$lib/db.svelte';
-	import type { Notebook } from '$lib/types';
 
 	import { Dock, Icon, NotebookList, TagList } from '$lib/components';
 
@@ -99,6 +98,7 @@
 	<div class="drawer-content">
 		<div>
 			{@render children()}
+			<Toaster duration={1000} position="top-right" visibleToasts={1} />
 		</div>
 	</div>
 	<div class="drawer-side border-base-300 border-r">
