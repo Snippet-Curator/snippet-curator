@@ -9,7 +9,6 @@
 
 	let note = $derived(noteState.note);
 
-	let newRating = $state(0);
 	let totalPages = $state(0);
 	let currentPage = $state(1);
 	let currentIndex = $state(0);
@@ -18,8 +17,6 @@
 	let isDeleteOpen = $state(false);
 	let isEditTagsOpen = $state(false);
 	let isEditNotebookOpen = $state(false);
-	let selectedNotebookID = $state('');
-	let selectedTags = $state<string[]>([]);
 
 	async function getNextNote() {
 		if (currentIndex == lastItemIndex && currentPage == totalPages) return;
@@ -86,8 +83,7 @@
 			<ArrowDown size={15} />
 			<Topbar.Rating
 				rating={note.rating}
-				bind:newRating
-				action={() => {
+				action={(newRating) => {
 					noteState.changeRating(newRating);
 				}}
 			/>
@@ -126,28 +122,24 @@
 		<Delete
 			bind:isOpen={isDeleteOpen}
 			name="Note"
-			action={async () => {
-				await noteState.softDeleteNote();
+			action={() => {
+				noteState.softDeleteNote();
 				window.history.back();
 			}}>this note</Delete
 		>
 
 		<EditNotebook
-			bind:selectedNotebookID
 			currentNotebookID={note.expand?.notebook.id}
 			bind:isOpen={isEditNotebookOpen}
-			action={async () => {
-				await noteState.changeNotebook(selectedNotebookID);
+			action={(selectedNotebookID) => {
+				noteState.changeNotebook(selectedNotebookID);
 			}}
 		></EditNotebook>
 
 		<EditTags
 			bind:isOpen={isEditTagsOpen}
-			bind:selectedTags
 			currentTags={note.expand?.tags}
-			action={async () => {
-				await noteState.changeTags(selectedTags);
-			}}
+			action={(selectedTags) => noteState.changeTags(selectedTags)}
 		/>
 	{/if}
 {/await}

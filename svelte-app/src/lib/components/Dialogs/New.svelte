@@ -3,12 +3,13 @@
 
 	type Props = {
 		isOpen: boolean;
-		name: string;
 		newType: 'Tag' | 'Notebook';
-		action: () => void;
+		action: (name: string) => void;
 	};
 
-	let { isOpen = $bindable(), newType, name = $bindable(), action }: Props = $props();
+	let { isOpen = $bindable(), newType, action }: Props = $props();
+
+	let newName = $state('');
 </script>
 
 <Dialog.Root open={isOpen}>
@@ -23,13 +24,13 @@
 		</Dialog.Header>
 		<label class="input w-full">
 			<span class="label">{newType} Name</span>
-			<input type="text" class="ring-0" bind:value={name} />
+			<input type="text" class="ring-0" bind:value={newName} />
 		</label>
 		<div class="flex justify-end gap-x-2">
 			<button onclick={() => (isOpen = false)} class="btn">Close</button>
 			<button
 				onclick={() => {
-					action();
+					action(newName);
 					isOpen = false;
 				}}
 				class="btn btn-primary">Create</button

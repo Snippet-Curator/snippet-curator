@@ -66,8 +66,8 @@
 <Delete
 	bind:isOpen={isEmptyTrashOpen}
 	name="Notes Permanently"
-	action={async () => {
-		await notelistState.emptyTrash();
+	action={() => {
+		notelistState.emptyTrash();
 		window.history.back();
 	}}>these notes</Delete
 >

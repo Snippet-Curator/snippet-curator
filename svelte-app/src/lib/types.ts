@@ -25,6 +25,9 @@ export type Note = {
     notebook?: Notebook,
     tags?: Tag
   }
+  weight: number
+  score: number
+  rating: number
   description: string,
   thumbnail: string,
   sources?: [

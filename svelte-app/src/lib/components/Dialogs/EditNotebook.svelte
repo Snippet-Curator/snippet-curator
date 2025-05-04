@@ -8,19 +8,14 @@
 
 	type Props = {
 		isOpen: boolean;
-		selectedNotebookID: string;
 		currentNotebookID?: string;
-		action: () => void;
+		action: (selectedNotebookID) => void;
 	};
 
-	let {
-		isOpen = $bindable(),
-		selectedNotebookID = $bindable(),
-		action,
-		currentNotebookID = ''
-	}: Props = $props();
+	let { isOpen = $bindable(), action, currentNotebookID = '' }: Props = $props();
 
 	let notebooks = $state<Notebook[]>();
+	let selectedNotebookID = $state<string>('');
 
 	async function getNotebooks() {
 		return await pb.collection('notebooks').getFullList({
@@ -69,7 +64,7 @@
 			<button onclick={() => (isOpen = false)} class="btn">Close</button>
 			<button
 				onclick={() => {
-					action();
+					action(selectedNotebookID);
 					isOpen = false;
 				}}
 				class="btn btn-primary">Save</button

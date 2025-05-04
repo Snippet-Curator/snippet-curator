@@ -1,22 +1,23 @@
 <script lang="ts">
-	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import type { RecordModel } from 'pocketbase';
+	import { onMount } from 'svelte';
 
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import * as Dialog from '$lib/components/ui/dialog/index';
 	import pb from '$lib/db.svelte';
-	import { onMount } from 'svelte';
 	import type { Tag } from '$lib/types';
 
 	type Props = {
 		isOpen: boolean;
-		selectedTags: string[];
-		action: () => void;
-		currentTags: any;
+		action: (selectedTags: string[]) => void;
+		currentTags: Tag[];
 	};
 
-	let { isOpen = $bindable(), selectedTags = $bindable(), currentTags, action }: Props = $props();
+	let { isOpen = $bindable(), currentTags, action }: Props = $props();
 
-	let tags = $state<Tag[]>();
-	let filteredTags = $state<Tag[]>([]);
+	let tags = $state<RecordModel[]>();
+	let selectedTags = $state<string[]>([]);
+	let filteredTags = $state<RecordModel[]>([]);
 	let tagSearchTerm = $state<string>('');
 
 	async function getTags() {
@@ -95,7 +96,7 @@
 			<button onclick={() => (isOpen = false)} class="btn">Close</button>
 			<button
 				onclick={() => {
-					action();
+					action(selectedTags);
 					isOpen = false;
 				}}
 				class="btn btn-primary">Save</button

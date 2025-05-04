@@ -10,9 +10,6 @@
 	let isDeleteOpen = $state(false);
 	let isEditTagsOpen = $state(false);
 	let isEditNotebookOpen = $state(false);
-	let selectedNotebookID = $state('');
-	let selectedTags = $state<string[]>([]);
-	let newRating = $state(0);
 
 	const initialLoading = noteState.getNote();
 </script>
@@ -33,8 +30,7 @@
 
 		<Topbar.Rating
 			rating={note.rating}
-			bind:newRating
-			action={() => {
+			action={(newRating) => {
 				noteState.changeRating(newRating);
 			}}
 		/>
@@ -42,8 +38,8 @@
 		<div class="divider divider-horizontal"></div>
 
 		<Topbar.Archive
-			action={async () => {
-				await noteState.archiveNote();
+			action={() => {
+				noteState.archiveNote();
 				window.history.back();
 			}}
 		/>
@@ -57,27 +53,23 @@
 	<Delete
 		bind:isOpen={isDeleteOpen}
 		name="Note"
-		action={async () => {
-			await noteState.softDeleteNote();
+		action={() => {
+			noteState.softDeleteNote();
 			window.history.back();
 		}}>this note</Delete
 	>
 
 	<EditNotebook
-		bind:selectedNotebookID
 		currentNotebookID={note.expand?.notebook.id}
 		bind:isOpen={isEditNotebookOpen}
-		action={async () => {
-			await noteState.changeNotebook(selectedNotebookID);
+		action={(selectedNotebookID) => {
+			noteState.changeNotebook(selectedNotebookID);
 		}}
 	></EditNotebook>
 
 	<EditTags
 		bind:isOpen={isEditTagsOpen}
-		bind:selectedTags
 		currentTags={note.expand?.tags}
-		action={async () => {
-			await noteState.changeTags(selectedTags);
-		}}
+		action={(selectedTags) => noteState.changeTags(selectedTags)}
 	/>
 {/await}

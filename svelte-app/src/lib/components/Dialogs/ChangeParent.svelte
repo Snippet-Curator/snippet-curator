@@ -15,7 +15,7 @@
 		];
 		selectedID: string;
 		cancel: () => void;
-		action: () => void;
+		action: () => Promise<void>;
 		filter: () => void;
 	};
 
@@ -74,8 +74,8 @@
 				class="btn">Clear Parent {renameType}</button
 			>
 			<button
-				onclick={() => {
-					action();
+				onclick={async () => {
+					await action();
 					searchTerm = '';
 					isOpen = false;
 				}}

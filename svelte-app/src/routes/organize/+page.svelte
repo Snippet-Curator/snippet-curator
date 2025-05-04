@@ -15,8 +15,6 @@
 
 	let isNewNotebookOpen = $state(false);
 	let isNewTagOpen = $state(false);
-	let newNotebookName = $state('');
-	let newTagName = $state('');
 </script>
 
 {#snippet renderNotebook(notebook: Notebook, NotebookIcon)}
@@ -79,13 +77,11 @@
 <New
 	bind:isOpen={isNewTagOpen}
 	newType="Tag"
-	bind:name={newTagName}
-	action={() => tagState.createOnebyName(newTagName)}
+	action={(newTagName) => tagState.createOnebyName(newTagName)}
 />
 
 <New
 	bind:isOpen={isNewNotebookOpen}
 	newType="Notebook"
-	bind:name={newNotebookName}
-	action={() => notebookState.createOnebyName(newNotebookName)}
+	action={(newNotebookName) => notebookState.createOnebyName(newNotebookName)}
 />

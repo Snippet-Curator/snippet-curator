@@ -152,7 +152,6 @@ export class TagState {
     if (error) {
       console.error('Error while creating new tag: ', error)
     }
-    console.log('new tag: ', data)
     await this.getAll()
   }
 
@@ -641,7 +640,7 @@ export class NoteState {
       console.error('Error changing tags: ', this.noteID, error)
     }
     await this.getNote()
-    return data
+    // return data
   }
 
   async changeRating(newRating: number) {

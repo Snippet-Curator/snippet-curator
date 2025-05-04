@@ -1,15 +1,15 @@
 <script lang="ts">
 	type Props = {
 		rating: number;
-		action: () => void;
-		newRating: number;
+		action: (newRating: number) => void;
 	};
 
-	let { rating, action, newRating = $bindable() }: Props = $props();
+	let { rating, action }: Props = $props();
+	let newRating = $state(0);
 
 	function updateRating(star: number) {
 		newRating = star == rating ? 0 : star;
-		action();
+		action(newRating);
 	}
 </script>
 
