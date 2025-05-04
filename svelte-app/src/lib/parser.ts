@@ -59,7 +59,6 @@ export async function makeDefaultNotebook() {
       console.log('Error making Trash: ', trashError.message)
     }
   }
-  return data
 }
 
 async function getDefaultNotebook() {
@@ -133,7 +132,7 @@ async function getVideoThumb(videoUrl: string): Promise<File> {
 }
 
 async function createThumbnail(recordID: string, resources) {
-  const { data, error } = await tryCatch(pb.collection('notes').getFirstListItem(`id="${recordID}"`))
+  const { data, error } = await tryCatch(pb.collection(notesCollection).getFirstListItem(`id="${recordID}"`))
 
   if (error) {
     console.error('Error getting record: ', error.message)
@@ -147,7 +146,13 @@ async function createThumbnail(recordID: string, resources) {
   for (const [index, resource] of resources.entries()) {
     if (record.thumbnail) return
 
-    const mimeType = resource.mime
+    let mimeType
+
+    if (resource.mime) {
+      mimeType = resource.mime
+    } else if (resource.type) {
+      mimeType = resource.type
+    }
 
     if (!mimeType.includes('image') && !mimeType.includes('video') && !mimeType.includes('application/octet-stream')) {
       return
@@ -156,7 +161,7 @@ async function createThumbnail(recordID: string, resources) {
     if (mimeType.includes('video') || mimeType == 'application/octet-stream') {
       const videoURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
       const thumbnailFile = await getVideoThumb(videoURL)
-      const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection('notes').update(record.id, {
+      const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
         'attachments+': [thumbnailFile]
       }))
       if (thumbError) {
@@ -164,22 +169,18 @@ async function createThumbnail(recordID: string, resources) {
       }
       if (!thumbRecord) return
       thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${thumbRecord.attachments.at(-1)}?thumb=500x0`
-      console.log(thumbRecord)
-      console.log('thumbURL', thumbnailURL)
     }
 
     else if (mimeType == 'image/gif') {
       thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
-      console.log('thumb gif', thumbnailURL)
     }
 
     else {
       thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}?thumb=500x0`
-      console.log('thumb image', thumbnailURL)
     }
 
     // update thumbnail
-    const { data: updatedRecord, error: thumbnailError } = await tryCatch(pb.collection('notes').update(record.id, {
+    const { data: updatedRecord, error: thumbnailError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
       'thumbnail': thumbnailURL
     }))
 
@@ -194,7 +195,7 @@ async function createThumbnail(recordID: string, resources) {
 
 function addMediaToContent(mimeType: string, fileURL: string, fileName: string) {
   if (mimeType.includes('image')) {
-    return `<img  src=${fileURL} type=${mimeType}>`;
+    return `<img src=${fileURL} type=${mimeType}>`;
   }
 
   if (mimeType.includes('video')) {
@@ -343,16 +344,12 @@ export class htmlImport {
   }
 
   parseURL(parsedHTML: Document) {
-
     return parsedHTML.querySelector('meta[property="og:url"]')?.getAttribute('content') || ""
-
-
   }
 
   base64ToFile(base64: string, mimeType: string) {
     const extension = mimeType.split("/")[1];
     const filename = `${crypto.randomUUID()}.${extension}`;
-
     const byteCharacters = atob(base64);
     const byteNumbers = new Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
@@ -366,18 +363,28 @@ export class htmlImport {
   async uploadImg() {
     for (const [index, img] of this.parsedHTML.querySelectorAll('img').entries()) {
       if (!img.src.includes('data:image')) return
+      if (img.src.includes('data:image/svg+xml')) return
 
       const base64Data = img.src.split(',')[1]
       const mimeType = img.src.split(';')[0].split(':')[1]
       const extension = mimeType.split('/')[1]
 
       // convert to file
+      console.log(img, img.src, mimeType, base64Data)
       const imgFile = this.base64ToFile(base64Data, mimeType)
 
       // upload to database
-      const record = await pb.collection('notes').update(this.recordID, {
+      const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
         'attachments+': [imgFile]
-      })
+      }))
+
+      if (error) {
+        console.error('Error uploading image: ', error.message)
+      }
+
+      if (!record) return
+
+      const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
 
       // fill in thumbnail
       if (record.thumbnail == '') {
@@ -385,13 +392,13 @@ export class htmlImport {
 
         // make thumbnail based on type of resource file
         if (mimeType == 'image/gif') {
-          thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
+          thumbnailURL = defaultThumbURL
         } else {
-          thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}?thumb=500x0`
+          thumbnailURL = `${defaultThumbURL}?thumb=500x0`
         }
 
         // update thumbnail
-        await pb.collection('notes').update(this.recordID, {
+        await pb.collection(notesCollection).update(this.recordID, {
           'thumbnail': thumbnailURL
         })
       }
@@ -407,8 +414,6 @@ export class htmlImport {
   }
 
   async uploadToDB() {
-    const defaultNotebook = await getDefaultNotebook()
-
     const sources = [{
       'source': this.source,
       'source_url': this.sourceURL
@@ -416,23 +421,25 @@ export class htmlImport {
 
     const skeletonData = {
       'title': this.title,
-      // 'source': this.source,
       'added': this.added,
-      // 'source_url': this.sourceURL,
       'weight': 5,
       'notebook': this.selectedNotebookdID,
       'last_score_updated': new Date().toISOString(),
       'sources': JSON.stringify(sources)
     }
 
-    const { data: record, error } = await tryCatch(pb.collection('notes').create(skeletonData))
+    const { data: record, error } = await tryCatch(pb.collection(notesCollection).create(skeletonData))
 
     if (error) {
-      throw new Error('Possible duplicate note')
+      if (error.data.data.title.code == "validation_not_unique") {
+        throw new Error('Skipped duplicate note')
+      }
+      throw (error)
     }
 
-    this.recordID = record.id
+    if (!record) return
 
+    this.recordID = record.id
     await this.uploadImg()
     this.content = sanitizeContent(this.content)
     this.description = createDescription(this.content)
@@ -443,7 +450,11 @@ export class htmlImport {
       'description': this.description
     }
 
-    await pb.collection('notes').update(this.recordID, data)
+    const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
+
+    if (updatedError) {
+      console.error('Error updating record: ', updatedError.message)
+    }
   }
 }
 
@@ -541,7 +552,6 @@ export class EnImport {
 
   replaceEnMedia() {
     // replaces en-media with regular html tags within content
-
     const mediaMatch = /<en-media[^>]+?hash="([a-zA-Z0-9]+)"[^>]*\/?>/g
 
     if (this.enResources.length == 0) return
@@ -562,7 +572,15 @@ export class EnImport {
   async addTags() {
     if (this.tags.length == 1 && this.tags[0] == '') return ''
     const tagList: string[] = []
-    const existingTags = await pb.collection('tags').getFullList() as { id: string; name: string }[]
+
+    const { data: existingTags, error } = await tryCatch<RecordModel[], PError>(pb.collection('tags').getFullList())
+
+    if (error) {
+      console.error('Unable to get all tags: ', error.message)
+    }
+
+    if (!existingTags) return []
+
     const existingTagNames = new Set(existingTags.map((tag: { name: string }) => tag.name))
 
     for (const tag of this.tags) {
@@ -578,19 +596,11 @@ export class EnImport {
   }
 
   async uploadToDB() {
-    const defaultNotebook = await getDefaultNotebook()
-    let tags
-    try {
-      tags = await this.addTags()
-    } catch (e) {
-      console.log(this.title, 'Error adding tags')
-    }
-
+    const tags = await this.addTags()
     const sources = [{
       'source': this.source,
       'source_url': this.sourceURL
     }]
-
     const skeletonData = {
       'title': this.title,
       'added': this.added,
@@ -601,7 +611,7 @@ export class EnImport {
       'sources': JSON.stringify(sources),
     }
 
-    const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection('notes').create(skeletonData))
+    const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).create(skeletonData))
 
     if (error) {
       if (error.data.data.title.code == "validation_not_unique") {
@@ -623,7 +633,11 @@ export class EnImport {
       'description': this.description
     }
 
-    await pb.collection('notes').update(this.recordID, data)
+    const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
+
+    if (updatedError) {
+      console.error('Error updating record: ', updatedError.message)
+    }
   }
 }
 
@@ -648,45 +662,24 @@ export class fileImport {
   }
 
   async uploadResources() {
-    const record = await pb.collection(notesCollection).update(this.recordID, {
+    const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).update(this.recordID, {
       'attachments+': [this.file]
-    })
+    }))
 
+    if (error) {
+      console.log(error.message)
+    }
+
+    if (!record) return
+
+    await createThumbnail(this.recordID, [this.file])
     // update attachment URL
     this.fileURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
-
-    // if not images or not videos, skip thumbnail creation
-    if (!this.mimeType.includes('image') && !this.mimeType.includes('video')) {
-      return
-    }
-
-    // fill in thumbnail
-    else if (record.thumbnail == '') {
-      let thumbnailURL = ''
-
-      // make thumbnail based on type of resource file
-      if (this.mimeType == 'image/gif') {
-        thumbnailURL = `${this.fileURL}`
-      } else if (this.mimeType.includes('video')) {
-        const thumbnailFile = await getVideoThumb(this.fileURL)
-        const thumbedRecord = await pb.collection(notesCollection).update(this.recordID, {
-          'attachments+': [thumbnailFile]
-        })
-        thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${thumbedRecord.attachments[1]}?thumb=500x0`
-      }
-      else {
-        thumbnailURL = `${this.fileURL}?thumb=500x0`
-      }
-
-      // update thumbnail
-      await pb.collection(notesCollection).update(this.recordID, {
-        'thumbnail': thumbnailURL
-      })
-    }
   }
 
   async uploadToDB() {
-    const defaultNotebook = await getDefaultNotebook()
+
+
     const skeletonData = {
       'title': this.title,
       'notebook': this.selectedNotebookdID,
@@ -695,15 +688,20 @@ export class fileImport {
       'added': this.added
     }
 
-    let record
-    try {
-      record = await pb.collection(notesCollection).create(skeletonData)
-    } catch (e) {
-      console.log(e, 'Possible duplicate note')
+    const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).create(skeletonData))
+
+    if (error) {
+      if (error.data.data.title.code == "validation_not_unique") {
+        throw new Error('Skipped duplicate note')
+      }
+      throw (error)
     }
+
+    if (!record) return
     this.recordID = record.id
 
     await this.uploadResources()
+    console.log('file upload: ', this.mimeType, this.fileURL, this.file.name)
     this.content = addMediaToContent(this.mimeType, this.fileURL, this.file.name)
 
     const data = {
@@ -711,6 +709,10 @@ export class fileImport {
       'original_content': this.content,
     }
 
-    await pb.collection(notesCollection).update(this.recordID, data)
+    const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
+
+    if (updatedError) {
+      console.error('Error updating record: ', updatedError.message)
+    }
   }
 }
