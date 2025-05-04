@@ -21,7 +21,7 @@ onRecordUpdateRequest((e) => {
     const randomFactor = Math.random()
 
     const score =
-      (0.25 * ratingNorm + 0.6 * recencyNorm + 0.25 * weightNorm + 0.2 * randomFactor) * 100
+      (0.2 * ratingNorm + 0.6 * recencyNorm + 0.2 * weightNorm + 0.3 * randomFactor) * 100
 
     return score
   }
