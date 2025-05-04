@@ -2,7 +2,12 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import { signalPageState } from '$lib/utils.svelte';
-	import { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
+	import {
+		getDefaultNotebooksState,
+		getNotelistState,
+		setNotelistState,
+		type NoteType
+	} from '$lib/db.svelte';
 	import { Pagination, NoteList, BulkToolbar, BulkEditBtn, Delete } from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
 
@@ -20,6 +25,7 @@
 
 	setNotelistState(notebookID, noteType);
 	const notelistState = getNotelistState(notebookID);
+	const defaultNotebooksState = getDefaultNotebooksState();
 
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash) ?? 1);
 
@@ -41,9 +47,9 @@
 <Topbar.Root>
 	<Topbar.Back />
 	<div class="grow"></div>
-
-	<Topbar.Empty bind:isOpen={isEmptyTrashOpen} />
-
+	{#if notebookID == defaultNotebooksState.trashID}
+		<Topbar.Empty bind:isOpen={isEmptyTrashOpen} />
+	{/if}
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
 </Topbar.Root>
 
