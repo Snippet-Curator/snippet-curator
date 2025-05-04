@@ -13,18 +13,23 @@
 	function handler(event: KeyboardEvent) {
 		switch (event.key) {
 			case 'ArrowLeft':
+			case 'a':
 				event.preventDefault();
 				onLeft();
 				break;
 			case 'ArrowRight':
+			case 'd':
+			case ' ':
 				event.preventDefault();
 				onRight();
 				break;
 			case 'ArrowUp':
+			case 'w':
 				event.preventDefault();
 				onUp();
 				break;
 			case 'ArrowDown':
+			case 's':
 				event.preventDefault();
 				onDown();
 				break;
