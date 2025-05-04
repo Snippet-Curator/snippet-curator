@@ -11,18 +11,23 @@
 	let { onLeft, onRight, onUp, onDown }: Props = $props();
 
 	function handler(event: KeyboardEvent) {
-		if (event.keyCode == 37) {
-			event.preventDefault();
-			onLeft();
-		} else if (event.keyCode == 39 || event.keyCode == 32) {
-			event.preventDefault();
-			onRight();
-		} else if (event.keyCode == 38) {
-			event.preventDefault();
-			onUp();
-		} else if (event.keyCode == 40) {
-			event.preventDefault();
-			onDown();
+		switch (event.key) {
+			case 'ArrowLeft':
+				event.preventDefault();
+				onLeft();
+				break;
+			case 'ArrowRight':
+				event.preventDefault();
+				onRight();
+				break;
+			case 'ArrowUp':
+				event.preventDefault();
+				onUp();
+				break;
+			case 'ArrowDown':
+				event.preventDefault();
+				onDown();
+				break;
 		}
 	}
 
