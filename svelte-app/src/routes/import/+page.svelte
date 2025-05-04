@@ -42,7 +42,15 @@
 
 		if (file.type == 'text/html') {
 			const parsedHTML = new htmlImport(decodedText, selectedNotebookID);
-			await parsedHTML.uploadToDB();
+			try {
+				await parsedHTML.uploadToDB();
+				listofSuccesses.push(file.name);
+			} catch (e) {
+				listOfErrors.push({
+					name: file.name,
+					error: e.message
+				});
+			}
 		} else if (file.name.includes('.enex')) {
 			const parsedXML = new EnImport(decodedText, selectedNotebookID);
 			try {

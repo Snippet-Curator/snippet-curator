@@ -20,6 +20,7 @@
 
 	setNotelistState(notebookID, noteType);
 	const notelistState = getNotelistState(notebookID);
+
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
 
 	async function updatePage() {
@@ -40,7 +41,9 @@
 <Topbar.Root>
 	<Topbar.Back />
 	<div class="grow"></div>
+
 	<Topbar.Empty bind:isOpen={isEmptyTrashOpen} />
+
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
 </Topbar.Root>
 

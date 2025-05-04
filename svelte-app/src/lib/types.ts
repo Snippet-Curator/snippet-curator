@@ -25,8 +25,14 @@ export type Note = {
     notebook?: Notebook,
     tags?: Tag
   }
-  description: string
-  thumbnail: string
+  description: string,
+  thumbnail: string,
+  sources?: [
+    {
+      source?: string,
+      source_url?: string
+    }
+  ]
 }
 
 export type NoteRecord = {

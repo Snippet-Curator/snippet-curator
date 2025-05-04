@@ -233,7 +233,7 @@ export class htmlImport {
   content: string
   parsedHTML: Document
   source: string
-  sourceUrl: string
+  sourceURL: string
   recordID: string
   added: string
   description: string
@@ -242,18 +242,25 @@ export class htmlImport {
   constructor(fileContent: string, selectedNotebookID: string) {
     this.recordID = ''
     this.selectedNotebookdID = selectedNotebookID
-
+    this.added = ''
+    this.sourceURL = ''
+    this.source = 'SingleFile clip'
     const { parsedHTML, title } = this.parseHTML(fileContent)
     this.title = title
     this.parsedHTML = parsedHTML
     this.content = this.parseHTMLContent(this.parsedHTML)
-    this.source = 'SingleFile clip'
-    this.sourceUrl = this.parseURL(this.parsedHTML)
-    this.added = new Date().toISOString()
     this.description = ''
   }
 
   parseHTML(fileContent: string) {
+
+    const match = fileContent.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
+
+    if (match) {
+      this.sourceURL = match[1];
+      this.added = new Date(match[2]).toISOString();
+    }
+
     const parser = new DOMParser()
     const parsedHTML = parser.parseFromString(fileContent, 'text/html')
     const title = parsedHTML.querySelector('title')?.textContent || 'Untitled'
@@ -272,7 +279,10 @@ export class htmlImport {
   }
 
   parseURL(parsedHTML: Document) {
+
     return parsedHTML.querySelector('meta[property="og:url"]')?.getAttribute('content') || ""
+
+
   }
 
   base64ToFile(base64: string, mimeType: string) {
@@ -335,14 +345,20 @@ export class htmlImport {
   async uploadToDB() {
     const defaultNotebook = await getDefaultNotebook()
 
+    const sources = [{
+      'source': this.source,
+      'source_url': this.sourceURL
+    }]
+
     const skeletonData = {
       'title': this.title,
-      'source': this.source,
+      // 'source': this.source,
       'added': this.added,
-      'source_url': this.sourceUrl,
+      // 'source_url': this.sourceURL,
       'weight': 5,
       'notebook': this.selectedNotebookdID,
-      'last_score_updated': new Date().toISOString()
+      'last_score_updated': new Date().toISOString(),
+      'sources': JSON.stringify(sources)
     }
 
     const { data: record, error } = await tryCatch(pb.collection('notes').create(skeletonData))
@@ -378,7 +394,7 @@ export class EnImport {
   added: string
   updated: string
   source: string
-  sourceUrl: string
+  sourceURL: string
   tags: string[]
   recordID: string
   description: string
@@ -402,7 +418,7 @@ export class EnImport {
     this.added = dayjs(this.enNote['en-export'].note.created, 'YYYYMMDDTHHmmss[Z]').toISOString()
     this.updated = this.enNote['en-export'].note.updated
     this.source = this.enNote['en-export'].note['note-attributes'].source
-    this.sourceUrl = this.enNote['en-export'].note['note-attributes']['source-url']
+    this.sourceURL = this.enNote['en-export'].note['note-attributes']['source-url']
     this.tags = Array.isArray(tags) ? tags : [tags]
     this.description = ''
   }
@@ -537,16 +553,21 @@ export class EnImport {
       console.log(this.title, 'Error adding tags')
     }
 
+    const sources = [{
+      'source': this.source,
+      'source_url': this.sourceURL
+    }]
 
     const skeletonData = {
       'title': this.title,
       'added': this.added,
-      'source': this.source,
-      'source_url': this.sourceUrl,
+      // 'source': this.source,
+      // 'source_url': this.sourceURL,
       'tags': tags,
       'weight': 5,
       'notebook': this.selectedNotebookdID,
-      'last_score_updated': new Date().toISOString()
+      'last_score_updated': new Date().toISOString(),
+      'sources': JSON.stringify(sources),
     }
 
     const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection('notes').create(skeletonData))
@@ -580,6 +601,7 @@ export class fileImport {
   file: File
   mimeType: string
   content: string
+  added: string
   fileURL: string
   recordID: string
   selectedNotebookdID: string
@@ -591,6 +613,7 @@ export class fileImport {
     this.fileURL = ''
     this.title = `${file.name} ${dayjs(Date()).format('MM-DD-YYYY')}`
     this.selectedNotebookdID = selectedNotebookID
+    this.added = new Date().toISOString()
   }
 
   async uploadResources() {
@@ -638,6 +661,7 @@ export class fileImport {
       'notebook': this.selectedNotebookdID,
       'last_score_updated': new Date().toISOString(),
       'weight': 5,
+      'added': this.added
     }
 
     let record
