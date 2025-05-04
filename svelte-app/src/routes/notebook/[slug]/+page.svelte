@@ -21,18 +21,18 @@
 	setNotelistState(notebookID, noteType);
 	const notelistState = getNotelistState(notebookID);
 
-	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
+	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash) ?? 1);
 
 	async function updatePage() {
 		await notelistState.getByNotebook(notebookID);
 		signalPageState.updatePageData(page.url.hash, notelistState.clickedPage);
 	}
 
-	let initialLoading = $state();
+	let initialLoading = $state<Promise<void>>();
 
 	$effect(() => {
 		// console.log('Slug changed:', page.params.slug);
-		notelistState.notebookID = page.params.slug;
+		notelistState.notebookID = notebookID;
 		notelistState.clickedPage = savedPage ? savedPage : 1;
 		initialLoading = updatePage();
 	});

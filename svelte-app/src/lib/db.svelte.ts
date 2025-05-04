@@ -1,7 +1,7 @@
 import PocketBase from 'pocketbase'
 import type { Notebook, Tag, Note, NoteRecord } from './types'
 import { getContext, setContext } from 'svelte'
-import { calculateNoteScore, tryCatch } from './utils.svelte'
+import { tryCatch } from './utils.svelte'
 
 const pb = new PocketBase('http://127.0.0.1:8090')
 
