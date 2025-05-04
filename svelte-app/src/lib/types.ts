@@ -76,6 +76,7 @@ export type EnResource = {
   hash?: string,
   file?: File,
   fileURL?: string,
+  name?: string,
   height: number,
   width: number,
   mime: string,

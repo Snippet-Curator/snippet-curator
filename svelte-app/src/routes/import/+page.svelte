@@ -24,6 +24,33 @@
 	let currentFile = $state('');
 	let selectedNotebookID = $state<string>();
 	let uploadStatus: 'stopped' | 'in progress' | 'error' | 'completed' = $state('stopped');
+	const items = [
+		{
+			title: 'Evernote .enex files',
+			description:
+				'Click the "Sign Up" button in the top right corner and follow the registration process.'
+		},
+		{
+			title: 'SingleFile .html files',
+			description:
+				'Click the "Sign Up" button in the top right corner and follow the registration process.'
+		},
+		{
+			title: 'Images',
+			description:
+				'Click the "Sign Up" button in the top right corner and follow the registration process.'
+		},
+		{
+			title: 'Videos and audio files',
+			description:
+				'Click the "Sign Up" button in the top right corner and follow the registration process.'
+		},
+		{
+			title: 'Misc files',
+			description:
+				'Click the "Sign Up" button in the top right corner and follow the registration process.'
+		}
+	];
 
 	function handleFileUpload(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -102,46 +129,34 @@
 	const notebooks = notebookState.notebooks;
 </script>
 
-<ScrollArea class="mx-auto max-h-screen max-w-6xl">
-	<section class="gap-golden-2xl m-golden-xl grid grid-cols-1">
-		<div>
-			<div class="card">
-				<div>
-					<p>Import Files. Currently supported formats include Evernote.</p>
-					<ul>
-						<li>.Enex</li>
-						<li>HTML</li>
-						<li>Image files</li>
-						<li>Video files</li>
-					</ul>
-				</div>
-			</div>
-
-			<fieldset class="fieldset">
-				<legend class="fieldset-legend">Import Files</legend>
+<ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
+	<section class="gap-golden-xl p-golden-xl card mx-auto mt-10 grid max-w-5xl grid-cols-1">
+		<div class="gap-golden-lg grid grid-cols-2">
+			<div class="gap-golden-md flex flex-col">
 				<input
 					onchange={handleFileUpload}
 					type="file"
 					multiple
 					id="file"
 					required
-					class="file-input"
+					class="file-input w-full"
 				/>
-				<select class="select" bind:value={selectedNotebookID}>
+
+				<select class="select w-full" bind:value={selectedNotebookID}>
 					<option disabled selected>Import into Notebook</option>
 					{#each notebooks as notebook}
 						<option value={notebook.id}>{notebook.name}</option>
 					{/each}
 				</select>
-				<label for="file" class="fieldset-label">Max size 5GB</label>
+
+				<label for="file" class="fieldset-label text-sm">Max size 5GB</label>
+
 				<button onclick={importFiles} class="btn btn-neutral">Import</button>
-			</fieldset>
+			</div>
 
 			{#if uploadStatus == 'in progress' || uploadStatus == 'completed'}
-				<div class="divider"></div>
-
-				<div class="flex w-full">
-					<div class="card card-border grid w-full grid-cols-3 items-center p-4">
+				<div class="flex w-full self-start">
+					<div class="card card-border p-golden-md grid w-full grid-cols-3">
 						<div>Progress</div>
 						<div class="col-span-2 flex items-center gap-x-2">
 							<progress class="progress h-4" value={progress} max="100"></progress>
@@ -156,7 +171,6 @@
 				</div>
 			{/if}
 		</div>
-		<!-- flex div -->
 
 		{#if uploadStatus == 'in progress' || uploadStatus == 'completed'}
 			<Tabs.Root value="success">
@@ -208,5 +222,23 @@
 				</Tabs.Content>
 			</Tabs.Root>
 		{/if}
+	</section>
+
+	<div class="divider mx-auto max-w-5xl"></div>
+
+	<section class="card prose p-golden-xl mx-auto max-w-5xl">
+		<h2>Supported Import Files</h2>
+
+		<div class="join join-vertical bg-base-100 w-full">
+			{#each items as item}
+				<div class="collapse-arrow join-item border-base-200 collapse border">
+					<input type="checkbox" name="my-accordion-4" />
+					<div class="collapse-title font-semibold">{item.title}</div>
+					<div class="collapse-content">
+						{item.description}
+					</div>
+				</div>
+			{/each}
+		</div>
 	</section>
 </ScrollArea>

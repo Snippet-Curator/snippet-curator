@@ -132,13 +132,77 @@ async function getVideoThumb(videoUrl: string): Promise<File> {
   })
 }
 
+async function createThumbnail(recordID: string, resources) {
+  const { data, error } = await tryCatch(pb.collection('notes').getFirstListItem(`id="${recordID}"`))
+
+  if (error) {
+    console.error('Error getting record: ', error.message)
+  }
+
+  if (!data.attachments) return
+
+  let thumbnailURL = ''
+  let record = data
+
+  for (const [index, resource] of resources.entries()) {
+    if (record.thumbnail) return
+
+    const mimeType = resource.mime
+
+    if (!mimeType.includes('image') && !mimeType.includes('video') && !mimeType.includes('application/octet-stream')) {
+      return
+    }
+
+    if (mimeType.includes('video') || mimeType == 'application/octet-stream') {
+      const videoURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
+      const thumbnailFile = await getVideoThumb(videoURL)
+      const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection('notes').update(record.id, {
+        'attachments+': [thumbnailFile]
+      }))
+      if (thumbError) {
+        console.error('Error getting updated thumbnail record: ', thumbError.message)
+      }
+      if (!thumbRecord) return
+      thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${thumbRecord.attachments.at(-1)}?thumb=500x0`
+      console.log(thumbRecord)
+      console.log('thumbURL', thumbnailURL)
+    }
+
+    else if (mimeType == 'image/gif') {
+      thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
+      console.log('thumb gif', thumbnailURL)
+    }
+
+    else {
+      thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}?thumb=500x0`
+      console.log('thumb image', thumbnailURL)
+    }
+
+    // update thumbnail
+    const { data: updatedRecord, error: thumbnailError } = await tryCatch(pb.collection('notes').update(record.id, {
+      'thumbnail': thumbnailURL
+    }))
+
+    if (thumbnailError) {
+      console.error('Error updating record: ', thumbnailError.message)
+    }
+    record = updatedRecord
+  }
+
+
+}
+
 function addMediaToContent(mimeType: string, fileURL: string, fileName: string) {
   if (mimeType.includes('image')) {
     return `<img  src=${fileURL} type=${mimeType}>`;
   }
 
-  if (mimeType == 'video/mp4') {
+  if (mimeType.includes('video')) {
     return `<video style='width:100%' controls><source src=${fileURL} type=${mimeType} />Your browser does not support the video tag.</video>`
+  }
+
+  if (mimeType == 'application/octet-stream') {
+    return `<video style='width:100%' controls><source src=${fileURL} />Your browser does not support the video tag.</video>`
   }
 
   if (mimeType == 'audio/mpeg') {
@@ -468,42 +532,11 @@ export class EnImport {
         'attachments+': [resource.file]
       })
 
-      // if not images or not videos, skip thumbnail creation
-      if (!resource.mime.includes('image') && !resource.mime.includes('video')) {
-        return
-      }
-
-      // fill in thumbnail
-      if (record.thumbnail == '') {
-        let thumbnailURL = ''
-
-        // make thumbnail based on type of resource file
-        if (resource.mime == 'image/gif') {
-          thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
-        } else if (resource.mime == 'video/mp4') {
-          const videoURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
-          const thumbnailFile = await getVideoThumb(videoURL)
-          const thumbedRecord = await pb.collection('notes').update(this.recordID, {
-            'attachments+': [thumbnailFile]
-          })
-          thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${thumbedRecord.attachments[1]}?thumb=500x0`
-        }
-        else {
-          thumbnailURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}?thumb=500x0`
-        }
-
-        // update thumbnail
-        await pb.collection('notes').update(this.recordID, {
-          'thumbnail': thumbnailURL
-        })
-      }
-
-      // get new filename and url
-      const newName = record.attachments[index]
-      const newURL = `${baseURL}/${notesCollection}/${this.recordID}/${newName}`
-      resource.fileURL = newURL
+      resource.name = record.attachments[index]
+      resource.fileURL = `${baseURL}/${notesCollection}/${this.recordID}/${resource.name}`
     }
 
+    await createThumbnail(this.recordID, this.enResources)
   }
 
   replaceEnMedia() {
@@ -561,8 +594,6 @@ export class EnImport {
     const skeletonData = {
       'title': this.title,
       'added': this.added,
-      // 'source': this.source,
-      // 'source_url': this.sourceURL,
       'tags': tags,
       'weight': 5,
       'notebook': this.selectedNotebookdID,
@@ -636,7 +667,7 @@ export class fileImport {
       // make thumbnail based on type of resource file
       if (this.mimeType == 'image/gif') {
         thumbnailURL = `${this.fileURL}`
-      } else if (this.mimeType == 'video/mp4') {
+      } else if (this.mimeType.includes('video')) {
         const thumbnailFile = await getVideoThumb(this.fileURL)
         const thumbedRecord = await pb.collection(notesCollection).update(this.recordID, {
           'attachments+': [thumbnailFile]
