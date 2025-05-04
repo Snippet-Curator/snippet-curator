@@ -97,29 +97,35 @@
 	</ContextMenu.Root>
 {/snippet}
 
-{#each notebooks as notebook}
-	{#if notebook.name != 'Inbox'}
-		<li class="group mr-4">
-			{#if notebook.children?.length > 0}
-				<details class="w-full">
-					<summary class="flex w-full py-0 pl-0">
-						<div class="grow">
-							{@render renderNotebookSection(notebook)}
-						</div>
-					</summary>
+<svelte:boundary>
+	{#each notebooks as notebook}
+		{#if notebook.name != 'Inbox'}
+			<li class="group mr-4">
+				{#if notebook.children?.length > 0}
+					<details class="w-full">
+						<summary class="flex w-full py-0 pl-0">
+							<div class="grow">
+								{@render renderNotebookSection(notebook)}
+							</div>
+						</summary>
 
-					{#if notebook.children}
-						<ul>
-							<NotebookList {allowEdit} notebooks={notebook.children} />
-						</ul>
-					{/if}
-				</details>
-			{:else}
-				{@render renderNotebookSection(notebook)}
-			{/if}
-		</li>
-	{/if}
-{/each}
+						{#if notebook.children}
+							<ul>
+								<NotebookList {allowEdit} notebooks={notebook.children} />
+							</ul>
+						{/if}
+					</details>
+				{:else}
+					{@render renderNotebookSection(notebook)}
+				{/if}
+			</li>
+		{/if}
+	{/each}
+
+	{#snippet failed()}
+		NotebookList Failed to Render
+	{/snippet}
+</svelte:boundary>
 
 <Rename
 	bind:isOpen={isEditOpen}

@@ -85,27 +85,33 @@
 	</ContextMenu.Root>
 {/snippet}
 
-{#each tags as tag}
-	<li class="group mr-4">
-		{#if tag.children?.length > 0}
-			<details class="w-full cursor-pointer">
-				<summary class="mr-4 flex w-full py-0 pl-0">
-					<div class="grow">
-						{@render renderTag(tag)}
-					</div>
-				</summary>
+<svelte:boundary>
+	{#each tags as tag}
+		<li class="group mr-4">
+			{#if tag.children?.length > 0}
+				<details class="w-full cursor-pointer">
+					<summary class="mr-4 flex w-full py-0 pl-0">
+						<div class="grow">
+							{@render renderTag(tag)}
+						</div>
+					</summary>
 
-				{#if tag.children}
-					<ul>
-						<TagList {allowEdit} tags={tag.children} />
-					</ul>
-				{/if}
-			</details>
-		{:else}
-			{@render renderTag(tag)}
-		{/if}
-	</li>
-{/each}
+					{#if tag.children}
+						<ul>
+							<TagList {allowEdit} tags={tag.children} />
+						</ul>
+					{/if}
+				</details>
+			{:else}
+				{@render renderTag(tag)}
+			{/if}
+		</li>
+	{/each}
+
+	{#snippet failed()}
+		Tags Failed to Render
+	{/snippet}
+</svelte:boundary>
 
 <Rename
 	bind:isOpen={isEditOpen}
