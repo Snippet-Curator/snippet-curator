@@ -17,6 +17,7 @@
 	let { note }: Props = $props();
 	let content = $state(note.content);
 	let container;
+	let iframe;
 
 	let isOpen = $state(false);
 	let isEditHTML = $state(false);
@@ -64,8 +65,29 @@
 		// `;
 	}
 
+	const customStyles = `
+	:root {
+			--color-base-100: oklch(100% 0 0);
+			--color-base-content: oklch(27.807% 0.029 256.847);
+		}
+		:host, :host * {
+			font-size: 16px !important;
+			line-height: 1.4;
+		}
+		p, pre, div {
+		background-color: var(--color-base-100) !important;
+		background: var(--color-base-100) !important; 
+		color: var(--color-base-content) !important;
+		}
+		img {
+			max-width: 100% !important;
+			height: auto !important;
+		}
+	`;
+
 	let shadow;
 	let style = document.createElement('style');
+	let doc;
 
 	function changeContent() {
 		shadow.innerHTML = content;
@@ -97,8 +119,42 @@
 		});
 	}
 
+	function manipulateIFrame(doc) {
+		// click link opens browser
+		const links = doc.querySelectorAll('a');
+		links.forEach((link) => {
+			link.addEventListener('click', (e) => {
+				e.preventDefault(); // Prevent default navigation
+				window.open(link.href);
+			});
+		});
+		// remove image links
+		const imgLinks = doc.querySelectorAll('a img');
+		imgLinks.forEach((img) => {
+			const link = img.parentElement;
+			link.parentNode.insertBefore(img, link);
+			link.parentNode.removeChild(link);
+		});
+		// add image viewing clicks
+		const images = doc.querySelectorAll('img');
+		images.forEach((img) => {
+			img.addEventListener('click', () => {
+				onImageClick(img.src);
+			});
+		});
+	}
+
 	onMount(() => {
 		content = note.content;
+		doc = iframe.contentDocument || iframe.contentWindow.document;
+		doc.open();
+		doc.write(content);
+		doc.close();
+
+		requestAnimationFrame(() => {
+			const height = doc.documentElement.scrollHeight;
+			iframe.style.height = `${height}px`;
+		});
 	});
 
 	$effect(() => {
@@ -126,6 +182,19 @@
 		}
 		`;
 		shadow.appendChild(style);
+
+		// iframe
+		const styleTag = doc.createElement('style');
+		styleTag.textContent = customStyles;
+		doc.head.appendChild(styleTag);
+
+		// Auto-resize iframe height
+		requestAnimationFrame(() => {
+			const height = doc.documentElement.scrollHeight;
+			iframe.style.height = `${height}px`;
+		});
+
+		manipulateIFrame(doc);
 	});
 </script>
 
@@ -153,6 +222,8 @@
 		<div class="card-body z-0">
 			<div class="relative" bind:this={container}></div>
 		</div>
+
+		<iframe class="border-none" scrolling="no" bind:this={iframe} />
 
 		{#if isEditHTML}
 			<button class="btn" onclick={() => (isEditHTML = false)}>Cancel</button>
