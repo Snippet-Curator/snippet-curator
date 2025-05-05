@@ -17,23 +17,17 @@
 	let { note }: Props = $props();
 	let content = $state(note.content);
 	let container;
-	let iframe;
+	let iframe = $state();
+	let shadow;
+	let doc = $state();
+	let styleTag = $state();
+	let zoom = $state(1);
 
 	let isOpen = $state(false);
 	let isEditHTML = $state(false);
 	let selectedImage = $state('');
 	let textSize = $state(16);
-
-	// function handleClick(event: MouseEvent) {
-	// 	console.log('click');
-	// 	console.log(event.target);
-	// 	const target = event.target as HTMLElement;
-	// 	if (target.tagName === 'IMG') {
-	// 		const img = target as HTMLImageElement;
-	// 		selectedImage = img.src;
-	// 		isOpen = true;
-	// 	}
-	// }
+	let newTextSize = $state(16);
 
 	function closeModal() {
 		isOpen = false;
@@ -46,48 +40,35 @@
 
 	function changeTextSize(event: Event) {
 		const target = event.target as HTMLInputElement;
-		let newTextSize = Number(target.value);
-		// style.textContent = `
+		newTextSize = Number(target.value);
+		textSize = Number(target.value);
+		// styleTag.textContent = `
 		// :host, :host * {
 		// 	font-size: ${newTextSize}px !important;
 		// 	line-height: 1.4;
 		// 	transition: font-size 0.3s ease;
-		// }
-		// 	p, pre, div {
-		// background-color: var(--color-base-100) !important;
-		// background: var(--color-base-100) !important;
-		// color: var(--color-base-content) !important;
-		// }
-		// img {
-		// 	max-width: 100% !important;
-		// 	height: auto !important;
-		// }
-		// `;
+		//  }`;
 	}
 
-	const customStyles = `
-	:root {
+	const customStyles = $state(`
+	  :root {
 			--color-base-100: oklch(100% 0 0);
 			--color-base-content: oklch(27.807% 0.029 256.847);
 		}
-		:host, :host * {
-			font-size: 16px !important;
-			line-height: 1.4;
-		}
+		* {
+			zoom: var(--zoom, 1);
+	   }
 		p, pre, div {
-		background-color: var(--color-base-100) !important;
-		background: var(--color-base-100) !important; 
-		color: var(--color-base-content) !important;
+			font-size: ${newTextSize}px !important;
+			background-color: var(--color-base-100) !important;
+			background: var(--color-base-100) !important; 
+			color: var(--color-base-content) !important;
+			transition: font-size 0.3s ease !important;
 		}
 		img {
 			max-width: 100% !important;
 			height: auto !important;
-		}
-	`;
-
-	let shadow;
-	let style = document.createElement('style');
-	let doc;
+		}`);
 
 	function changeContent() {
 		shadow.innerHTML = content;
@@ -150,51 +131,65 @@
 		doc.open();
 		doc.write(content);
 		doc.close();
-
-		requestAnimationFrame(() => {
-			const height = doc.documentElement.scrollHeight;
-			iframe.style.height = `${height}px`;
-		});
-	});
-
-	$effect(() => {
-		if (!container.shadowRoot) {
-			shadow = container.attachShadow({ mode: 'open' });
-		} else {
-			shadow = container.shadowRoot;
-		}
-
-		shadow.innerHTML = content;
-		manipulateContent(shadow);
-		style.textContent = `
-		:host, :host * {
-			font-size: ${textSize}px !important;
-			line-height: 1.4;
-		}
-		p, pre, div {
-		background-color: var(--color-base-100) !important;
-		background: var(--color-base-100) !important; 
-		color: var(--color-base-content) !important;
-		}
-		img {
-			max-width: 100% !important;
-			height: auto !important;
-		}
-		`;
-		shadow.appendChild(style);
-
-		// iframe
 		const styleTag = doc.createElement('style');
 		styleTag.textContent = customStyles;
 		doc.head.appendChild(styleTag);
+		iframe.onload = () => {
+			requestAnimationFrame(() => {
+				const height = doc.documentElement.scrollHeight;
+				iframe.style.height = `${height}px`;
+			});
+		};
+		doc.documentElement.style.setProperty('--zoom', zoom);
+	});
 
-		// Auto-resize iframe height
-		requestAnimationFrame(() => {
-			const height = doc.documentElement.scrollHeight;
-			iframe.style.height = `${height}px`;
-		});
+	$effect(() => {
+		content = note.content;
+		// const doc = iframe.contentDocument || iframe.contentWindow.document;
+		doc.open();
+		doc.write(note.content);
+		doc.close();
 
-		manipulateIFrame(doc);
+		// manipulateIFrame(doc);
+
+		iframe.onload = () => {
+			const doc = iframe.contentDocument;
+			const styleTag = doc.createElement('style');
+			styleTag.textContent = customStyles;
+			doc.head.appendChild(styleTag);
+
+			doc.documentElement.style.setProperty('--zoom', zoom);
+			requestAnimationFrame(() => {
+				const height = doc.documentElement.scrollHeight;
+				console.log(height);
+				iframe.style.height = `${height}px`;
+			});
+		};
+
+		// if (!container.shadowRoot) {
+		// 	shadow = container.attachShadow({ mode: 'open' });
+		// } else {
+		// 	shadow = container.shadowRoot;
+		// }
+
+		// shadow.innerHTML = content;
+		// manipulateContent(shadow);
+		// style.textContent = `
+		// :host, :host * {
+		// 	font-size: ${textSize}px !important;
+		// 	line-height: 1.4;
+		// }
+		// p, pre, div {
+		// background-color: var(--color-base-100) !important;
+		// background: var(--color-base-100) !important;
+		// color: var(--color-base-content) !important;
+		// }
+		// img {
+		// 	max-width: 100% !important;
+		// 	height: auto !important;
+		// }
+		// `;
+		// shadow.appendChild(style);
 	});
 </script>
 
@@ -212,6 +207,18 @@
 				bind:value={textSize}
 				oninput={changeTextSize}
 			/>
+
+			<input
+				type="range"
+				min="0.8"
+				max="1.2"
+				step="0.01"
+				bind:value={zoom}
+				oninput={() => {
+					const doc = iframe.contentDocument;
+					doc?.documentElement.style.setProperty('--zoom', zoom);
+				}}
+			/>
 			<CaseSensitive size={32} />
 		</div>
 	</div>
@@ -219,9 +226,9 @@
 
 <ScrollArea type="scroll" class="h-full pb-20">
 	<div class="card mx-auto mt-10 max-w-3xl px-10 lg:max-w-5xl">
-		<div class="card-body z-0">
+		<!-- <div class="card-body z-0">
 			<div class="relative" bind:this={container}></div>
-		</div>
+		</div> -->
 
 		<iframe class="border-none" scrolling="no" bind:this={iframe} />
 
