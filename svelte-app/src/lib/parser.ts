@@ -237,26 +237,34 @@ function createDescription(htmlContent: string, maxLength = 300) {
 export function sanitizeHTMLContent(content: string) {
   const cleanContent = sanitizeHTML(content, {
     parseStyleAttributes: false,
-    allowedTags: sanitizeHTML.defaults.allowedTags.concat([
-      'img',
-      'form',
-      'code',
-      'style',
-      'video',
-      'source',
-    ]),
-    // allowedTags: false,
+    // allowedTags: sanitizeHTML.defaults.allowedTags.concat([
+    //   'img',
+    //   'form',
+    //   'code',
+    //   'style',
+    //   'video',
+    //   'source',
+    // ]),
+    allowedTags: false,
     allowVulnerableTags: true,
-    allowedAttributes: {
-      // '*': ['src', 'href'],
-      // 'a': ['href', 'type', 'target'],
-      // 'img': ['src', 'type'],
-      // 'video': ['style', 'controls'],
-      // 'audio': ['class', 'controls', 'style'],
-      // 'iframe': ['src', 'style'],
-      // 'source': ['src', 'type'],
-      '*': ['style', 'id', 'class', 'src', 'href', 'type', 'controls']
-    },
+    // allowedAttributes: {
+    // '*': ['src', 'href', 'class', 'id'],
+    // 'a': ['href', 'type', 'target'],
+    // 'img': ['src', 'type'],
+    // 'video': ['style', 'controls'],
+    // 'audio': ['class', 'controls', 'style'],
+    // 'iframe': ['src', 'style'],
+    // 'source': ['src', 'type'],
+    // 'p': ['*'],
+    // 'div': ['*'],
+    // 'h1': ['*'],
+    // 'h2': ['*'],
+    // 'h3': ['*'],
+    // 'h4': ['*'],
+    // 'h5': ['*'],
+    // 'h6': ['*'],
+    //   '*': ['style', 'id', 'class', 'src', 'href', 'type', 'controls']
+    // },
     allowedSchemes: ['data', 'http', 'https'],
     transformTags: {
       a: function (tagName, attribs) {
@@ -277,17 +285,17 @@ export function sanitizeHTMLContent(content: string) {
         };
       },
     },
-    exclusiveFilter: function (frame) {
-      if (frame.tag == 'style') {
-        if (frame.text.includes('base64')) {
-          return true; // Exclude this <style> tag
-        }
-      }
-      if (frame.tag == 'link' && frame.attribs.href.includes('data:image/svg+xm')) {
-        return true;
-      }
-      return false;
-    }
+    // exclusiveFilter: function (frame) {
+    //   if (frame.tag == 'style') {
+    //     if (frame.text.includes('base64')) {
+    //       return true; // Exclude this <style> tag
+    //     }
+    //   }
+    //   if (frame.tag == 'link' && frame.attribs.href.includes('data:image/svg+xm')) {
+    //     return true;
+    //   }
+    //   return false;
+    // }
   });
   return cleanContent
 }
@@ -356,6 +364,7 @@ export function sanitizeContent(content: string) {
 export class htmlImport {
   title: string
   content: string
+  content2: string
   parsedHTML: Document
   source: string
   sourceURL: string
@@ -374,6 +383,7 @@ export class htmlImport {
     this.title = title
     this.parsedHTML = parsedHTML
     this.content = this.parseHTMLContent(this.parsedHTML)
+    this.content2 = fileContent
     this.description = ''
   }
 
@@ -512,12 +522,12 @@ export class htmlImport {
     this.recordID = record.id
     // console.log('content', this.content)
     await this.uploadImg()
-    this.content = sanitizeHTMLContent(this.content)
+    // this.content = sanitizeHTMLContent(this.content)
     this.description = createDescription(this.content)
 
     const data = {
-      'content': this.content,
-      'original_content': this.content,
+      'content': this.content2,
+      'original_content': this.content2,
       'description': this.description
     }
 

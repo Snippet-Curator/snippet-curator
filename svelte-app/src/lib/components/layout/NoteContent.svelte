@@ -97,8 +97,11 @@
 		});
 	}
 
-	$effect(() => {
+	onMount(() => {
 		content = note.content;
+	});
+
+	$effect(() => {
 		if (!container.shadowRoot) {
 			shadow = container.attachShadow({ mode: 'open' });
 		} else {
@@ -147,7 +150,7 @@
 
 <ScrollArea type="scroll" class="h-full pb-20">
 	<div class="card mx-auto mt-10 max-w-3xl px-10 lg:max-w-5xl">
-		<div class="card-body z-0 text-lg">
+		<div class="card-body z-0">
 			<div class="relative" bind:this={container}></div>
 		</div>
 
