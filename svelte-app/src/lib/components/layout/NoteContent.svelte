@@ -151,7 +151,7 @@
 			<div class="relative" bind:this={container}></div>
 		</div>
 
-		<!-- {#if isEditHTML}
+		{#if isEditHTML}
 			<button class="btn" onclick={() => (isEditHTML = false)}>Cancel</button>
 
 			<textarea
@@ -162,7 +162,7 @@
 			></textarea>
 		{:else}
 			<button onclick={() => (isEditHTML = true)} class="btn mb-20">Edit HTML</button>
-		{/if} -->
+		{/if}
 	</div>
 </ScrollArea>
 

@@ -234,6 +234,64 @@ function createDescription(htmlContent: string, maxLength = 300) {
   return trimmedText.substring(0, maxLength);
 }
 
+export function sanitizeHTMLContent(content: string) {
+  const cleanContent = sanitizeHTML(content, {
+    parseStyleAttributes: false,
+    allowedTags: sanitizeHTML.defaults.allowedTags.concat([
+      'img',
+      'form',
+      'code',
+      'style',
+      'video',
+      'source',
+    ]),
+    // allowedTags: false,
+    allowVulnerableTags: true,
+    allowedAttributes: {
+      // '*': ['src', 'href'],
+      // 'a': ['href', 'type', 'target'],
+      // 'img': ['src', 'type'],
+      // 'video': ['style', 'controls'],
+      // 'audio': ['class', 'controls', 'style'],
+      // 'iframe': ['src', 'style'],
+      // 'source': ['src', 'type'],
+      '*': ['style', 'id', 'class', 'src', 'href', 'type', 'controls']
+    },
+    allowedSchemes: ['data', 'http', 'https'],
+    transformTags: {
+      a: function (tagName, attribs) {
+        if (
+          !attribs.href ||
+          !attribs.href == undefined ||
+          attribs['href'] == '#' ||
+          attribs['href'].includes('javascript:')
+        ) {
+          return {
+            tagName: 'span',
+            attribs: attribs
+          };
+        }
+        return {
+          tagName: 'a',
+          attribs: attribs
+        };
+      },
+    },
+    exclusiveFilter: function (frame) {
+      if (frame.tag == 'style') {
+        if (frame.text.includes('base64')) {
+          return true; // Exclude this <style> tag
+        }
+      }
+      if (frame.tag == 'link' && frame.attribs.href.includes('data:image/svg+xm')) {
+        return true;
+      }
+      return false;
+    }
+  });
+  return cleanContent
+}
+
 export function sanitizeContent(content: string) {
   const cleanContent = sanitizeHTML(content, {
     parseStyleAttributes: false,
@@ -271,24 +329,26 @@ export function sanitizeContent(content: string) {
           attribs: attribs
         };
       },
-      // div: function (tagName, attribs) {
-      //   let newStyle =
-      //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;';
-      //   attribs.style = attribs.style ? `${attribs.style};${newStyle}` : newStyle;
-      //   return {
-      //     tagName: 'div',
-      //     attribs: attribs
-      //   };
-      // },
-      // pre: sanitizeHTML.simpleTransform('pre', {
-      //   style:
-      //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
-      // }),
-      // p: sanitizeHTML.simpleTransform('p', {
-      //   style:
-      //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
-      // })
-    }
+    },
+
+    // div: function (tagName, attribs) {
+    //   let newStyle =
+    //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;';
+    //   attribs.style = attribs.style ? `${attribs.style};${newStyle}` : newStyle;
+    //   return {
+    //     tagName: 'div',
+    //     attribs: attribs
+    //   };
+    // },
+    // pre: sanitizeHTML.simpleTransform('pre', {
+    //   style:
+    //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
+    // }),
+    // p: sanitizeHTML.simpleTransform('p', {
+    //   style:
+    //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
+    // })
+
   });
   return cleanContent
 }
@@ -348,6 +408,7 @@ export class htmlImport {
   }
 
   base64ToFile(base64: string, mimeType: string) {
+
     const extension = mimeType.split("/")[1];
     const filename = `${crypto.randomUUID()}.${extension}`;
     const byteCharacters = atob(base64);
@@ -362,15 +423,22 @@ export class htmlImport {
 
   async uploadImg() {
     for (const [index, img] of this.parsedHTML.querySelectorAll('img').entries()) {
-      if (!img.src.includes('data:image')) return
-      if (img.src.includes('data:image/svg+xml')) return
 
-      const base64Data = img.src.split(',')[1]
-      const mimeType = img.src.split(';')[0].split(':')[1]
-      const extension = mimeType.split('/')[1]
+      if (!img.src.includes('data:image')) continue
+      if (img.src.includes('data:image/svg+xml')) continue
+
+      let base64Data = ''
+      let mimeType = ''
+
+      try {
+        base64Data = img.src.split(',')[1]
+        mimeType = img.src.split(';')[0].split(':')[1]
+      } catch (e) {
+        console.log(e)
+        continue
+      }
 
       // convert to file
-      console.log(img, img.src, mimeType, base64Data)
       const imgFile = this.base64ToFile(base64Data, mimeType)
 
       // upload to database
@@ -404,11 +472,13 @@ export class htmlImport {
       }
 
       // get new filename and url
-      const newName = record.attachments[index]
+      const newName = record.attachments.at(-1)
       const newURL = `${baseURL}/${notesCollection}/${this.recordID}/${newName}`
 
       // replace img src
-      img.setAttribute('src', newURL)
+      if (newURL) {
+        img.setAttribute('src', newURL)
+      }
     }
     this.content = this.parseHTMLContent(this.parsedHTML)
   }
@@ -440,8 +510,9 @@ export class htmlImport {
     if (!record) return
 
     this.recordID = record.id
+    // console.log('content', this.content)
     await this.uploadImg()
-    this.content = sanitizeContent(this.content)
+    this.content = sanitizeHTMLContent(this.content)
     this.description = createDescription(this.content)
 
     const data = {
