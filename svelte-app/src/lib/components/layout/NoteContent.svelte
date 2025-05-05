@@ -21,7 +21,7 @@
 	let shadow;
 	let doc = $state();
 	let styleTag = $state();
-	let zoom = $state(1);
+	let fontScale = $state(1);
 
 	let isOpen = $state(false);
 	let isEditHTML = $state(false);
@@ -56,14 +56,14 @@
 			--color-base-content: oklch(27.807% 0.029 256.847);
 		}
 		* {
-			zoom: var(--zoom, 1);
+			font-size: calc(1em * var(--fontScale, 1)) !important;
+			line-height: 1.4 !important;
 	   }
 		p, pre, div {
-			font-size: ${newTextSize}px !important;
 			background-color: var(--color-base-100) !important;
 			background: var(--color-base-100) !important; 
 			color: var(--color-base-content) !important;
-			transition: font-size 0.3s ease !important;
+			// transition: font-size 0.05s ease !important;
 		}
 		img {
 			max-width: 100% !important;
@@ -134,23 +134,24 @@
 		const styleTag = doc.createElement('style');
 		styleTag.textContent = customStyles;
 		doc.head.appendChild(styleTag);
+
 		iframe.onload = () => {
 			requestAnimationFrame(() => {
-				const height = doc.documentElement.scrollHeight;
+				const height = doc.body.scrollHeight;
 				iframe.style.height = `${height}px`;
 			});
 		};
-		doc.documentElement.style.setProperty('--zoom', zoom);
+		doc.documentElement.style.setProperty('--fontScale', fontScale);
 	});
 
 	$effect(() => {
 		content = note.content;
-		// const doc = iframe.contentDocument || iframe.contentWindow.document;
+		const doc = iframe.contentDocument || iframe.contentWindow.document;
 		doc.open();
 		doc.write(note.content);
 		doc.close();
 
-		// manipulateIFrame(doc);
+		manipulateIFrame(doc);
 
 		iframe.onload = () => {
 			const doc = iframe.contentDocument;
@@ -158,38 +159,32 @@
 			styleTag.textContent = customStyles;
 			doc.head.appendChild(styleTag);
 
-			doc.documentElement.style.setProperty('--zoom', zoom);
+			doc.documentElement.style.setProperty('--fontScale', fontScale);
+
+			iframe.style.height = '0px';
+
 			requestAnimationFrame(() => {
-				const height = doc.documentElement.scrollHeight;
-				console.log(height);
+				const doc = iframe.contentDocument;
+				const height = doc.body.scrollHeight;
 				iframe.style.height = `${height}px`;
 			});
 		};
 
-		// if (!container.shadowRoot) {
-		// 	shadow = container.attachShadow({ mode: 'open' });
-		// } else {
-		// 	shadow = container.shadowRoot;
-		// }
+		doc.addEventListener('keydown', (event) => {
+			document.dispatchEvent(new KeyboardEvent(event.type, event));
+		});
+	});
 
-		// shadow.innerHTML = content;
-		// manipulateContent(shadow);
-		// style.textContent = `
-		// :host, :host * {
-		// 	font-size: ${textSize}px !important;
-		// 	line-height: 1.4;
-		// }
-		// p, pre, div {
-		// background-color: var(--color-base-100) !important;
-		// background: var(--color-base-100) !important;
-		// color: var(--color-base-content) !important;
-		// }
-		// img {
-		// 	max-width: 100% !important;
-		// 	height: auto !important;
-		// }
-		// `;
-		// shadow.appendChild(style);
+	$effect(() => {
+		fontScale;
+
+		iframe.style.height = '0px';
+
+		requestAnimationFrame(() => {
+			const doc = iframe.contentDocument;
+			const height = doc.documentElement.scrollHeight;
+			iframe.style.height = `${height}px`;
+		});
 	});
 </script>
 
@@ -199,24 +194,25 @@
 		<div
 			class="text-base-content/20 hover:text-base-content flex items-center gap-x-4 transition-colors duration-300"
 		>
-			<input
+			<!-- <input
 				type="range"
 				class="range range-xs"
 				min="14"
 				max="30"
 				bind:value={textSize}
 				oninput={changeTextSize}
-			/>
+			/> -->
 
 			<input
 				type="range"
+				class="range range-xs"
 				min="0.8"
 				max="1.2"
 				step="0.01"
-				bind:value={zoom}
+				bind:value={fontScale}
 				oninput={() => {
 					const doc = iframe.contentDocument;
-					doc?.documentElement.style.setProperty('--zoom', zoom);
+					doc?.documentElement.style.setProperty('--fontScale', fontScale);
 				}}
 			/>
 			<CaseSensitive size={32} />
