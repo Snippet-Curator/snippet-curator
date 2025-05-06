@@ -25,6 +25,7 @@ const parser = new XMLParser({
   attributeNamePrefix: "",
 })
 
+
 export async function makeDefaultNotebook() {
   const { data, error } = await tryCatch<RecordModel, PError>(pb.collection(notebookCollection).create({ name: inboxNotebook })
   )
@@ -221,6 +222,8 @@ function addMediaToContent(mimeType: string, fileURL: string, fileName: string) 
 }
 
 function createDescription(htmlContent: string, maxLength = 300) {
+  if (!htmlContent) return ''
+
   const strippedText = htmlContent
     .replace(/<[^>]+>/g, '') // Remove HTML tags
     .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
@@ -365,7 +368,6 @@ export function sanitizeContent(content: string) {
 export class htmlImport {
   title: string
   content: string
-  content2: string
   parsedHTML: Document
   source: string
   sourceURL: string
@@ -377,46 +379,48 @@ export class htmlImport {
   constructor(fileContent: string, selectedNotebookID: string) {
     this.recordID = ''
     this.selectedNotebookdID = selectedNotebookID
-    this.added = ''
-    this.sourceURL = ''
-    this.source = 'SingleFile clip'
-    const { parsedHTML, title } = this.parseHTML(fileContent)
+    const { parsedHTML, title, sourceURL, added } = this.parseHTML(fileContent)
     this.title = title
+    this.source = 'SingleFile clip'
+    this.sourceURL = sourceURL
+    this.added = added
     this.parsedHTML = parsedHTML
-    this.content = this.parseHTMLContent(this.parsedHTML)
-    this.content2 = fileContent
-    this.description = ''
+    this.content = fileContent
+    this.description = createDescription(parsedHTML.querySelector('meta[property="og:description"]')?.getAttribute('content') || '')
   }
 
   parseHTML(fileContent: string) {
 
     const match = fileContent.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
+    let sourceURL = ''
+    let added = ''
 
     if (match) {
-      this.sourceURL = match[1];
-      this.added = new Date(match[2]).toISOString();
+      sourceURL = match[1] || '';
+      added = new Date(match[2]).toISOString() || new Date().toISOString();
     }
 
-    const parser = new DOMParser()
-    const parsedHTML = parser.parseFromString(fileContent, 'text/html')
+    const HTMLparser = new DOMParser()
+
+    const parsedHTML = HTMLparser.parseFromString(fileContent, 'text/html')
     const title = parsedHTML.querySelector('title')?.textContent || 'Untitled'
 
     return {
-      parsedHTML, title
+      parsedHTML, title, sourceURL, added
     }
   }
 
-  parseHTMLContent(parsedHTML: Document) {
-    const bodyContent = parsedHTML.body.innerHTML
-    const styleTags = [...parsedHTML.querySelectorAll('style')].map(style => style.outerHTML).join('\n')
-    const htmlContent = `${styleTags} ${bodyContent}`
+  // parseHTMLContent(parsedHTML: Document) {
+  //   const bodyContent = parsedHTML.body.innerHTML
+  //   const styleTags = [...parsedHTML.querySelectorAll('style')].map(style => style.outerHTML).join('\n')
+  //   const htmlContent = `${styleTags} ${bodyContent}`
 
-    return htmlContent
-  }
+  //   return htmlContent
+  // }
 
-  parseURL(parsedHTML: Document) {
-    return parsedHTML.querySelector('meta[property="og:url"]')?.getAttribute('content') || ""
-  }
+  // parseURL(parsedHTML: Document) {
+  //   return parsedHTML.querySelector('meta[property="og:url"]')?.getAttribute('content') || ""
+  // }
 
   base64ToFile(base64: string, mimeType: string) {
 
@@ -432,70 +436,70 @@ export class htmlImport {
     return new File([byteArray], filename, { type: mimeType });
   }
 
-  async uploadImg() {
-    for (const [index, img] of this.parsedHTML.querySelectorAll('img').entries()) {
+  // async uploadImg() {
+  //   for (const [index, img] of this.parsedHTML.querySelectorAll('img').entries()) {
 
-      if (!img.src.includes('data:image')) continue
-      if (img.src.includes('data:image/svg+xml')) continue
+  //     if (!img.src.includes('data:image')) continue
+  //     if (img.src.includes('data:image/svg+xml')) continue
 
-      let base64Data = ''
-      let mimeType = ''
+  //     let base64Data = ''
+  //     let mimeType = ''
 
-      try {
-        base64Data = img.src.split(',')[1]
-        mimeType = img.src.split(';')[0].split(':')[1]
-      } catch (e) {
-        console.log(e)
-        continue
-      }
+  //     try {
+  //       base64Data = img.src.split(',')[1]
+  //       mimeType = img.src.split(';')[0].split(':')[1]
+  //     } catch (e) {
+  //       console.log(e)
+  //       continue
+  //     }
 
-      // convert to file
-      const imgFile = this.base64ToFile(base64Data, mimeType)
+  //     // convert to file
+  //     const imgFile = this.base64ToFile(base64Data, mimeType)
 
-      // upload to database
-      const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
-        'attachments+': [imgFile]
-      }))
+  //     // upload to database
+  //     const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
+  //       'attachments+': [imgFile]
+  //     }))
 
-      if (error) {
-        console.error('Error uploading image: ', error.message)
-      }
+  //     if (error) {
+  //       console.error('Error uploading image: ', error.message)
+  //     }
 
-      if (!record) return
+  //     if (!record) return
 
-      const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
+  //     const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
 
-      // fill in thumbnail
-      if (record.thumbnail == '') {
-        let thumbnailURL = ''
+  //     // fill in thumbnail
+  //     if (record.thumbnail == '') {
+  //       let thumbnailURL = ''
 
-        // make thumbnail based on type of resource file
-        if (mimeType == 'image/gif') {
-          thumbnailURL = defaultThumbURL
-        } else {
-          thumbnailURL = `${defaultThumbURL}?thumb=500x0`
-        }
+  //       // make thumbnail based on type of resource file
+  //       if (mimeType == 'image/gif') {
+  //         thumbnailURL = defaultThumbURL
+  //       } else {
+  //         thumbnailURL = `${defaultThumbURL}?thumb=500x0`
+  //       }
 
-        // update thumbnail
-        await pb.collection(notesCollection).update(this.recordID, {
-          'thumbnail': thumbnailURL
-        })
-      }
+  //       // update thumbnail
+  //       await pb.collection(notesCollection).update(this.recordID, {
+  //         'thumbnail': thumbnailURL
+  //       })
+  //     }
 
-      // get new filename and url
-      const newName = record.attachments.at(-1)
-      const newURL = `${baseURL}/${notesCollection}/${this.recordID}/${newName}`
+  //     // get new filename and url
+  //     const newName = record.attachments.at(-1)
+  //     const newURL = `${baseURL}/${notesCollection}/${this.recordID}/${newName}`
 
-      // replace img src
-      if (newURL) {
-        img.setAttribute('src', newURL)
-      }
-    }
-    this.content = this.parseHTMLContent(this.parsedHTML)
-  }
+  //     // replace img src
+  //     if (newURL) {
+  //       img.setAttribute('src', newURL)
+  //     }
+  //   }
+  //   this.content = this.parseHTMLContent(this.parsedHTML)
+  // }
 
   async replaceResources(fileContent: string) {
-    // replaces en-media with regular html tags within content
+    // replaces src with image and font with pocketbase file links. Href is skipped
     const mediaMatch = /\bsrc=(['"])?(data:(?:image|font)\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+)\1?/g
 
     if (!fileContent) {
@@ -504,7 +508,6 @@ export class htmlImport {
     }
 
     const matches = [...fileContent.matchAll(mediaMatch)]
-    console.log(matches)
     let updatedContent = fileContent
 
     for (const match of matches) {
@@ -521,7 +524,6 @@ export class htmlImport {
       }
 
       const resourceFile = this.base64ToFile(base64Data, mimeType)
-      console.log(resourceFile)
 
       // upload to database
       const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
@@ -538,7 +540,6 @@ export class htmlImport {
       }
 
       const newURL = `src=${baseURL}\/${notesCollection}\/${this.recordID}\/${record.attachments.at(-1)}`
-      console.log(newURL)
 
       const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments.at(-1)}`
 
@@ -547,8 +548,7 @@ export class htmlImport {
         updatedContent = updatedContent.replace(match[0], newURL)
       }
 
-      console.log(resourceFile.name, resourceFile.size)
-
+      // make thumbnail
       if (record.thumbnail) continue
       if (resourceFile.size < 10000) continue
       if (!mimeType.includes('image')) continue
@@ -566,12 +566,16 @@ export class htmlImport {
       }
 
       // update thumbnail
-      await pb.collection(notesCollection).update(this.recordID, {
+      const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
         'thumbnail': thumbnailURL
-      })
-    }
-    this.content2 = updatedContent;
+      }))
 
+      if (thumbError) {
+        console.error('Error updating thumbnail: ', thumbError.message)
+      }
+    }
+
+    this.content = updatedContent;
   }
 
   async uploadToDB() {
@@ -583,6 +587,7 @@ export class htmlImport {
     const skeletonData = {
       'title': this.title,
       'added': this.added,
+      'description': this.description,
       'weight': 5,
       'notebook': this.selectedNotebookdID,
       'last_score_updated': new Date().toISOString(),
@@ -603,14 +608,12 @@ export class htmlImport {
     this.recordID = record.id
     // console.log('content', this.content)
     // await this.uploadImg()
-    await this.replaceResources(this.content2)
+    await this.replaceResources(this.content)
     // this.content = sanitizeHTMLContent(this.content)
-    this.description = createDescription(this.content)
 
     const data = {
-      'content': this.content2,
-      'original_content': this.content2,
-      'description': this.description
+      'content': this.content,
+      'original_content': this.content,
     }
 
     const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
@@ -819,6 +822,7 @@ export class fileImport {
     this.mimeType = file.type
     this.recordID = ''
     this.fileURL = ''
+    this.content = ''
     this.title = `${file.name} ${dayjs(Date()).format('MM-DD-YYYY')}`
     this.selectedNotebookdID = selectedNotebookID
     this.added = new Date().toISOString()
@@ -864,7 +868,6 @@ export class fileImport {
     this.recordID = record.id
 
     await this.uploadResources()
-    console.log('file upload: ', this.mimeType, this.fileURL, this.file.name)
     this.content = addMediaToContent(this.mimeType, this.fileURL, this.file.name)
 
     const data = {
