@@ -1,5 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
+import path from 'path'
+import os from 'os'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { spawn } from 'child_process'
@@ -10,6 +12,19 @@ let pocketBaseProcess
 const pocketbaseDevPath = join(__dirname, '..', '..', 'db', 'pocketbase')
 const pocketbaseProdPath = join(resourcesPath, 'db', 'pocketbase')
 
+function getIconPath() {
+  const platform = os.platform();
+
+  if (platform === 'win32') {
+    return path.join(__dirname, 'resources', 'icon.ico');
+  } else if (platform === 'darwin') {
+    return path.join(__dirname, 'resources', 'icon.icns');
+  } else {
+    // Linux
+    return path.join(__dirname, 'resources', 'icon.png');
+  }
+}
+
 
 function createWindow(): void {
   // Create the browser window.
@@ -18,6 +33,7 @@ function createWindow(): void {
     height: 720,
     show: false,
     autoHideMenuBar: true,
+    icon: getIconPath(),
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

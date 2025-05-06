@@ -6,6 +6,16 @@
   "author": "example.com",
   "homepage": "https://electron-vite.org",
   "build": {
+    "icon": "resources/icon",
+    "win": {
+      "icon": "resources/icon.ico"
+    },
+    "mac": {
+      "icon": "resources/icon.icns"
+    },
+    "linux": {
+      "icon": "resources/icon.png"
+    },
     "files": [
       "!db/pb_data/",
       "!.db/pb_data/",

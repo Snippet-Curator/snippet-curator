@@ -48,7 +48,7 @@
 				}}
 				class="btn"><Tags size={18} class="text-base-content/60" />Edit Tags</button
 			>
-			<button class="btn"><Merge size={18} class="text-base-content/60" />Merge</button>
+			<!-- <button class="btn"><Merge size={18} class="text-base-content/60" />Merge</button> -->
 			{#if currentNotebookName != 'Archive' && currentNotebookName != 'Trash'}
 				<button
 					onclick={() => {
