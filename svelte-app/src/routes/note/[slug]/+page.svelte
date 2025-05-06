@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { NoteContent, Delete, EditNotebook, EditTags } from '$lib/components/';
+	import { NoteContent, Delete, EditNotebook, EditTags, NoteLoading } from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
 	import * as Topbar from '$lib/components/Topbar/index';
 
@@ -15,7 +15,7 @@
 </script>
 
 {#await initialLoading}
-	<br />
+	<NoteLoading />
 {:then}
 	<Topbar.Root>
 		<Topbar.Back />

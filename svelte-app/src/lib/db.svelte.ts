@@ -355,7 +355,7 @@ export class NotelistState {
     totalPages: 0,
   })
   clickedPage = 1
-  collectionName = 'notes'
+  collectionName = 'notes_without_content'
   notebookID = $state<string>()
   notebookName = $state<string>()
   tagID = $state<string>()

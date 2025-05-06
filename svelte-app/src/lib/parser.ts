@@ -496,7 +496,7 @@ export class htmlImport {
 
   async replaceResources(fileContent: string) {
     // replaces en-media with regular html tags within content
-    const mediaMatch = /\b(['"])?(data:(?:image|font)\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+)\1?/g
+    const mediaMatch = /\bsrc=(['"])?(data:(?:image|font)\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+)\1?/g
 
     if (!fileContent) {
       console.log('no file content')
@@ -537,17 +537,24 @@ export class htmlImport {
         continue
       }
 
-      const newURL = `"${baseURL}/${notesCollection}/${this.recordID}/${record.attachments.at(-1)}"`
+      const newURL = `src=${baseURL}\/${notesCollection}\/${this.recordID}\/${record.attachments.at(-1)}`
       console.log(newURL)
 
-      const defaultThumbURL = `${baseURL}\/${notesCollection}\/${this.recordID}\/${record.attachments.at(-1)}`
+      const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments.at(-1)}`
 
       // replace media with new URL
       if (newURL) {
         updatedContent = updatedContent.replace(match[0], newURL)
       }
 
+      console.log(resourceFile.name, resourceFile.size)
+
       if (record.thumbnail) continue
+      if (resourceFile.size < 10000) continue
+      if (!mimeType.includes('image')) continue
+      if (mimeType.includes('svg')) continue
+      if (mimeType.includes('ico')) continue
+
       // // fill in thumbnail
       let thumbnailURL = ''
 
@@ -563,7 +570,6 @@ export class htmlImport {
         'thumbnail': thumbnailURL
       })
     }
-    console.log(updatedContent)
     this.content2 = updatedContent;
 
   }

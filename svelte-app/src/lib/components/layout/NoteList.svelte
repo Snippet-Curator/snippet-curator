@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { NoteList, Note } from '$lib/types';
-	import { Background, Blank } from '$lib/components/';
+	import { Blank, NoteLoading } from '$lib/components/';
 
 	type Props = {
 		isBulkEdit: boolean;
@@ -76,9 +76,8 @@
 				</div>
 			{/each}
 		{:else}
-			<Blank />
+			<NoteLoading />
 		{/if}
-		<Background />
 	</div>
 
 	{#snippet failed()}

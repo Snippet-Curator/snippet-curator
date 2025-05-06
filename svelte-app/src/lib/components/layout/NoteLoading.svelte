@@ -1,8 +1,3 @@
-<!-- <div class="flex w-52 flex-col gap-4">
-	<div class="skeleton h-32 w-full"></div>
-	<div class="skeleton h-4 w-28"></div>
-	<div class="skeleton h-4 w-full"></div>
-	<div class="skeleton h-4 w-full"></div>
-</div> -->
-
-<span class="loading loading-dots loading-xl"></span>
+<div class="grid h-full w-full place-items-center">
+	<span class="loading loading-dots loading-xl"></span>
+</div>

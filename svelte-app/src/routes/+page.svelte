@@ -7,7 +7,15 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import pb, { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
-	import { Pagination, NoteList, Search, BulkToolbar, BulkEditBtn, Blank } from '$lib/components/';
+	import {
+		Pagination,
+		NoteList,
+		Search,
+		BulkToolbar,
+		BulkEditBtn,
+		Blank,
+		NoteLoading
+	} from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { searchState, signalPageState } from '$lib/utils.svelte';
 
@@ -16,6 +24,7 @@
 	let searchInput = $state('');
 	let isBulkEdit = $state(false);
 	let selectedNotesID = $state<string[]>([]);
+	let isLoading = $state(true);
 	// let scrollElement;
 
 	let notebookID = 'homepage';
@@ -26,6 +35,8 @@
 	const notelistState = getNotelistState(notebookID);
 
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
+
+	isLoading = false;
 
 	async function updatePage() {
 		if (searchInput == '') {
@@ -90,16 +101,19 @@
 
 <ScrollArea class="relative mb-20 h-[calc(100vh-60px)] overflow-y-auto">
 	{#await initialLoading}
-		<br />
+		<NoteLoading />
 	{:then}
 		<Pagination {notelistState} changePage={updatePage} currentID={notebookID} />
 		{#if isBulkEdit}
 			<BulkToolbar bind:isBulkEdit bind:selectedNotesID {notelistState} />
 		{/if}
-		{#if notelistState.notes.totalItems > 0}
+		{#if isLoading}
+			<NoteLoading />
+		{:else if notelistState.notes.totalItems > 0}
 			<NoteList {isBulkEdit} bind:selectedNotesID notes={notelistState.notes} />
 		{:else}
-			<Blank />
+			<!-- <Blank /> -->
+			<NoteLoading />
 		{/if}
 	{/await}
 </ScrollArea>

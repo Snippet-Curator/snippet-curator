@@ -47,14 +47,15 @@
 				--color-base-content: oklch(97.807% 0.029 256.847); 
 		 }
 	  }
-		body {
+		html, body {
 			margin: 0 !important;
+			height: 100% !important;
 		}
 		* {
 			font-size: calc(1em * var(--fontScale, 1)) !important;
 			line-height: 1.4 !important;
 	   }
-		p, pre, body, div {
+		html, body, main, section, p, pre, div {
 			background-color: var(--color-base-100) !important;
 			background: var(--color-base-100) !important; 
 			color: var(--color-base-content) !important;
@@ -100,10 +101,11 @@
 		const styleTag = doc.createElement('style');
 		styleTag.textContent = customStyles;
 		doc.head.appendChild(styleTag);
+
 		iframe.onload = () => {
 			requestAnimationFrame(() => {
 				const height = doc.body.scrollHeight;
-				iframe.style.height = `${height}px`;
+				iframe.style.height = `${height + 100}px`;
 			});
 		};
 	});
@@ -118,12 +120,12 @@
 		doc.documentElement.style.setProperty('--fontScale', fontScale);
 
 		manipulateIframe(doc);
+		const styleTag = doc.createElement('style');
+		styleTag.textContent = customStyles;
+		doc.head.appendChild(styleTag);
 
 		iframe.onload = () => {
 			const doc = iframe.contentDocument;
-			const styleTag = doc.createElement('style');
-			styleTag.textContent = customStyles;
-			doc.head.appendChild(styleTag);
 
 			doc.documentElement.style.setProperty('--fontScale', fontScale);
 
@@ -132,7 +134,8 @@
 			requestAnimationFrame(() => {
 				const doc = iframe.contentDocument;
 				const height = doc.body.scrollHeight;
-				iframe.style.height = `${height}px`;
+				console.log(height);
+				iframe.style.height = `${height + 100}px`;
 			});
 		};
 
@@ -171,9 +174,9 @@
 			<div class="relative" bind:this={container}></div>
 		</div> -->
 
-		<iframe class="border-none" scrolling="no" bind:this={iframe} />
+		<iframe class="bg-base-100 border-none" scrolling="no" bind:this={iframe} />
 
-		{#if isEditHTML}
+		<!-- {#if isEditHTML}
 			<button class="btn" onclick={() => (isEditHTML = false)}>Cancel</button>
 
 			<textarea
@@ -184,7 +187,7 @@
 			></textarea>
 		{:else}
 			<button onclick={() => (isEditHTML = true)} class="btn mb-20">Edit HTML</button>
-		{/if}
+		{/if} -->
 	</div>
 </ScrollArea>
 
