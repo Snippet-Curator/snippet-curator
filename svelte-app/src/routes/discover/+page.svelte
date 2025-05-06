@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { NoteContent, Delete, EditNotebook, EditTags, Blank } from '$lib/components/';
+	import {
+		NoteContent,
+		Delete,
+		EditNotebook,
+		EditTags,
+		Blank,
+		NoteLoading
+	} from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { onMount } from 'svelte';
@@ -111,8 +118,8 @@
 			<NoteContent {note} />
 		</div>
 	{:else}
-		<div class="h-screen">
-			<Blank />
+		<div class="grid h-screen place-items-center">
+			<NoteLoading />
 		</div>
 	{/if}
 {/await}

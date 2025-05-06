@@ -26,8 +26,6 @@
 	let isOpen = $state(false);
 	let isEditHTML = $state(false);
 	let selectedImage = $state('');
-	let textSize = $state(16);
-	let newTextSize = $state(16);
 
 	function closeModal() {
 		isOpen = false;
@@ -38,28 +36,25 @@
 		isOpen = true;
 	}
 
-	function changeTextSize(event: Event) {
-		const target = event.target as HTMLInputElement;
-		newTextSize = Number(target.value);
-		textSize = Number(target.value);
-		// styleTag.textContent = `
-		// :host, :host * {
-		// 	font-size: ${newTextSize}px !important;
-		// 	line-height: 1.4;
-		// 	transition: font-size 0.3s ease;
-		//  }`;
-	}
-
 	const customStyles = $state(`
 	  :root {
 			--color-base-100: oklch(100% 0 0);
 			--color-base-content: oklch(27.807% 0.029 256.847);
 		}
+		@media (prefers-color-scheme: dark) {
+		  :root {
+				--color-base-100: oklch(25.33% 0.016 252.42);
+				--color-base-content: oklch(97.807% 0.029 256.847); 
+		 }
+	  }
+		body {
+			margin: 0 !important;
+		}
 		* {
 			font-size: calc(1em * var(--fontScale, 1)) !important;
 			line-height: 1.4 !important;
 	   }
-		p, pre, div {
+		p, pre, body, div {
 			background-color: var(--color-base-100) !important;
 			background: var(--color-base-100) !important; 
 			color: var(--color-base-content) !important;
@@ -75,32 +70,7 @@
 		manipulateContent(shadow);
 	}
 
-	function manipulateContent(shadow) {
-		// click link opens browser
-		const links = shadow.querySelectorAll('a');
-		links.forEach((link) => {
-			link.addEventListener('click', (e) => {
-				e.preventDefault(); // Prevent default navigation
-				window.open(link.href);
-			});
-		});
-		// remove image links
-		const imgLinks = shadow.querySelectorAll('a img');
-		imgLinks.forEach((img) => {
-			const link = img.parentElement;
-			link.parentNode.insertBefore(img, link);
-			link.parentNode.removeChild(link);
-		});
-		// add image viewing clicks
-		const images = shadow.querySelectorAll('img');
-		images.forEach((img) => {
-			img.addEventListener('click', () => {
-				onImageClick(img.src);
-			});
-		});
-	}
-
-	function manipulateIFrame(doc) {
+	function manipulateIframe(doc) {
 		// click link opens browser
 		const links = doc.querySelectorAll('a');
 		links.forEach((link) => {
@@ -126,22 +96,16 @@
 	}
 
 	onMount(() => {
-		content = note.content;
-		doc = iframe.contentDocument || iframe.contentWindow.document;
-		doc.open();
-		doc.write(content);
-		doc.close();
+		doc = iframe.contentDocument;
 		const styleTag = doc.createElement('style');
 		styleTag.textContent = customStyles;
 		doc.head.appendChild(styleTag);
-
 		iframe.onload = () => {
 			requestAnimationFrame(() => {
 				const height = doc.body.scrollHeight;
 				iframe.style.height = `${height}px`;
 			});
 		};
-		doc.documentElement.style.setProperty('--fontScale', fontScale);
 	});
 
 	$effect(() => {
@@ -151,7 +115,9 @@
 		doc.write(note.content);
 		doc.close();
 
-		manipulateIFrame(doc);
+		doc.documentElement.style.setProperty('--fontScale', fontScale);
+
+		manipulateIframe(doc);
 
 		iframe.onload = () => {
 			const doc = iframe.contentDocument;
@@ -174,18 +140,6 @@
 			document.dispatchEvent(new KeyboardEvent(event.type, event));
 		});
 	});
-
-	$effect(() => {
-		fontScale;
-
-		iframe.style.height = '0px';
-
-		requestAnimationFrame(() => {
-			const doc = iframe.contentDocument;
-			const height = doc.documentElement.scrollHeight;
-			iframe.style.height = `${height}px`;
-		});
-	});
 </script>
 
 <div class="bg-base-100/90 sticky top-0 z-20 flex w-full px-8 py-4 backdrop-blur-2xl">
@@ -194,20 +148,11 @@
 		<div
 			class="text-base-content/20 hover:text-base-content flex items-center gap-x-4 transition-colors duration-300"
 		>
-			<!-- <input
-				type="range"
-				class="range range-xs"
-				min="14"
-				max="30"
-				bind:value={textSize}
-				oninput={changeTextSize}
-			/> -->
-
 			<input
 				type="range"
 				class="range range-xs"
-				min="0.8"
-				max="1.2"
+				min="0.98"
+				max="1.1"
 				step="0.01"
 				bind:value={fontScale}
 				oninput={() => {

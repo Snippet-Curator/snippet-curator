@@ -10,6 +10,7 @@ import { tryCatch } from './utils.svelte';
 import { type PError } from './types';
 import type { RecordModel } from 'pocketbase';
 
+
 dayjs.extend(customParseFormat)
 
 const notesCollection = 'notes'
@@ -493,6 +494,80 @@ export class htmlImport {
     this.content = this.parseHTMLContent(this.parsedHTML)
   }
 
+  async replaceResources(fileContent: string) {
+    // replaces en-media with regular html tags within content
+    const mediaMatch = /\b(['"])?(data:(?:image|font)\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+)\1?/g
+
+    if (!fileContent) {
+      console.log('no file content')
+      return
+    }
+
+    const matches = [...fileContent.matchAll(mediaMatch)]
+    console.log(matches)
+    let updatedContent = fileContent
+
+    for (const match of matches) {
+      console.log(match)
+      const openingQuote = match[1] || undefined
+      const dataURL = match[2]
+      const closingQuote = match[3] || undefined
+      const base64Data = dataURL.split(',')[1]
+      const mimeType = dataURL.split(';')[0].split(':')[1]
+
+      if (!base64Data || !mimeType) {
+        console.log('Invalid data URL format')
+        continue
+      }
+
+      const resourceFile = this.base64ToFile(base64Data, mimeType)
+      console.log(resourceFile)
+
+      // upload to database
+      const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
+        'attachments+': [resourceFile],
+      }))
+
+      if (error) {
+        console.error('Error uploading resource: ', error.message)
+      }
+
+      if (!record) {
+        console.log('no record')
+        continue
+      }
+
+      const newURL = `"${baseURL}/${notesCollection}/${this.recordID}/${record.attachments.at(-1)}"`
+      console.log(newURL)
+
+      const defaultThumbURL = `${baseURL}\/${notesCollection}\/${this.recordID}\/${record.attachments.at(-1)}`
+
+      // replace media with new URL
+      if (newURL) {
+        updatedContent = updatedContent.replace(match[0], newURL)
+      }
+
+      if (record.thumbnail) continue
+      // // fill in thumbnail
+      let thumbnailURL = ''
+
+      // make thumbnail based on type of resource file
+      if (mimeType == 'image/gif') {
+        thumbnailURL = defaultThumbURL
+      } else {
+        thumbnailURL = `${defaultThumbURL}?thumb=500x0`
+      }
+
+      // update thumbnail
+      await pb.collection(notesCollection).update(this.recordID, {
+        'thumbnail': thumbnailURL
+      })
+    }
+    console.log(updatedContent)
+    this.content2 = updatedContent;
+
+  }
+
   async uploadToDB() {
     const sources = [{
       'source': this.source,
@@ -521,7 +596,8 @@ export class htmlImport {
 
     this.recordID = record.id
     // console.log('content', this.content)
-    await this.uploadImg()
+    // await this.uploadImg()
+    await this.replaceResources(this.content2)
     // this.content = sanitizeHTMLContent(this.content)
     this.description = createDescription(this.content)
 
