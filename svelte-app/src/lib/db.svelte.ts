@@ -555,10 +555,12 @@ export class NoteState {
   noteList = $state()
   noteID: string
   collectionName: string
+  viewCollectionName: string
 
   constructor(noteID: string) {
     this.noteID = noteID
     this.collectionName = 'notes'
+    this.viewCollectionName = 'notes_without_content'
   }
 
   async getNote() {
@@ -575,7 +577,7 @@ export class NoteState {
   }
 
   async getDiscoverNoteList(page = 1) {
-    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(page, 100, {
+    const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getList(page, 100, {
       expand: 'notebook,tags',
       sort: '-score'
     }))
@@ -589,8 +591,19 @@ export class NoteState {
   }
 
   async getDiscoverNote(index = 0) {
-    this.note = this.noteList.items[index]
-    this.noteID = this.note.id
+    this.noteID = this.noteList.items[index].id
+
+    const { data: record, error: recordError } = await tryCatch(pb.collection(this.collectionName).getFirstListItem(`id="${this.noteID}"`))
+
+    if (recordError) {
+      console.error('Error getting discover note: ', recordError.data)
+    }
+
+    if (!record) {
+      console.log('No discovery note found')
+    }
+
+    this.note = record
 
     const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.note.id, {
       last_opened: new Date(),
