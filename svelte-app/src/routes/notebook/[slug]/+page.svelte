@@ -64,7 +64,7 @@
 		{#if notelistState.notes.totalItems > 0}
 			<NoteList {isBulkEdit} bind:selectedNotesID notes={notelistState.notes} />
 		{:else}
-			<Blank />
+			<br />
 		{/if}
 	{/await}
 </ScrollArea>

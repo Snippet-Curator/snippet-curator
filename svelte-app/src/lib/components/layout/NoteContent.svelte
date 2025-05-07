@@ -134,7 +134,6 @@
 			requestAnimationFrame(() => {
 				const doc = iframe.contentDocument;
 				const height = doc.body.scrollHeight;
-				console.log(height);
 				iframe.style.height = `${height + 100}px`;
 			});
 		};

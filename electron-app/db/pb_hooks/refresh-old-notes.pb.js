@@ -44,15 +44,19 @@ onBootstrap((e) => {
     })
   )
 
-  e.app
-    .db()
-    .newQuery(
-      'SELECT id, title, rating, weight, last_score_updated FROM notes WHERE last_score_updated < {:cutoff}'
-    )
-    .bind({
-      cutoff: cutoff
-    })
-    .all(notes)
+  try {
+    e.app
+      .db()
+      .newQuery(
+        'SELECT id, title, rating, weight, last_score_updated FROM notes WHERE last_score_updated < {:cutoff}'
+      )
+      .bind({
+        cutoff: cutoff
+      })
+      .all(notes)
+  } catch (err) {
+    console.error(`No notes found: ${err.message}`)
+  }
 
   for (const note of notes) {
     const newScore = calculateNoteScore(note.rating, note.weight, note.lastOpened)

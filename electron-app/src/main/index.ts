@@ -106,12 +106,12 @@ function runPocketbase() {
 
   let pocketBaseProcess
   if (is.dev) {
+    console.log('starting Pocketbase dev...')
     pocketBaseProcess = spawn(pocketbaseDevPath, ['serve'])
   } else {
+    console.log('starting Pocketbase prod...')
     pocketBaseProcess = spawn(pocketbaseProdPath, ['serve'])
   }
-
-  console.log('starting Pocketbase...')
 
   pocketBaseProcess.stdout.on('data', (data) => {
     console.log(`Pocketbase: ${data.toString()}`)
@@ -130,13 +130,6 @@ function runPocketbase() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
-
-
-  // try {
-  //   await createAdminAccount()
-  // } catch (err) {
-  //   console.log('Error creating admin account: ', err)
-  // }
 
   // run pocketbase
   runPocketbase()

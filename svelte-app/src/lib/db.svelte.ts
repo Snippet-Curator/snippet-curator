@@ -355,7 +355,8 @@ export class NotelistState {
     totalPages: 0,
   })
   clickedPage = 1
-  collectionName = 'notes_without_content'
+  collectionName = 'notes'
+  viewCollectionName = 'notes_without_content'
   notebookID = $state<string>()
   notebookName = $state<string>()
   tagID = $state<string>()
@@ -395,7 +396,7 @@ export class NotelistState {
 
     if (!archiveNotebook || !trashNotebook) return
 
-    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
+    const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getList(this.clickedPage, 24, {
       sort: sort,
       filter: `notebook!="${archiveNotebook.id}" && notebook!="${trashNotebook.id}"`,
       expand: 'notebook, tags'
@@ -410,7 +411,7 @@ export class NotelistState {
   }
 
   async getByNotebook(notebookID: string) {
-    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
+    const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getList(this.clickedPage, 24, {
       filter: `notebook="${notebookID}"`,
       expand: 'tags,notebook',
       sort: '-created',
@@ -426,7 +427,7 @@ export class NotelistState {
   async getByTag(tagID: string) {
     const archiveNotebook = await getArchiveNotebook()
     const trashNotebook = await getTrashNotebook()
-    const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
+    const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getList(this.clickedPage, 24, {
       filter: `tags~"${tagID}" && notebook!="${archiveNotebook.id}" && notebook!="${trashNotebook.id}"`,
       expand: 'tags,notebook',
       sort: '-created',
