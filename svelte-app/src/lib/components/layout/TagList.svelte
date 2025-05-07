@@ -23,11 +23,8 @@
 	let isChangeParentOpen = $state(false);
 	let isNewTagOpen = $state(false);
 	let selectedTag = $state<Tag>();
-	let newTagName = $state<string>('');
-	let renameTagName = $state<string>('');
 	let tagSearchTerm = $state<string>('');
 	let filteredTags = $state(tagState.tags);
-	let selectedParentTagID = $state<string>();
 
 	function filterTag(ownTag: Tag) {
 		if (!tagSearchTerm) {
@@ -64,7 +61,7 @@
 			<ContextMenu.Item
 				onSelect={() => {
 					selectedTag = tag;
-					selectedParentTagID = tag.parent;
+					// selectedParentTagID = tag.parent;
 					filterTag(selectedTag);
 					isChangeParentOpen = true;
 				}}>Change Parent</ContextMenu.Item
@@ -117,8 +114,7 @@
 	bind:isOpen={isEditOpen}
 	renameType="Tag"
 	currentName={selectedTag.name}
-	bind:newName={renameTagName}
-	action={() => tagState.updateOnebyName(selectedTag.id, renameTagName)}
+	action={(renameTagName) => tagState.updateOnebyName(selectedTag.id, renameTagName)}
 />
 
 <Delete bind:isOpen={isDeleteOpen} name="Tag" action={() => tagState.delete(selectedTag.id)}
@@ -128,17 +124,15 @@
 <ChangeParent
 	bind:isOpen={isChangeParentOpen}
 	renameType="Tag"
-	bind:selectedID={selectedParentTagID}
 	bind:searchTerm={tagSearchTerm}
 	filteredItems={filteredTags}
 	filter={() => filterTag(selectedTag)}
 	cancel={() => tagState.updateOnebyParent(selectedTag?.id, '')}
-	action={() => tagState.updateOnebyParent(selectedTag?.id, selectedParentTagID)}
+	action={(selectedParentTagID) => tagState.updateOnebyParent(selectedTag?.id, selectedParentTagID)}
 />
 
 <New
 	bind:isOpen={isNewTagOpen}
 	newType="Tag"
-	bind:name={newTagName}
-	action={() => tagState.createOnebyName(newTagName)}
+	action={(newTagName) => tagState.createOnebyName(newTagName)}
 />

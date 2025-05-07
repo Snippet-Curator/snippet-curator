@@ -64,7 +64,8 @@
 		img {
 			max-width: 100% !important;
 			height: auto !important;
-		}`);
+		}
+		`);
 
 	function changeContent() {
 		shadow.innerHTML = content;

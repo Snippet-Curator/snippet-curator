@@ -24,11 +24,8 @@
 	let isChangeParentOpen = $state(false);
 	let isNewNotebookOpen = $state(false);
 	let selectedNotebook = $state<Notebook>();
-	let newNotebookName = $state('');
-	let renameNotebookName = $state<string>('');
 	let notebookSearchTerm = $state<string>('');
 	let filteredNotebooks = $state(notebookState.notebooks);
-	let selectedParentNotebookID = $state<string>();
 
 	function filterNotebook(ownNotebook: Notebook) {
 		if (!notebookSearchTerm) {
@@ -76,7 +73,7 @@
 			<ContextMenu.Item
 				onSelect={() => {
 					selectedNotebook = notebook;
-					selectedParentNotebookID = notebook.parent;
+					// selectedParentNotebookID = notebook.parent;
 					filterNotebook(selectedNotebook);
 					isChangeParentOpen = true;
 				}}>Change Parent</ContextMenu.Item
@@ -131,8 +128,7 @@
 	bind:isOpen={isEditOpen}
 	renameType="Notebook"
 	currentName={selectedNotebook.name}
-	bind:newName={renameNotebookName}
-	action={() => notebookState.updateOnebyName(selectedNotebook.id, renameNotebookName)}
+	action={(newName) => notebookState.updateOnebyName(selectedNotebook.id, newName)}
 />
 
 <Delete
@@ -144,17 +140,16 @@
 <ChangeParent
 	bind:isOpen={isChangeParentOpen}
 	renameType="Notebook"
-	bind:selectedID={selectedParentNotebookID}
 	bind:searchTerm={notebookSearchTerm}
 	filteredItems={filteredNotebooks}
 	filter={() => filterNotebook(selectedNotebook)}
 	cancel={() => notebookState.updateOnebyParent(selectedNotebook?.id, '')}
-	action={() => notebookState.updateOnebyParent(selectedNotebook?.id, selectedParentNotebookID)}
+	action={(selectedParentNotebookID) =>
+		notebookState.updateOnebyParent(selectedNotebook?.id, selectedParentNotebookID)}
 />
 
 <New
 	bind:isOpen={isNewNotebookOpen}
 	newType="Notebook"
-	bind:name={newNotebookName}
-	action={() => notebookState.createOnebyName(newNotebookName)}
+	action={(newNotebookName) => notebookState.createOnebyName(newNotebookName)}
 />

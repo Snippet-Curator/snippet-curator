@@ -89,6 +89,7 @@
 					name: file.name,
 					error: e.message
 				});
+				console.log(e);
 			}
 		} else {
 			const imageFile = new fileImport(file, selectedNotebookID);

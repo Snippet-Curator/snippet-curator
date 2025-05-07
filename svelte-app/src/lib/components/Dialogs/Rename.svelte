@@ -5,17 +5,12 @@
 		isOpen: boolean;
 		renameType: string;
 		currentName: string;
-		newName: string;
-		action: () => void;
+		action: (newName: string) => void;
 	};
 
-	let {
-		isOpen = $bindable(),
-		currentName,
-		renameType,
-		newName = $bindable(),
-		action
-	}: Props = $props();
+	let { isOpen = $bindable(), currentName, renameType, action }: Props = $props();
+
+	let newName = $state('');
 </script>
 
 <Dialog.Root open={isOpen}>
@@ -43,7 +38,7 @@
 			<button onclick={() => (isOpen = false)} class="btn">Close</button>
 			<button
 				onclick={() => {
-					action();
+					action(newName);
 					isOpen = false;
 				}}
 				class="btn btn-primary">Save</button

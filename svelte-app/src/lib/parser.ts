@@ -213,7 +213,7 @@ function addMediaToContent(mimeType: string, fileURL: string, fileName: string) 
   }
 
   if (mimeType == 'application/pdf') {
-    return `<iframe src=${fileURL} style="width: 80vw; height: 100vh; max-width: 900px; margin: auto; display: block;" frameborder="0" > </iframe> <a href=${fileURL} target="_blank">${fileName}</a>`
+    return `<a href=${fileURL} target="_blank">${fileName}</a><iframe src=${fileURL} style="width: 80vw; min-height: 800px; height: 100vh; max-width: 900px; margin: auto; display: block;" frameborder="0" > </iframe> `
   }
 
   else {
@@ -750,12 +750,19 @@ export class EnImport {
     const existingTagNames = new Set(existingTags.map((tag: { name: string }) => tag.name))
 
     for (const tag of this.tags) {
-      if (existingTagNames.has(tag)) {
-        const record = existingTags.find((record: { name: string }) => record.name === tag)
+      if (existingTagNames.has(tag.toLowerCase())) {
+        const record = existingTags.find((record: { name: string }) => record.name === tag.toLowerCase())
         tagList.push(record.id)
       } else {
-        const newTagRecord = await pb.collection('tags').create({ 'name': tag.toLowerCase() })
-        tagList.push(newTagRecord.id)
+        const { data: newTag, error: newTagError } = await tryCatch<RecordModel[], PError>(pb.collection('tags').create({ 'name': tag.toLowerCase() }))
+
+        if (newTagError) {
+          console.error('Unable to make new tags: ', newTagError.message, tag)
+        }
+
+        if (!newTag) return
+
+        tagList.push(newTag.id)
       }
     }
     return tagList
@@ -783,6 +790,7 @@ export class EnImport {
       if (error.data.data.title.code == "validation_not_unique") {
         throw new Error('Skipped duplicate note')
       }
+      console.log(error.message)
       throw (error)
     }
 

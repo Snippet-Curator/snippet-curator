@@ -13,22 +13,22 @@
 				id: string;
 			}
 		];
-		selectedID: string;
 		cancel: () => void;
-		action: () => Promise<void>;
+		action: (selectedID: string) => void;
 		filter: () => void;
 	};
 
 	let {
 		isOpen = $bindable(),
 		renameType,
-		selectedID = $bindable(),
 		searchTerm = $bindable(),
 		filteredItems,
 		cancel,
 		action,
 		filter
 	}: Props = $props();
+
+	let selectedID = $state('');
 </script>
 
 <Dialog.Root open={isOpen}>
@@ -74,8 +74,8 @@
 				class="btn">Clear Parent {renameType}</button
 			>
 			<button
-				onclick={async () => {
-					await action();
+				onclick={() => {
+					action(selectedID);
 					searchTerm = '';
 					isOpen = false;
 				}}
