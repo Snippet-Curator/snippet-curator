@@ -173,7 +173,8 @@
 			<div class="relative" bind:this={container}></div>
 		</div> -->
 
-		<iframe class="bg-base-100 border-none" scrolling="no" bind:this={iframe} />
+		<iframe title="content" class="bg-base-100 border-none" scrolling="no" bind:this={iframe}
+		></iframe>
 
 		<!-- {#if isEditHTML}
 			<button class="btn" onclick={() => (isEditHTML = false)}>Cancel</button>

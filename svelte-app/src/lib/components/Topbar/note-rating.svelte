@@ -15,6 +15,10 @@
 	}
 
 	function handler(event: KeyboardEvent) {
+		if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+			return;
+		}
+
 		switch (event.key) {
 			case 'h':
 				event.preventDefault();

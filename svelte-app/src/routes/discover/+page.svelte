@@ -119,7 +119,8 @@
 		</div>
 	{:else}
 		<div class="grid h-screen place-items-center">
-			<NoteLoading />
+			<!-- <NoteLoading /> -->
+			<br />
 		</div>
 	{/if}
 {/await}

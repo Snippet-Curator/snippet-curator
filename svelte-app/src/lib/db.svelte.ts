@@ -594,7 +594,9 @@ export class NoteState {
   async getDiscoverNote(index = 0) {
     this.noteID = this.noteList.items[index].id
 
-    const { data: record, error: recordError } = await tryCatch(pb.collection(this.collectionName).getFirstListItem(`id="${this.noteID}"`))
+    const { data: record, error: recordError } = await tryCatch(pb.collection(this.collectionName).getFirstListItem(`id="${this.noteID}"`, {
+      expand: 'notebook,tags',
+    }))
 
     if (recordError) {
       console.error('Error getting discover note: ', recordError.data)
