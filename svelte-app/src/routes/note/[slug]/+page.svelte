@@ -15,7 +15,9 @@
 </script>
 
 {#await initialLoading}
-	<NoteLoading />
+	<div class="h-[calc(100vh-60px)]">
+		<NoteLoading />
+	</div>
 {:then}
 	<Topbar.Root>
 		<Topbar.Back />

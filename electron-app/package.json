@@ -4,7 +4,7 @@
   "description": "collect and discover snippets",
   "main": "./out/main/index.js",
   "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "homepage": "https://curator.krxiang.com",
   "build": {
     "icon": "resources/icon",
     "win": {
