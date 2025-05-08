@@ -29,6 +29,7 @@ function getIconPath() {
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
+    title: 'Recollect',
     width: 1280,
     height: 720,
     show: false,
