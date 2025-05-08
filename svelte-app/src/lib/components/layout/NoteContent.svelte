@@ -65,6 +65,9 @@
 			max-width: 100% !important;
 			height: auto !important;
 		}
+		video {
+			max-height: 800px; !important;
+		}
 		`);
 
 	function changeContent() {
