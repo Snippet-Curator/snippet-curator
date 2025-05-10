@@ -70,12 +70,6 @@ body {
 	@apply overflow-hidden;
 }
 
-ul,
-li,
-p {
-	@apply text-base;
-}
-
 input,
 label {
 	@apply outline-none;
