@@ -1,6 +1,7 @@
 # custom
-pocketbase.exe 
+electron-app/db/pocketbase.exe 
 pb_data/
+electron-app/db/pocketbase
 
 # Logs
 logs
@@ -132,3 +133,4 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
