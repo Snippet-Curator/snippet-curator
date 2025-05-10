@@ -21,7 +21,7 @@
 	<div class="flex w-full cursor-auto items-center justify-between px-2">
 		<a
 			href="#/notebook/{notebook.id}"
-			class="badge hover:badge-neutral badge-xl flex items-center text-nowrap transition-colors"
+			class="badge hover:badge-neutral flex items-center text-nowrap transition-colors"
 			><NotebookIcon size={18} />{notebook.name}
 		</a>
 		<span class="text-base-content/60">{notebook.note_count}</span>
@@ -29,14 +29,14 @@
 {/snippet}
 
 <ScrollArea class="h-[calc(100vh-60px)]">
-	<div class="mx-auto max-w-5xl py-6 pb-20 pt-10">
+	<div class="mx-auto max-w-5xl p-golden-xl">
 		<div class="flex items-center px-3">
 			<h1 class="grow">Notebooks</h1>
 			<button
 				onclick={() => {
 					isNewNotebookOpen = true;
 				}}
-				class="btn">New Notebook</button
+				class="btn btn-sm md:btn-md">New</button
 			>
 		</div>
 
@@ -64,7 +64,7 @@
 				onclick={() => {
 					isNewTagOpen = true;
 				}}
-				class="btn">New Tag</button
+				class="btn md:btn-md">New</button
 			>
 		</div>
 

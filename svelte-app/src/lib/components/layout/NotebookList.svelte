@@ -49,7 +49,7 @@
 			href="#/notebook/{notebook.id}"
 			class="{page.url.hash == `#/notebook/${notebook.id}`
 				? 'badge-neutral'
-				: ''} badge hover:badge-neutral badge-xl mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
+				: ''} badge hover:badge-neutral mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
 		>
 			<NotebookIcon size={15} />
 			{notebook.name}
