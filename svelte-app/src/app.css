@@ -67,7 +67,7 @@
 } */
 
 body {
-	@apply overflow-hidden text-lg;
+	@apply overflow-hidden;
 }
 
 ul,

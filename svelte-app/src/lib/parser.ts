@@ -578,6 +578,11 @@ export class htmlImport {
     this.content = updatedContent;
   }
 
+  stripCSP() {
+    const matchPattern = /<meta http-equiv=["]?Content-Security-Policy["]?[^>]*>/ig
+    this.content = this.content.replace(matchPattern,'');
+  }
+
   async uploadToDB() {
     const sources = [{
       'source': this.source,
@@ -609,6 +614,7 @@ export class htmlImport {
     // console.log('content', this.content)
     // await this.uploadImg()
     await this.replaceResources(this.content)
+    this.stripCSP()
     // this.content = sanitizeHTMLContent(this.content)
 
     const data = {
