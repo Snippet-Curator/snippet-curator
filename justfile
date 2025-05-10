@@ -21,6 +21,9 @@ build: full-svelte
 build-only: 
 	concurrently "cd electron-app && pnpm run build:win"
 
+build-only-mac: 
+	concurrently "cd electron-app && pnpm run build:mac"
+
 full-svelte: build-svelte prep-svelte move-svelte
 
 build-svelte:
@@ -33,3 +36,12 @@ move-svelte:
 	if (Test-Path "electron-app\out\renderer") { Remove-Item -Recurse -Force "electron-app\out\renderer" }; 
 	New-Item -ItemType Directory -Force -Path "electron-app\out\renderer" | Out-Null; 
 	Copy-Item -Path "svelte-app\build\*" -Destination "electron-app\out\renderer" -Recurse
+
+move-svelte-mac:
+	#!/usr/bin/env bash
+	set -euxo pipefail # https://just.systems/man/en/chapter_44.html#safer-bash-shebang-recipes
+	if [ -d "electron-app/out/renderer/" ]; then
+		trash electron-app/out/renderer/
+	fi
+	mkdir -p electron-app/out/renderer
+	cp -R svelte-app/build/* electron-app/out/renderer
