@@ -73,39 +73,10 @@ function createWindow(): void {
   }
 }
 
-
-
-// function createAdminAccount() {
-//   return new Promise((resolve, reject) => {
-//     let createAdmin
-//     if (is.dev) {
-//       createAdmin = spawn(pocketbaseDevPath, ['superuser', 'upsert', adminEmail, adminPass])
-//     } else {
-//       createAdmin = spawn(pocketbaseProdPath, ['superuser', 'upsert', adminEmail, adminPass])
-//     }
-
-//     createAdmin.stdout.on('data', () => {
-//       console.log('Create admin PocketBase account if not already exist.')
-//     })
-
-//     createAdmin.on('close', (code) => {
-//       if (code === 0) {
-//         console.log('Admin account either exists or created successfully.')
-//         resolve(undefined)
-//       } else {
-//         reject(new Error('Failed to create admin account'))
-//       }
-//     })
-
-//     createAdmin.on('error', (err) => {
-//       reject(err)
-//     })
-//   })
-// }
-
 function runPocketbase() {
 
   let pocketBaseProcess
+
   if (is.dev) {
     console.log('starting Pocketbase dev...')
     pocketBaseProcess = spawn(pocketbaseDevPath, ['serve'])
@@ -156,6 +127,20 @@ app.whenReady().then(async () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
+
+// Gracefully handle quitting
+app.on('before-quit', (event) => {
+  if (pocketBaseProcess) {
+    console.log('Stopping PocketBase...');
+    event.preventDefault(); // Prevent default quit until we're done
+    pocketBaseProcess.kill('SIGINT');
+
+    pocketBaseProcess.on('close', () => {
+      pocketBaseProcess = null;
+      app.quit(); // Now actually quit
+    });
+  }
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
