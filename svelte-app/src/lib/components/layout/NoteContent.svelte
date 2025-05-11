@@ -9,6 +9,8 @@
 	import type { Note } from '$lib/types';
 
 	import { onMount } from 'svelte';
+	import { tryCatch } from '$lib/utils.svelte';
+	import pb from '$lib/db.svelte';
 
 	type Props = {
 		note: Note;
@@ -70,9 +72,21 @@
 		}
 		`);
 
-	function changeContent() {
-		shadow.innerHTML = content;
-		manipulateContent(shadow);
+	// function changeContent() {
+	// 	shadow.innerHTML = content;
+	// 	manipulateContent(shadow);
+	// }
+
+	async function saveHTML(newHTML: HTMLElement) {
+		const { data, error } = await tryCatch(
+			pb.collection('notes').update(note.id, {
+				content: newHTML
+			})
+		);
+		if (error) {
+			console.error('Error updating note: ', note.title, error.message);
+		}
+		return data;
 	}
 
 	function manipulateIframe(doc) {
@@ -177,21 +191,53 @@
 			<div class="relative" bind:this={container}></div>
 		</div> -->
 
-		<iframe title="content" class="bg-base-100 border-none" scrolling="no" bind:this={iframe}
+		<iframe
+			title="content"
+			class="{isEditHTML
+				? 'border-base-content rounded-md border'
+				: 'border-none'} bg-base-100 mb-10"
+			scrolling="no"
+			bind:this={iframe}
 		></iframe>
 
-		<!-- {#if isEditHTML}
-			<button class="btn" onclick={() => (isEditHTML = false)}>Cancel</button>
+		<div class="mb-20 flex justify-end gap-x-2">
+			{#if isEditHTML}
+				<button
+					class="btn"
+					onclick={() => {
+						const doc = iframe.contentDocument;
+						doc.body.contentEditable = 'false';
+						isEditHTML = false;
+					}}>Cancel</button
+				>
+				<button
+					class="btn btn-primary"
+					onclick={async () => {
+						const doc = iframe.contentDocument;
+						doc.body.contentEditable = 'false';
+						content = await saveHTML(doc.documentElement.outerHTML);
+						isEditHTML = false;
+					}}>Save</button
+				>
 
+				<!-- 
 			<textarea
 				class="textarea h-100 mb-20 mt-10 w-full"
 				contenteditable="true"
 				oninput={changeContent}
 				bind:value={content}
-			></textarea>
-		{:else}
-			<button onclick={() => (isEditHTML = true)} class="btn mb-20">Edit HTML</button>
-		{/if} -->
+			></textarea> -->
+			{:else}
+				<button
+					onclick={() => {
+						const doc = iframe.contentDocument;
+						doc.body.contentEditable = 'true';
+						isEditHTML = true;
+					}}
+					class="btn">Edit</button
+				>
+			{/if}
+		</div>
 	</div>
 </ScrollArea>
 
