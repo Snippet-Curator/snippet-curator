@@ -1,9 +1,8 @@
 name: Build Electron App (Windows + macOS + Linux)
 
-on: 
-  push:
-    tags:
-      - 'v*' # e.g. v1.0.0
+on: push
+    # tags:
+    #   - 'v*' # e.g. v1.0.0
 
 jobs:
   build:
@@ -86,6 +85,6 @@ jobs:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and publish Electron app
-        run: pnpm electron-builder --publish onTag
+        run: npm electron-builder --publish onTag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
