@@ -40,9 +40,9 @@ jobs:
 
       - name: Move svelte build files
         run: |
-            rm -rf electron-app/out/renderer
-            mkdir -p electron-app/out/renderer
-            cp -r svelte-app/build/* electron-app/out/renderer/
+          if (Test-Path "electron-app\out\renderer") { Remove-Item -Recurse -Force "electron-app\out\renderer" }; 
+          New-Item -ItemType Directory -Force -Path "electron-app\out\renderer" | Out-Null; 
+          Copy-Item -Path "svelte-app\build\*" -Destination "electron-app\out\renderer" -Recurse
 
       - name: Build Electron App
         run: cd electron-app && npm run build
@@ -53,9 +53,9 @@ jobs:
           # macOS signing (optional)
           # CSC_LINK and CSC_KEY_PASSWORD will work here too
           # For notarization:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       # - name: Upload release artifacts
       #   uses: softprops/action-gh-release@v2
