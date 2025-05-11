@@ -23,14 +23,14 @@ jobs:
       - name: Install dependencies for frontend
         run: |
          cd svelte-app
-         pnpm install
+         npm install
          cd ../electron-app
-         pnpm install
+         npm install
 
       - name: Build svelte frontend
         run: |
          cd svelte-app
-         pnpm run build
+         npm run build
 
       - name: Prepare svelte build
         run: sed -i.bak 's|/_app|./_app|g' svelte-app/build/index.html
@@ -42,7 +42,7 @@ jobs:
             cp -r svelte-app/build/* electron-app/out/renderer/
 
       - name: Build Electron App
-        run: cd electron-app && pnpm run build
+        run: cd electron-app && npm run build
         env:
           # Common envs
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
