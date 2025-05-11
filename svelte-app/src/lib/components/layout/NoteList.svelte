@@ -22,7 +22,13 @@
 
 {#snippet renderNotes(note: Note)}
 	<figure class="w-full">
+		<!-- {#if ['mp4', 'webm', 'ogg'].some((ext) => note.thumbnail.includes(ext))}
+			<video style="width:100%" loop autoplay muted
+				><source src={note.thumbnail} />Your browser does not support the video tag.</video
+			>
+		{:else} -->
 		<img class="w-full" src={note.thumbnail} alt="" />
+		<!-- {/if} -->
 	</figure>
 	<div id="card-body" class="card-body p-golden-lg w-full">
 		<div id="card-title" class="card-title text-pretty break-words text-left">

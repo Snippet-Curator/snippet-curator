@@ -1,7 +1,7 @@
 {
   "name": "recollect",
   "productName": "Recollect",
-  "version": "0.0.1",
+  "version": "0.1.0.0",
   "description": "collect and discover snippets",
   "main": "./out/main/index.js",
   "author": "example.com",

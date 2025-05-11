@@ -2,6 +2,7 @@
 electron-app/db/pocketbase.exe 
 pb_data/
 electron-app/db/pocketbase
+electron-app/win-packed/
 
 # Logs
 logs

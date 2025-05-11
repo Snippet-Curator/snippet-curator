@@ -173,6 +173,7 @@ async function createThumbnail(recordID: string, resources) {
       }
       if (!thumbRecord) return
       thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${thumbRecord.attachments.at(-1)}?thumb=500x0`
+      // thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
     }
 
     else if (mimeType == 'image/gif') {
