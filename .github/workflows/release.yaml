@@ -12,37 +12,32 @@ jobs:
         os: [windows-latest]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    #   - name: Checkout code
+    #     uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+    #   - name: Set up Node.js
+    #     uses: actions/setup-node@v4
+    #     with:
+    #       node-version: 18
 
-      - name: Install dependencies for frontend
-        run: |
-         cd svelte-app
-         npm install
-         cd ../electron-app
-         npm install
+    #   - name: Install dependencies for frontend
+    #     run: |
+    #      cd svelte-app
+    #      npm install
+    #      cd ../electron-app
+    #      npm install
 
-      - name: Build svelte frontend
-        run: |
-         cd svelte-app
-         npm run build
+    #   - name: Build svelte frontend
+    #     run: |
+    #      cd svelte-app
+    #      npm run build
 
       - name: Prepare Svelte index.html (Windows PowerShell)
         shell: pwsh
-        run: |
-          if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            sed -i 's|/_app|./_app|g' svelte-app/build/index.html
-          elif [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i 's|/_app|./_app|g' svelte-app/build/index.html
-          elif [[ "$OSTYPE" == "msys"* || "$OSTYPE"  == "cygwin" ]]; then
-            (Get-Content svelte-app/build/index.html) -replace '/_app', './_app' | Set-Content svelte-app/build/index.html
-          fi
-      
+        if: startsWith(matrix.os, 'windows')
+        run: 
+          (Get-Content svelte-app/build/index.html) -replace '/_app', './_app' | Set-Content svelte-app/build/index.html
+
       - name: Move svelte build files
         run: |
             rm -rf electron-app/out/renderer
