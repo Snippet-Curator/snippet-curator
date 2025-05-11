@@ -30,7 +30,7 @@
 		</div>
 
 		{#if !note.thumbnail}
-			<p class="line-clamp-3 text-left">
+			<p class="line-clamp-3 text-pretty text-left">
 				{note.description}
 			</p>
 		{/if}
@@ -40,7 +40,7 @@
 			{/if}
 			{#if note.expand?.tags}
 				{#each note.expand?.tags as tag}
-					<span class="badge text-nowrap">{tag.name}</span>
+					<span class="badge text-nowrap">#{tag.name}</span>
 				{/each}
 			{/if}
 		</div>
