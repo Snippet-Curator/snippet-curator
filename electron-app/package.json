@@ -1,11 +1,16 @@
 {
   "name": "recollect",
   "productName": "Recollect",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "collect and discover snippets",
   "main": "./out/main/index.js",
   "author": "kang rui xiang",
   "homepage": "https://recollect.krxiang.com",
+  "publish": [
+    {
+      "provider": "github"
+    }
+  ],
   "build": {
     "icon": "resources/icon",
     "win": {

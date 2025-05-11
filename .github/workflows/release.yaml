@@ -32,17 +32,31 @@ jobs:
          cd svelte-app
          npm run build
 
-      - name: Prepare Svelte index.html (Windows PowerShell)
-        shell: pwsh
+      - name: Prepare Svelte index.html (Windows)
         if: startsWith(matrix.os, 'windows')
         run: 
           (Get-Content svelte-app/build/index.html) -replace '/_app', './_app' | Set-Content svelte-app/build/index.html
 
-      - name: Move svelte build files
+      - name: Prepare Svelte index.html (Mac)
+        if: startsWith(matrix.os, 'macos')
+        run: 
+          sed -i.bak 's|/_app|./_app|g' svelte-app/build/index.html
+          
+      - name: Move svelte build files (Windows)
+        if: startsWith(matrix.os, 'windows')
         run: |
           if (Test-Path "electron-app\out\renderer") { Remove-Item -Recurse -Force "electron-app\out\renderer" }; 
           New-Item -ItemType Directory -Force -Path "electron-app\out\renderer" | Out-Null; 
           Copy-Item -Path "svelte-app\build\*" -Destination "electron-app\out\renderer" -Recurse
+
+      - name: Move svelte build files (Mac)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          if [ -d "electron-app/out/renderer/" ]; then
+            trash electron-app/out/renderer/
+          fi
+          mkdir -p electron-app/out/renderer
+          cp -R svelte-app/build/* electron-app/out/renderer
 
       - name: Build Electron App
         run: cd electron-app && npm run build
@@ -53,9 +67,9 @@ jobs:
           # macOS signing (optional)
           # CSC_LINK and CSC_KEY_PASSWORD will work here too
           # For notarization:
-          # APPLE_ID: ${{ secrets.APPLE_ID }}
-          # APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       # - name: Upload release artifacts
       #   uses: softprops/action-gh-release@v2
@@ -69,3 +83,8 @@ jobs:
       #       dist/*.deb
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish Electron app
+        run: electron-builder --publish onTag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
