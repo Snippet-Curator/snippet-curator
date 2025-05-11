@@ -1,0 +1,69 @@
+name: Build Electron App (Windows + macOS + Linux)
+
+on:
+  push:
+    tags:
+      - 'v*' # e.g. v1.0.0
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies for frontend
+        run: |
+         cd svelte-app
+         pnpm install
+         cd ../electron-app
+         pnpm install
+
+      - name: Build svelte frontend
+        run: |
+         cd svelte-app
+         pnpm run build
+
+      - name: Prepare svelte build
+        run: sed -i.bak 's|/_app|./_app|g' svelte-app/build/index.html
+      
+      - name: Move svelte build files
+        run: |
+            rm -rf electron-app/out/renderer
+            mkdir -p electron-app/out/renderer
+            cp -r svelte-app/build/* electron-app/out/renderer/
+
+      - name: Build Electron App
+        run: cd electron-app && pnpm run build
+        env:
+          # Common envs
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # macOS signing (optional)
+          # CSC_LINK and CSC_KEY_PASSWORD will work here too
+          # For notarization:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      # - name: Upload release artifacts
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     files: |
+      #       dist/*.dmg
+      #       dist/*.exe
+      #       dist/*.AppImage
+      #       dist/*.zip
+      #       dist/*.msi
+      #       dist/*.deb
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
