@@ -147,14 +147,16 @@ async function createThumbnail(recordID: string, resources) {
 
   for (const [index, resource] of resources.entries()) {
     if (record.thumbnail) return
+    if (resource.size < 10000) return
 
-    let mimeType
+    const mimeType = resource.type
+    // takes care of difference between file import and evernote import
 
-    if (resource.mime) {
-      mimeType = resource.mime
-    } else if (resource.type) {
-      mimeType = resource.type
-    }
+    // if (resource.mime) {
+    //   mimeType = resource.mime
+    // } else if (resource.type) {
+    //   mimeType = resource.type
+    // }
 
     if (!mimeType.includes('image') && !mimeType.includes('video') && !mimeType.includes('application/octet-stream')) {
       return
@@ -580,7 +582,7 @@ export class htmlImport {
 
   stripCSP() {
     const matchPattern = /<meta http-equiv=["]?Content-Security-Policy["]?[^>]*>/ig
-    this.content = this.content.replace(matchPattern,'');
+    this.content = this.content.replace(matchPattern, '');
   }
 
   async uploadToDB() {
@@ -698,6 +700,7 @@ export class EnImport {
   }
 
   async uploadResources() {
+    let files = []
     for (const [index, resource] of this.enResources.entries()) {
       if (!resource) return
 
@@ -715,11 +718,13 @@ export class EnImport {
         'attachments+': [resource.file]
       })
 
+      console.log(resource)
       resource.name = record.attachments[index]
       resource.fileURL = `${baseURL}/${notesCollection}/${this.recordID}/${resource.name}`
+      files.push(resource.file)
     }
 
-    await createThumbnail(this.recordID, this.enResources)
+    await createThumbnail(this.recordID, files)
   }
 
   replaceEnMedia() {
