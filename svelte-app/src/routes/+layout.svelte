@@ -91,7 +91,7 @@
 	});
 </script>
 
-<Resizable.PaneGroup direction="horizontal" class="font-display max-h-screen w-full">
+<Resizable.PaneGroup direction="horizontal" class="font-display max-h-screen min-h-screen w-full">
 	<Resizable.Pane
 		class="{sidebarState.isOpen
 			? '-motion-translate-x-in-100 motion-duration-200'

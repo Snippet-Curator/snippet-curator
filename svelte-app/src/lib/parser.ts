@@ -378,52 +378,86 @@ export class htmlImport {
   added: string
   description: string
   selectedNotebookdID: string
+  HTMLparser: DOMParser
 
   constructor(fileContent: string, selectedNotebookID: string) {
+    this.HTMLparser = new DOMParser()
+    this.content = fileContent
+    this.parsedHTML = this.parseHTML(fileContent)
+    this.title = this.getTitle()
+    this.description = this.getDescription()
+    this.source = this.getSource()
+    this.sourceURL = this.getSourceURL()
+    this.added = this.getAdded()
     this.recordID = ''
     this.selectedNotebookdID = selectedNotebookID
-    const { parsedHTML, title, sourceURL, added } = this.parseHTML(fileContent)
-    this.title = title
-    this.source = 'SingleFile clip'
-    this.sourceURL = sourceURL
-    this.added = added
-    this.parsedHTML = parsedHTML
-    this.content = fileContent
-    this.description = createDescription(parsedHTML.querySelector('meta[property="og:description"]')?.getAttribute('content') || '')
+    // const { parsedHTML, title, sourceURL, added } = this.parseHTML(fileContent)
+    // this.parsedHTML = parsedHTML
   }
 
   parseHTML(fileContent: string) {
-
-    const match = fileContent.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
-    let sourceURL = ''
-    let added = ''
-
-    if (match) {
-      sourceURL = match[1] || '';
-      added = new Date(match[2]).toISOString() || new Date().toISOString();
-    }
-
-    const HTMLparser = new DOMParser()
-
-    const parsedHTML = HTMLparser.parseFromString(fileContent, 'text/html')
-    const title = parsedHTML.querySelector('title')?.textContent || 'Untitled'
-
-    return {
-      parsedHTML, title, sourceURL, added
-    }
+    return this.HTMLparser.parseFromString(fileContent, 'text/html')
   }
 
-  // parseHTMLContent(parsedHTML: Document) {
-  //   const bodyContent = parsedHTML.body.innerHTML
-  //   const styleTags = [...parsedHTML.querySelectorAll('style')].map(style => style.outerHTML).join('\n')
-  //   const htmlContent = `${styleTags} ${bodyContent}`
+  getTitle() {
+    return this.parsedHTML.querySelector('title')?.textContent || 'Untitled'
+  }
 
-  //   return htmlContent
-  // }
+  getDescription() {
+    return createDescription(this.parsedHTML.querySelector('meta[property="og:description"]')?.getAttribute('content') || '')
+  }
 
-  // parseURL(parsedHTML: Document) {
-  //   return parsedHTML.querySelector('meta[property="og:url"]')?.getAttribute('content') || ""
-  // }
+  getSource() {
+    // parse instagram saves with source meta property
+    const source = this.parsedHTML.querySelector('meta[property="source"]')
+    console.log("source", source?.getAttribute('content'))
+
+    if (source) {
+      return source.getAttribute('content')
+    }
+
+    // if not, use regex to match singleFile source
+    const match = this.content.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
+
+    if (match) {
+      return 'SingleFile Save'
+    }
+
+    return ''
+  }
+
+  getSourceURL() {
+    const sourceURL = this.parsedHTML.querySelector('meta[property="source-url"]')
+    console.log("sourceurl", sourceURL, sourceURL?.getAttribute('content'))
+
+    if (sourceURL) {
+      return sourceURL.getAttribute('content')
+    }
+
+    const match = this.content.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
+
+    if (match) {
+      return match[1] || '';
+    }
+
+    return ''
+  }
+
+  getAdded() {
+    const added = this.parsedHTML.querySelector('meta[property="added"]')
+
+    if (added && added.textContent) {
+      return added.getAttribute('content')
+    }
+
+    const match = this.content.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
+
+    if (match) {
+      return new Date(match[2]).toISOString()
+    }
+
+    return new Date().toISOString()
+  }
 
   base64ToFile(base64: string, mimeType: string) {
 
@@ -438,68 +472,6 @@ export class htmlImport {
 
     return new File([byteArray], filename, { type: mimeType });
   }
-
-  // async uploadImg() {
-  //   for (const [index, img] of this.parsedHTML.querySelectorAll('img').entries()) {
-
-  //     if (!img.src.includes('data:image')) continue
-  //     if (img.src.includes('data:image/svg+xml')) continue
-
-  //     let base64Data = ''
-  //     let mimeType = ''
-
-  //     try {
-  //       base64Data = img.src.split(',')[1]
-  //       mimeType = img.src.split(';')[0].split(':')[1]
-  //     } catch (e) {
-  //       console.log(e)
-  //       continue
-  //     }
-
-  //     // convert to file
-  //     const imgFile = this.base64ToFile(base64Data, mimeType)
-
-  //     // upload to database
-  //     const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
-  //       'attachments+': [imgFile]
-  //     }))
-
-  //     if (error) {
-  //       console.error('Error uploading image: ', error.message)
-  //     }
-
-  //     if (!record) return
-
-  //     const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
-
-  //     // fill in thumbnail
-  //     if (record.thumbnail == '') {
-  //       let thumbnailURL = ''
-
-  //       // make thumbnail based on type of resource file
-  //       if (mimeType == 'image/gif') {
-  //         thumbnailURL = defaultThumbURL
-  //       } else {
-  //         thumbnailURL = `${defaultThumbURL}?thumb=500x0`
-  //       }
-
-  //       // update thumbnail
-  //       await pb.collection(notesCollection).update(this.recordID, {
-  //         'thumbnail': thumbnailURL
-  //       })
-  //     }
-
-  //     // get new filename and url
-  //     const newName = record.attachments.at(-1)
-  //     const newURL = `${baseURL}/${notesCollection}/${this.recordID}/${newName}`
-
-  //     // replace img src
-  //     if (newURL) {
-  //       img.setAttribute('src', newURL)
-  //     }
-  //   }
-  //   this.content = this.parseHTMLContent(this.parsedHTML)
-  // }
 
   async replaceResources(fileContent: string) {
     // replaces src with image and font with pocketbase file links. Href is skipped
@@ -631,6 +603,81 @@ export class htmlImport {
       console.error('Error updating record: ', updatedError.message)
     }
   }
+
+
+  // parseHTMLContent(parsedHTML: Document) {
+  //   const bodyContent = parsedHTML.body.innerHTML
+  //   const styleTags = [...parsedHTML.querySelectorAll('style')].map(style => style.outerHTML).join('\n')
+  //   const htmlContent = `${styleTags} ${bodyContent}`
+
+  //   return htmlContent
+  // }
+
+  // parseURL(parsedHTML: Document) {
+  //   return parsedHTML.querySelector('meta[property="og:url"]')?.getAttribute('content') || ""
+  // }
+
+  // async uploadImg() {
+  //   for (const [index, img] of this.parsedHTML.querySelectorAll('img').entries()) {
+
+  //     if (!img.src.includes('data:image')) continue
+  //     if (img.src.includes('data:image/svg+xml')) continue
+
+  //     let base64Data = ''
+  //     let mimeType = ''
+
+  //     try {
+  //       base64Data = img.src.split(',')[1]
+  //       mimeType = img.src.split(';')[0].split(':')[1]
+  //     } catch (e) {
+  //       console.log(e)
+  //       continue
+  //     }
+
+  //     // convert to file
+  //     const imgFile = this.base64ToFile(base64Data, mimeType)
+
+  //     // upload to database
+  //     const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
+  //       'attachments+': [imgFile]
+  //     }))
+
+  //     if (error) {
+  //       console.error('Error uploading image: ', error.message)
+  //     }
+
+  //     if (!record) return
+
+  //     const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
+
+  //     // fill in thumbnail
+  //     if (record.thumbnail == '') {
+  //       let thumbnailURL = ''
+
+  //       // make thumbnail based on type of resource file
+  //       if (mimeType == 'image/gif') {
+  //         thumbnailURL = defaultThumbURL
+  //       } else {
+  //         thumbnailURL = `${defaultThumbURL}?thumb=500x0`
+  //       }
+
+  //       // update thumbnail
+  //       await pb.collection(notesCollection).update(this.recordID, {
+  //         'thumbnail': thumbnailURL
+  //       })
+  //     }
+
+  //     // get new filename and url
+  //     const newName = record.attachments.at(-1)
+  //     const newURL = `${baseURL}/${notesCollection}/${this.recordID}/${newName}`
+
+  //     // replace img src
+  //     if (newURL) {
+  //       img.setAttribute('src', newURL)
+  //     }
+  //   }
+  //   this.content = this.parseHTMLContent(this.parsedHTML)
+  // }
 }
 
 export class EnImport {
