@@ -72,11 +72,6 @@
 		}
 		`);
 
-	// function changeContent() {
-	// 	shadow.innerHTML = content;
-	// 	manipulateContent(shadow);
-	// }
-
 	async function saveHTML(newHTML: HTMLElement) {
 		const { data, error } = await tryCatch(
 			pb.collection('notes').update(note.id, {
@@ -219,14 +214,6 @@
 						isEditHTML = false;
 					}}>Save</button
 				>
-
-				<!-- 
-			<textarea
-				class="textarea h-100 mb-20 mt-10 w-full"
-				contenteditable="true"
-				oninput={changeContent}
-				bind:value={content}
-			></textarea> -->
 			{:else}
 				<button
 					onclick={() => {

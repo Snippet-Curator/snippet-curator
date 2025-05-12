@@ -51,14 +51,14 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
-  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        'Content-Security-Policy': ["default-src 'self' data: http://127.0.0.1:8090 ws://127.0.0.1:8090; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"]
-      }
-    });
-  });
+  // mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+  //   callback({
+  //     responseHeaders: {
+  //       ...details.responseHeaders,
+  //       'Content-Security-Policy': ["default-src 'self' data: http://127.0.0.1:8090 ws://127.0.0.1:8090; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"]
+  //     }
+  //   });
+  // });
 
   mainWindow.on('close', () => {
     if (pocketBaseProcess) {

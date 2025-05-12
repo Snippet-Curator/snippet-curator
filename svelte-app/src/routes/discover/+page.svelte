@@ -10,7 +10,6 @@
 	import { NoteState } from '$lib/db.svelte';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { onMount } from 'svelte';
-	import { ArrowDown, ArrowUp } from 'lucide-svelte';
 
 	const noteState = new NoteState('discovery');
 
@@ -80,13 +79,6 @@
 				onRight={getNextNote}
 			></Topbar.NavBtns>
 			<!-- {note.score.toFixed(2)} -->
-
-			<!-- <Topbar.Keyboard
-				onLeft={getPreviousNote}
-				onRight={getNextNote}
-				onUp={upvote}
-				onDown={downvote}
-			></Topbar.Keyboard> -->
 			<Topbar.Weight onUp={upvote} onDown={downvote}></Topbar.Weight>
 			<div class="grow"></div>
 
