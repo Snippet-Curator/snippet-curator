@@ -25,16 +25,18 @@
 	} from '$lib/db.svelte';
 
 	import { Dock, Icon, NotebookList, TagList } from '$lib/components';
+	import { getSideBarState, setSideBarState } from '$lib/utils.svelte';
 
 	let { children } = $props();
 	setTagState();
 	setNotebookState();
 	setDefaultNotebooksState();
+	setSideBarState();
 	const tagState = getTagState();
 	const notebookState = getNotebookState();
 	const defaultNotebooksState = getDefaultNotebooksState();
+	const sidebarState = getSideBarState();
 
-	let showSidePanel = $state(true);
 	let screenWidth = window.innerWidth;
 
 	async function getDefaultNotebooks() {
@@ -43,7 +45,10 @@
 
 	const updateScreenWidth = () => {
 		screenWidth = window.innerWidth;
-		showSidePanel = screenWidth >= 768; // Collapse below md breakpoint
+		if (screenWidth < 768) {
+			sidebarState.isOpen = false;
+		}
+		// Collapse below md breakpoint
 	};
 
 	type LayoutPage = {
@@ -88,8 +93,8 @@
 
 <Resizable.PaneGroup direction="horizontal" class="font-display max-h-screen w-full">
 	<Resizable.Pane
-		class="{showSidePanel
-			? ''
+		class="{sidebarState.isOpen
+			? '-motion-translate-x-in-100 motion-duration-200'
 			: 'hidden'} menu bg-base-200 border-base-content/10 space-y-2 border-r"
 		defaultSize={16}
 		minSize={10}

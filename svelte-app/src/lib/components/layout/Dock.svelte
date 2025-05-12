@@ -38,7 +38,7 @@
 	</button>
 {/snippet}
 
-<div class="dock lg:hidden">
+<div class="dock md:hidden">
 	{#each pages as page}
 		{@render bar(page)}
 	{/each}

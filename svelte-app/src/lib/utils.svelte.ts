@@ -1,4 +1,5 @@
 import { page } from '$app/state';
+import { getContext, setContext } from 'svelte';
 
 export function categorizeMediabyType(content: string) {
   const mediaMatch =
@@ -42,6 +43,11 @@ function signalSavePage() {
   }
 }
 
+export class sidebarState {
+  isOpen = $state(true)
+}
+
+
 // Types for the result object with discriminated union
 type Success<T> = {
   data: T;
@@ -80,3 +86,9 @@ export function debounce<T extends (...args: any[]) => void>(fn: T, delay: numbe
 
 export const searchState = changeSearchTerm()
 export const signalPageState = signalSavePage()
+export function setSideBarState() {
+  return setContext('sidebar', new sidebarState())
+}
+export function getSideBarState() {
+  return getContext<ReturnType<typeof setSideBarState>>('sidebar')
+}
