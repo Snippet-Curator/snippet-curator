@@ -105,7 +105,7 @@
 		<label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
 
 		<ul class="menu bg-base-200 w-68 min-h-screen space-y-2 p-4">
-			<div class="mb-6 ml-1 flex h-8 items-center gap-x-1">
+			<div class="m-golden-md flex h-8 items-center gap-x-1">
 				<Icon /> <span class="text-xl font-semibold tracking-widest">ecollect</span>
 			</div>
 

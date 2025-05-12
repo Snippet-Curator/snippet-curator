@@ -68,7 +68,7 @@
 
 @layer base {
 	html {
-		@apply 3xl:text-2xl 4xl:text-2xl 5xl:text-4xl 2xl:text-lg;
+		@apply 3xl:text-lg 4xl:text-2xl 5xl:text-4xl 2xl:text-lg;
 	}
 }
 
