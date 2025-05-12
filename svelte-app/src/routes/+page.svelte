@@ -99,7 +99,7 @@
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
 </Topbar.Root>
 
-<ScrollArea class="relative mb-20 h-[calc(100vh-60px)] overflow-y-auto">
+<ScrollArea scrollHideDelay={200} class="relative mb-20 h-[calc(100vh-60px)] overflow-y-auto">
 	{#await initialLoading}
 		<NoteLoading />
 	{:then}

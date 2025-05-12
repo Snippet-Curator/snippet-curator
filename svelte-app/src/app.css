@@ -76,6 +76,16 @@
 	border: 1px solid black;
 } */
 
+html {
+	box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+	box-sizing: inherit;
+}
+
 body {
 	@apply overflow-hidden;
 }
