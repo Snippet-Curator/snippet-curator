@@ -7,9 +7,12 @@ import Empty from './topbar-empty-trash.svelte'
 import Info from './topbar-note-info.svelte'
 import Notebook from './topbar-notebook.svelte'
 import TagBtn from './topbar-tags.svelte'
-import Rating from './note-rating.svelte'
-import Tags from './tag-list.svelte'
+import Rating from './topbar-rating.svelte'
+import Tags from './topbar-tag-list.svelte'
 import Keyboard from './topbar-keys.svelte'
+import SidebarIcon from './topbar-sidebar.svelte'
+import NavBtns from './topbar-next-previous.svelte'
+import Weight from './topbar-weight.svelte'
 
 export {
   Archive,
@@ -19,8 +22,11 @@ export {
   Info,
   Notebook,
   TagBtn,
+  NavBtns,
   Tags,
   Rating,
   Keyboard,
+  SidebarIcon,
+  Weight,
   Topbar as Root,
 }

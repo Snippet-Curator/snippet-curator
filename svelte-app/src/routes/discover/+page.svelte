@@ -19,7 +19,7 @@
 	let totalPages = $state(0);
 	let currentPage = $state(1);
 	let currentIndex = $state(0);
-	let lastItemIndex = $state();
+	let lastItemIndex = $state<number>(99);
 
 	let isDeleteOpen = $state(false);
 	let isEditTagsOpen = $state(false);
@@ -50,10 +50,12 @@
 
 	async function upvote() {
 		await noteState.upvoteWeight();
+		await getNextNote();
 	}
 
 	async function downvote() {
 		await noteState.downvoteWeight();
+		await getNextNote();
 	}
 
 	let initialLoading = $state();
@@ -68,14 +70,24 @@
 {#await initialLoading then}
 	{#if note}
 		<Topbar.Root>
-			{note.score.toFixed(2)}
+			<Topbar.SidebarIcon></Topbar.SidebarIcon>
+			<Topbar.NavBtns
+				{currentIndex}
+				{currentPage}
+				{totalPages}
+				{lastItemIndex}
+				onLeft={getPreviousNote}
+				onRight={getNextNote}
+			></Topbar.NavBtns>
+			<!-- {note.score.toFixed(2)} -->
 
-			<Topbar.Keyboard
+			<!-- <Topbar.Keyboard
 				onLeft={getPreviousNote}
 				onRight={getNextNote}
 				onUp={upvote}
 				onDown={downvote}
-			></Topbar.Keyboard>
+			></Topbar.Keyboard> -->
+			<Topbar.Weight onUp={upvote} onDown={downvote}></Topbar.Weight>
 			<div class="grow"></div>
 
 			{#if note?.expand?.tags}
@@ -85,9 +97,7 @@
 			{#if note?.expand?.notebook}
 				<Topbar.Notebook bind:isOpen={isEditNotebookOpen} notebook={note.expand.notebook} />
 			{/if}
-			<ArrowUp size={15} />
-			{note.weight}
-			<ArrowDown size={15} />
+
 			<Topbar.Rating
 				rating={note.rating}
 				action={(newRating) => {
@@ -106,15 +116,6 @@
 			<Topbar.Info {note} />
 		</Topbar.Root>
 		<div class="h-[calc(100vh-60px)]">
-			<!-- <button disabled={currentIndex == 0 && currentPage == 1} class="btn" onclick={getPreviousNote}
-				>Previous</button
-			>
-			<button
-				disabled={currentIndex == lastItemIndex && currentPage == totalPages}
-				class="btn"
-				onclick={getNextNote}>Next</button
-			> -->
-
 			<NoteContent {note} />
 		</div>
 	{:else}

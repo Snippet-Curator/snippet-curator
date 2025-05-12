@@ -86,7 +86,7 @@
 	});
 </script>
 
-<Resizable.PaneGroup direction="horizontal" class="max-h-screen w-full">
+<Resizable.PaneGroup direction="horizontal" class="font-display max-h-screen w-full">
 	<Resizable.Pane
 		class="{showSidePanel
 			? ''

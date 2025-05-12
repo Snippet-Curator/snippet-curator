@@ -8,7 +8,7 @@
 	let { action }: Props = $props();
 </script>
 
-<div class="tooltip tooltip-bottom z-30" data-tip="Archive Note">
+<div class="tooltip tooltip-bottom z-30" data-tip="Archive">
 	<button
 		onclick={() => {
 			action();
