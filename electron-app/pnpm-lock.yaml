@@ -14,6 +14,9 @@ importers:
       '@electron-toolkit/utils':
         specifier: ^3.0.0
         version: 3.0.0(electron@31.7.7)
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
       electron-updater:
         specifier: ^6.1.7
         version: 6.6.2
@@ -27,6 +30,9 @@ importers:
       '@electron-toolkit/tsconfig':
         specifier: ^1.0.1
         version: 1.0.1(@types/node@20.17.43)
+      '@electron/notarize':
+        specifier: ^3.0.1
+        version: 3.0.1
       '@sveltejs/vite-plugin-svelte':
         specifier: ^3.1.1
         version: 3.1.2(svelte@4.2.19)(vite@5.4.19(@types/node@20.17.43))
@@ -198,6 +204,10 @@ packages:
   '@electron/notarize@2.2.1':
     resolution: {integrity: sha512-aL+bFMIkpR0cmmj5Zgy0LMKEpgy43/hw5zadEArgmAMWWlKc5buwFvFT9G/o/YJkvXAJm5q3iuTuLaiaXW39sg==}
     engines: {node: '>= 10.0.0'}
+
+  '@electron/notarize@3.0.1':
+    resolution: {integrity: sha512-5xzcOwvMGNjkSk7s0sPx4XcKWei9FYk4f2S5NkSorWW0ce5yktTOtlPa0W5yQHcREILh+C3JdH+t+M637g9TmQ==}
+    engines: {node: '>= 22.12.0'}
 
   '@electron/osx-sign@1.0.5':
     resolution: {integrity: sha512-k9ZzUQtamSoweGQDV2jILiRIHUu7lYlJ3c6IEmjv1hC17rclE+eb9U+f6UFlOOETo0JzY1HNlXy4YOlCvl+Lww==}
@@ -1009,6 +1019,10 @@ packages:
 
   dotenv-expand@5.1.0:
     resolution: {integrity: sha512-YXQl1DSa4/PQyRfgrv6aoNjhasp/p4qs9FjJ4q4cQk+8m4r6k4ZSiEyytKG8f8W9gi8WsQtIObNmKd+tMzNTmA==}
+
+  dotenv@16.5.0:
+    resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
+    engines: {node: '>=12'}
 
   dotenv@9.0.2:
     resolution: {integrity: sha512-I9OvvrHp4pIARv4+x9iuewrWycX6CcZtoAu1XrzPxc5UygMJXJZYmBsynku8IkrJwgypE5DGNjDPmPRhDCptUg==}
@@ -2448,6 +2462,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@electron/notarize@3.0.1':
+    dependencies:
+      debug: 4.4.0
+      promise-retry: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
+
   '@electron/osx-sign@1.0.5':
     dependencies:
       compare-version: 0.1.2
@@ -3282,6 +3303,8 @@ snapshots:
       esutils: 2.0.3
 
   dotenv-expand@5.1.0: {}
+
+  dotenv@16.5.0: {}
 
   dotenv@9.0.2: {}
 

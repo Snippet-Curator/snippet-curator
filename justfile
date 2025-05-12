@@ -18,6 +18,9 @@ dev-frontend:
 build: full-svelte
 	concurrently "cd electron-app && pnpm run build:win"
 
+build-mac: full-svelte-mac
+	concurrently "cd electron-app && pnpm run build:mac"
+
 build-only: 
 	concurrently "cd electron-app && pnpm run build:win"
 
@@ -25,6 +28,8 @@ build-only-mac:
 	concurrently "cd electron-app && pnpm run build:mac"
 
 full-svelte: build-svelte prep-svelte move-svelte
+
+full-svelte-mac: build-svelte prep-svelte move-svelte-mac
 
 build-svelte:
   concurrently "cd svelte-app && pnpm run build"

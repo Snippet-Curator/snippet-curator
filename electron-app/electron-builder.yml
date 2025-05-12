@@ -1,7 +1,9 @@
-appId: com.electron.app
+appId: com.krxiang.recollect
 productName: Recollect
 directories:
   buildResources: build
+build:
+  afterSign: build/notarize.js
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -19,15 +21,19 @@ nsis:
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 mac:
+  entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
+  notarize: false,
+  hardenedRuntime: true,
+  gatekeeperAssess: false
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}.${ext},
+  sign: false,
 linux:
   target:
     - AppImage
