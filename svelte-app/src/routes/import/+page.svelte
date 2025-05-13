@@ -69,7 +69,6 @@
 
 		if (file.type == 'text/html') {
 			const parsedHTML = new htmlImport(decodedText, selectedNotebookID);
-			console.log(parsedHTML);
 			try {
 				await parsedHTML.uploadToDB();
 				listofSuccesses.push(file.name);

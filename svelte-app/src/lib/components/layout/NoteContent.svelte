@@ -67,6 +67,11 @@
 			max-width: 100% !important;
 			height: auto !important;
 		}
+		.img-wrapper {
+			display: flex;
+			justify-content: center;
+			margin-bottom: 1rem;
+		}
 		video {
 			max-height: 800px; !important;
 		}

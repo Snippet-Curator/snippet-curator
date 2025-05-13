@@ -491,7 +491,6 @@ export class htmlImport {
     let updatedContent = fileContent
 
     for (const match of matches) {
-      console.log(match)
       const openingQuote = match[1] || undefined
       const dataURL = match[2]
       const closingQuote = match[3] || undefined
@@ -563,6 +562,11 @@ export class htmlImport {
     this.content = this.content.replace(matchPattern, '');
   }
 
+  // centerImage() {
+  //   const matchPattern = /<div>\s*(<img[^>]*>)\s*<\/div>/g
+  //   this.content = this.content.replace(matchPattern, (_match, imgTag) => `<div class='img-wrapper'>${imgTag}</div>`);
+  // }
+
   async uploadToDB() {
     const sources = [{
       'source': this.source,
@@ -595,6 +599,7 @@ export class htmlImport {
     // await this.uploadImg()
     await this.replaceResources(this.content)
     this.stripCSP()
+    // this.centerImage()
     // this.content = sanitizeHTMLContent(this.content)
 
     const data = {
