@@ -2,7 +2,7 @@ appId: com.krxiang.recollect
 productName: Recollect
 directories:
   buildResources: build
-afterSign: build/notarize.js
+# afterSign: build/notarize.js
 icon: resources/icon
 files:
   - '!**/.vscode/*'

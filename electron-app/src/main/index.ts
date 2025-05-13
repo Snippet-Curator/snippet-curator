@@ -6,7 +6,6 @@ import os from 'os'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { spawn } from 'child_process'
-import { resourcesPath } from 'process'
 
 let pocketBaseProcess
 const userDataPath = app.getPath('userData')
@@ -15,7 +14,7 @@ const pbDataPath = path.join(userDataPath, 'pb_data')
 const currentVersion = app.getVersion()
 const versionFile = path.join(userDataPath, '.pb_version')
 const pocketbaseDevPath = join(__dirname, '..', '..', 'db', 'pocketbase')
-const pocketbaseProdPath = join(resourcesPath, 'db', 'pocketbase')
+const pocketbaseProdPath = join(process.resourcesPath, 'db', 'pocketbase')
 
 function getIconPath() {
   const platform = os.platform();
@@ -99,9 +98,11 @@ function copyPbFolder(requiredFolders: string[]) {
 
 function checkPbVersion() {
   let storedVersion: string = '';
-  const requiredFolders = ['pb_migrations', 'pb_hooks', 'pb_public']
+  const requiredFolders = ['pb_migrations', 'pb_hooks']
 
-  const needsCopy = requiredFolders.some(folder => !existsSync(path.join(userDataPath, folder)))
+  const needsCopy = requiredFolders.some(folder => {
+    console.log('path exists: ', path.join(userDataPath, folder), existsSync(path.join(userDataPath, folder)))
+    return !existsSync(path.join(userDataPath, folder))})
 
   if (needsCopy) {
     console.log('no pb data folder found', needsCopy)
@@ -111,7 +112,7 @@ function checkPbVersion() {
   if (!existsSync(versionFile)) {
     console.log('version file does not exist, creating new', currentVersion)
     writeFileSync(versionFile, currentVersion)
-    copyPbFolder(requiredFolders)
+    // copyPbFolder(requiredFolders)
     return
   }
 
@@ -126,7 +127,8 @@ function checkPbVersion() {
 }
 
 function runPocketbase() {
-  if (is.dev) {
+  return new Promise((resolve) => {
+    if (is.dev) {
     console.log('Starting Pocketbase dev...')
     pocketBaseProcess = spawn(pocketbaseDevPath, ['serve'])
   } else {
@@ -137,7 +139,12 @@ function runPocketbase() {
   }
 
   pocketBaseProcess.stdout.on('data', (data) => {
-    console.log(`Pocketbase: ${data.toString()}`)
+    const output = data.toString()
+    console.log(`Pocketbase: ${output}`)
+
+    if (output.includes('Server started')){
+      resolve(pocketBaseProcess)
+    }
   })
 
   pocketBaseProcess.on('close', (code) => {
@@ -147,6 +154,8 @@ function runPocketbase() {
   pocketBaseProcess.on('error', (err) => {
     console.log('Failed to start Pocketbase: ', err)
   })
+  })
+  
 }
 
 // This method will be called when Electron has finished
@@ -155,7 +164,12 @@ function runPocketbase() {
 app.whenReady().then(async () => {
 
   // run pocketbase
-  runPocketbase()
+  try {
+    await runPocketbase()
+  } catch (err) {
+    console.error('Failed to start Pocketbase')
+    app.quit()
+  }
 
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
@@ -180,16 +194,11 @@ app.whenReady().then(async () => {
 })
 
 // Gracefully handle quitting
-app.on('before-quit', (event) => {
+app.on('before-quit', () => {
   if (pocketBaseProcess) {
     console.log('Stopping PocketBase...');
-    event.preventDefault(); // Prevent default quit until we're done
     pocketBaseProcess.kill('SIGINT');
-
-    pocketBaseProcess.on('close', () => {
-      pocketBaseProcess = null;
-      app.quit(); // Now actually quit
-    });
+    pocketBaseProcess = null;
   }
 });
 
@@ -201,6 +210,7 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
