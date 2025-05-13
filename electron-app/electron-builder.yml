@@ -2,8 +2,8 @@ appId: com.krxiang.recollect
 productName: Recollect
 directories:
   buildResources: build
-build:
-  afterSign: build/notarize.js
+afterSign: build/notarize.js
+icon: resources/icon
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -11,16 +11,34 @@ files:
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!db/pb_data/'
+  - '!.db/pb_data/'
+  - '!.db/pb_data/**'
+  - '!db/pb_data/**'
+extraResources: 
+  - from: ./db/pb_migrations
+    to: db/pb_migrations
+  - from: ./db/pb_hooks
+    to: db/pb_hooks
+  - from: ./db/pocketbase.exe
+    to: ./db/pocketbase.exe
+  - from: ./db/pocketbase
+    to: ./db/pocketbase
 asarUnpack:
   - resources/**
 win:
   executableName: Recollect
+  icon: resources/icon.ico
+  target:
+    - nsis
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+  oneClick: false
 mac:
+  icon: resources/icon.icns
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
@@ -28,12 +46,12 @@ mac:
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false,
-  hardenedRuntime: true,
+  notarize: false
+  hardenedRuntime: true
   gatekeeperAssess: false
 dmg:
-  artifactName: ${name}-${version}.${ext},
-  sign: false,
+  artifactName: ${name}-${version}.${ext}
+  sign: false
 linux:
   target:
     - AppImage
@@ -41,6 +59,7 @@ linux:
     - deb
   maintainer: electronjs.org
   category: Utility
+  icon: resources/icon.png
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false

@@ -1,6 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import path from 'path'
+import { existsSync, cpSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import os from 'os'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -8,7 +9,11 @@ import { spawn } from 'child_process'
 import { resourcesPath } from 'process'
 
 let pocketBaseProcess
-
+const userDataPath = app.getPath('userData')
+const resourcePath = path.join(process.resourcesPath, 'db')
+const pbDataPath = path.join(userDataPath, 'pb_data')
+const currentVersion = app.getVersion()
+const versionFile = path.join(userDataPath, '.pb_version')
 const pocketbaseDevPath = join(__dirname, '..', '..', 'db', 'pocketbase')
 const pocketbaseProdPath = join(resourcesPath, 'db', 'pocketbase')
 
@@ -24,7 +29,6 @@ function getIconPath() {
     return path.join(__dirname, 'resources', 'icon.png');
   }
 }
-
 
 function createWindow(): void {
   // Create the browser window.
@@ -71,8 +75,6 @@ function createWindow(): void {
     }
   })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
   if (is.dev) {
     mainWindow.loadURL('http://localhost:5173')
     mainWindow.webContents.openDevTools();
@@ -82,16 +84,56 @@ function createWindow(): void {
   }
 }
 
+function copyPbFolder(requiredFolders: string[]) {
+  for (const folder of requiredFolders) {
+    const from = path.join(resourcePath, folder);
+    const to = path.join(userDataPath, folder);
+    console.log('copying: ', from, to)
+
+    if (existsSync(from)) {
+      rmSync(to, { recursive: true, force: true })
+      cpSync(from, to, { recursive: true });
+    }
+  }
+}
+
+function checkPbVersion() {
+  let storedVersion: string = '';
+  const requiredFolders = ['pb_migrations', 'pb_hooks', 'pb_public']
+
+  const needsCopy = requiredFolders.some(folder => !existsSync(path.join(userDataPath, folder)))
+
+  if (needsCopy) {
+    console.log('no pb data folder found', needsCopy)
+    copyPbFolder(requiredFolders)
+  }
+
+  if (!existsSync(versionFile)) {
+    console.log('version file does not exist, creating new', currentVersion)
+    writeFileSync(versionFile, currentVersion)
+    copyPbFolder(requiredFolders)
+    return
+  }
+
+  storedVersion = readFileSync(versionFile, 'utf-8')
+
+  console.log('check version: ', storedVersion, currentVersion)
+
+  if (storedVersion == currentVersion) return
+
+  copyPbFolder(requiredFolders)
+  writeFileSync(versionFile, currentVersion)
+}
+
 function runPocketbase() {
-
-  let pocketBaseProcess
-
   if (is.dev) {
-    console.log('starting Pocketbase dev...')
+    console.log('Starting Pocketbase dev...')
     pocketBaseProcess = spawn(pocketbaseDevPath, ['serve'])
   } else {
-    console.log('starting Pocketbase prod...')
-    pocketBaseProcess = spawn(pocketbaseProdPath, ['serve'])
+    checkPbVersion()
+    console.log('Starting Pocketbase prod...')
+    // pocketBaseProcess = spawn(pocketbaseProdPath, ['serve'])
+    pocketBaseProcess = spawn(pocketbaseProdPath, ['serve', '--dir', pbDataPath])
   }
 
   pocketBaseProcess.stdout.on('data', (data) => {
