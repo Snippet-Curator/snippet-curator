@@ -167,7 +167,7 @@
 				type="range"
 				class="range range-xs"
 				min="0.98"
-				max="1.1"
+				max="1.2"
 				step="0.01"
 				bind:value={fontScale}
 				oninput={() => {

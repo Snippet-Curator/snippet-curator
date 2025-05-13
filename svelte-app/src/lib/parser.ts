@@ -404,13 +404,19 @@ export class htmlImport {
   }
 
   getDescription() {
+    // parse instagram saves with source meta property
+    const description = this.parsedHTML.querySelector('meta[property="description"]')
+
+    if (description) {
+      return description.getAttribute('content')
+    }
+
     return createDescription(this.parsedHTML.querySelector('meta[property="og:description"]')?.getAttribute('content') || '')
   }
 
   getSource() {
     // parse instagram saves with source meta property
     const source = this.parsedHTML.querySelector('meta[property="source"]')
-    console.log("source", source?.getAttribute('content'))
 
     if (source) {
       return source.getAttribute('content')
@@ -428,7 +434,6 @@ export class htmlImport {
 
   getSourceURL() {
     const sourceURL = this.parsedHTML.querySelector('meta[property="source-url"]')
-    console.log("sourceurl", sourceURL, sourceURL?.getAttribute('content'))
 
     if (sourceURL) {
       return sourceURL.getAttribute('content')
@@ -475,7 +480,7 @@ export class htmlImport {
 
   async replaceResources(fileContent: string) {
     // replaces src with image and font with pocketbase file links. Href is skipped
-    const mediaMatch = /\bsrc=(['"])?(data:(?:image|font)\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+)\1?/g
+    const mediaMatch = /\bsrc=(['"])?(data:(?:image|font|video)\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+)\1?/g
 
     if (!fileContent) {
       console.log('no file content')
@@ -600,7 +605,7 @@ export class htmlImport {
     const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
 
     if (updatedError) {
-      console.error('Error updating record: ', updatedError.message)
+      console.error('Error updating record: ', updatedError.message, updatedError.data)
     }
   }
 
