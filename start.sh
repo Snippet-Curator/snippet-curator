@@ -7,7 +7,7 @@ PB_PID=$!
 
 # Serve static Svelte app
 cd ..
-serve build -l 5173
+serve build -l tcp:0.0.0.0:5173
 
 # When `serve` exits, stop PocketBase too
 kill $PB_PID
