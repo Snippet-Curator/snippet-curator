@@ -12,6 +12,9 @@ install:
 dev: 
   concurrently "cd svelte-app && pnpm run dev" "cd electron-app && pnpm run dev"
 
+server: 
+	concurrently "cd electron-app\db && pocketbase serve" "cd svelte-app && pnpm run start"
+
 dev-frontend:
 	concurrently "cd svelte-app && pnpm run dev"
 
