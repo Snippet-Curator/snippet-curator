@@ -37,6 +37,7 @@
 </script>
 
 <Topbar.Root>
+	<Topbar.SidebarIcon></Topbar.SidebarIcon>
 	<Topbar.Back />
 	<div class="grow"></div>
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />

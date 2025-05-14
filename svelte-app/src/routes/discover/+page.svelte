@@ -68,7 +68,7 @@
 
 {#await initialLoading then}
 	{#if note}
-		<Topbar.Root class="pl-1">
+		<Topbar.Root>
 			<Topbar.SidebarIcon></Topbar.SidebarIcon>
 			<Topbar.NavBtns
 				{currentIndex}

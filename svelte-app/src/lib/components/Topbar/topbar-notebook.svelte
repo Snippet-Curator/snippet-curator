@@ -2,6 +2,7 @@
 	import { Notebook as NotebookIcon } from 'lucide-svelte';
 
 	import type { Notebook } from '$lib/types';
+	import { onDestroy, onMount } from 'svelte';
 
 	type Props = {
 		notebook: Notebook;
@@ -9,6 +10,27 @@
 	};
 
 	let { notebook, isOpen = $bindable() }: Props = $props();
+
+	function handler(event: KeyboardEvent) {
+		if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+			return;
+		}
+
+		switch (event.key) {
+			case 'n':
+				event.preventDefault();
+				isOpen = true;
+				break;
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener('keydown', handler);
+
+		onDestroy(() => {
+			document.removeEventListener('keydown', handler);
+		});
+	});
 </script>
 
 <div class="tooltip tooltip-bottom z-30" data-tip="Change Notebook">

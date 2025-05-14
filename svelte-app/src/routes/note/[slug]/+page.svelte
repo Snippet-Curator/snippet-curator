@@ -20,6 +20,7 @@
 	</div>
 {:then}
 	<Topbar.Root>
+		<Topbar.SidebarIcon></Topbar.SidebarIcon>
 		<Topbar.Back />
 		<div class="grow"></div>
 		{#if note.expand?.tags}
@@ -61,6 +62,12 @@
 		}}>this note</Delete
 	>
 
+	<EditTags
+		bind:isOpen={isEditTagsOpen}
+		currentTags={note.expand?.tags}
+		action={(selectedTags) => noteState.changeTags(selectedTags)}
+	/>
+
 	<EditNotebook
 		currentNotebookID={note.expand?.notebook.id}
 		bind:isOpen={isEditNotebookOpen}
@@ -68,10 +75,4 @@
 			noteState.changeNotebook(selectedNotebookID);
 		}}
 	></EditNotebook>
-
-	<EditTags
-		bind:isOpen={isEditTagsOpen}
-		currentTags={note.expand?.tags}
-		action={(selectedTags) => noteState.changeTags(selectedTags)}
-	/>
 {/await}

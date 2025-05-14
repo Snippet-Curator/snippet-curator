@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { RecordModel } from 'pocketbase';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import * as Dialog from '$lib/components/ui/dialog/index';
@@ -10,10 +10,10 @@
 	type Props = {
 		isOpen: boolean;
 		action: (selectedTags: string[]) => void;
-		currentTags: Tag[];
+		currentTags?: Tag[];
 	};
 
-	let { isOpen = $bindable(), currentTags, action }: Props = $props();
+	let { isOpen = $bindable(), currentTags = [], action }: Props = $props();
 
 	let tags = $state<RecordModel[]>();
 	let selectedTags = $state<string[]>([]);
@@ -45,11 +45,30 @@
 		}
 	}
 
+	function handler(event: KeyboardEvent) {
+		if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+			return;
+		}
+
+		switch (event.key) {
+			case 't':
+				event.preventDefault();
+				isOpen = true;
+				break;
+		}
+	}
+
 	onMount(async () => {
 		tags = await getTags();
 		filteredTags = tags;
 		currentTags.forEach((tag) => {
 			selectedTags.push(tag.id);
+		});
+
+		document.addEventListener('keydown', handler);
+
+		onDestroy(() => {
+			document.removeEventListener('keydown', handler);
 		});
 	});
 </script>

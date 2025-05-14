@@ -21,26 +21,32 @@
 
 		switch (event.key) {
 			case 'h':
+			case '0':
 				event.preventDefault();
 				updateRating(0);
 				break;
 			case 'j':
+			case '1':
 				event.preventDefault();
 				updateRating(1);
 				break;
 			case 'k':
+			case '2':
 				event.preventDefault();
 				updateRating(2);
 				break;
 			case 'l':
+			case '3':
 				event.preventDefault();
 				updateRating(3);
 				break;
 			case ';':
+			case '4':
 				event.preventDefault();
 				updateRating(4);
 				break;
 			case "'":
+			case '5':
 				event.preventDefault();
 				updateRating(5);
 				break;

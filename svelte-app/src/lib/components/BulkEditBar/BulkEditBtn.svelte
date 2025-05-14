@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Pencil } from 'lucide-svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	type Props = {
 		isBulkEdit: boolean;
@@ -7,6 +8,28 @@
 	};
 
 	let { isBulkEdit = $bindable(), selectedNotesID = $bindable() }: Props = $props();
+
+	function handler(event: KeyboardEvent) {
+		if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+			return;
+		}
+
+		switch (event.key) {
+			case 'b':
+				event.preventDefault();
+				isBulkEdit = !isBulkEdit;
+				selectedNotesID = [];
+				break;
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener('keydown', handler);
+
+		onDestroy(() => {
+			document.removeEventListener('keydown', handler);
+		});
+	});
 </script>
 
 <div class="tooltip tooltip-bottom z-30" data-tip="Bulk Edit">

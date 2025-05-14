@@ -1,21 +1,18 @@
 <script lang="ts">
-	import { ScrollArea } from '$lib/components/ui/scroll-area';
-
-	import * as Dialog from '$lib/components/ui/dialog/index';
-	import pb from '$lib/db.svelte';
+	import * as Command from '$lib/components/ui/command/index.js';
 	import { onMount } from 'svelte';
+	import pb from '$lib/db.svelte';
 	import type { Notebook } from '$lib/types';
 
 	type Props = {
 		isOpen: boolean;
 		currentNotebookID?: string;
-		action: (selectedNotebookID) => void;
+		action: (selectedNotebookID: string) => void;
 	};
 
 	let { isOpen = $bindable(), action, currentNotebookID = '' }: Props = $props();
 
 	let notebooks = $state<Notebook[]>();
-	let selectedNotebookID = $state<string>('');
 
 	async function getNotebooks() {
 		return await pb.collection('notebooks').getFullList({
@@ -24,51 +21,24 @@
 	}
 
 	onMount(async () => {
-		selectedNotebookID = currentNotebookID;
 		notebooks = await getNotebooks();
 	});
 </script>
 
-<Dialog.Root open={isOpen}>
-	<Dialog.Content
-		onCloseAutoFocus={(e) => {
-			e.preventDefault();
-			isOpen = false;
-		}}
-	>
-		<Dialog.Header>
-			<Dialog.Title>Change Notebook</Dialog.Title>
-			<Dialog.Description>Select Notebook to change</Dialog.Description>
-		</Dialog.Header>
-
-		<ScrollArea class="bg-base-200/30 p-golden-md mt-8 min-h-[10vh] rounded-lg">
+<Command.Dialog bind:open={isOpen}>
+	<Command.Input placeholder="Search Notebooks..." />
+	<Command.List>
+		<Command.Empty>No notebook found.</Command.Empty>
+		<Command.Group heading="">
 			{#each notebooks as notebook}
-				<ul class="list">
-					<li class="list-row flex items-center">
-						<label for="">
-							<input
-								type="radio"
-								class="radio radio-sm mx-2"
-								name="radio-1"
-								bind:group={selectedNotebookID}
-								value={notebook.id}
-							/>
-							{notebook.name}
-						</label>
-					</li>
-				</ul>
+				<Command.Item
+					onSelect={() => {
+						action(notebook.id);
+						isOpen = false;
+					}}
+					>{notebook.name}
+				</Command.Item>
 			{/each}
-		</ScrollArea>
-
-		<div class="flex justify-end gap-x-2">
-			<button onclick={() => (isOpen = false)} class="btn">Close</button>
-			<button
-				onclick={() => {
-					action(selectedNotebookID);
-					isOpen = false;
-				}}
-				class="btn btn-primary">Save</button
-			>
-		</div>
-	</Dialog.Content>
-</Dialog.Root>
+		</Command.Group>
+	</Command.List>
+</Command.Dialog>

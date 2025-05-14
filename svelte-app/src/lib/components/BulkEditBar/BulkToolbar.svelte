@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { NotelistState } from '$lib/db.svelte';
-	import { Archive, Merge, Trash2, Notebook as NotebookIcon, Tags } from 'lucide-svelte';
+	import { Archive, Trash2, Notebook as NotebookIcon, Tags } from 'lucide-svelte';
 	import { Delete, EditNotebook, EditTags } from '$lib/components/';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { page } from '$app/state';
 
 	type Props = {
@@ -16,13 +16,36 @@
 	let isDeleteOpen = $state(false);
 	let isEditNotebookOpen = $state(false);
 	let isEditTagsOpen = $state(false);
-	let selectedNotebookID = $state('');
-	let selectedTags = $state<string[]>([]);
 	let currentNotebookName = $state('');
 
+	function handler(event: KeyboardEvent) {
+		if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+			return;
+		}
+
+		switch (event.key) {
+			case 'n':
+				event.preventDefault();
+				isEditNotebookOpen = true;
+				break;
+			case 't':
+				event.preventDefault();
+				isEditTagsOpen = true;
+				break;
+		}
+	}
+
 	onMount(async () => {
-		const currentNotebook = await notelistState.getCurrentNotebook(page.params.slug);
-		currentNotebookName = currentNotebook.name;
+		// if page is a notebook slug, then get notebook name
+		if (page.params.slug) {
+			const currentNotebook = await notelistState.getCurrentNotebook(page.params.slug);
+			currentNotebookName = currentNotebook.name;
+		}
+		document.addEventListener('keydown', handler);
+
+		onDestroy(() => {
+			document.removeEventListener('keydown', handler);
+		});
 	});
 </script>
 
@@ -83,8 +106,7 @@
 
 <EditNotebook
 	bind:isOpen={isEditNotebookOpen}
-	bind:selectedNotebookID
-	action={async () => {
+	action={async (selectedNotebookID) => {
 		await notelistState.changeNotebook(selectedNotesID, selectedNotebookID);
 		isBulkEdit = false;
 	}}
@@ -92,9 +114,7 @@
 
 <EditTags
 	bind:isOpen={isEditTagsOpen}
-	bind:selectedTags
-	currentTags="[]"
-	action={async () => {
+	action={async (selectedTags) => {
 		await notelistState.changeTags(selectedNotesID, selectedTags);
 		isBulkEdit = false;
 	}}

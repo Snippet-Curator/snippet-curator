@@ -95,6 +95,7 @@
 </script>
 
 <Topbar.Root>
+	<Topbar.SidebarIcon></Topbar.SidebarIcon>
 	<Search bind:searchInput />
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
 </Topbar.Root>

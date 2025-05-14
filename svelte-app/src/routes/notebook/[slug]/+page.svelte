@@ -45,6 +45,7 @@
 </script>
 
 <Topbar.Root>
+	<Topbar.SidebarIcon></Topbar.SidebarIcon>
 	<Topbar.Back />
 	<div class="grow"></div>
 	{#if notebookID == defaultNotebooksState.trashID}
