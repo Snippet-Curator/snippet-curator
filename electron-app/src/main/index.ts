@@ -130,10 +130,12 @@ function runPocketbase() {
   return new Promise((resolve) => {
     if (is.dev) {
     console.log('Starting Pocketbase dev...')
+    console.log('Dev path: ', pocketbaseDevPath)
     pocketBaseProcess = spawn(pocketbaseDevPath, ['serve'])
   } else {
     checkPbVersion()
     console.log('Starting Pocketbase prod...')
+    console.log('Production path: ', pocketbaseProdPath)
     // pocketBaseProcess = spawn(pocketbaseProdPath, ['serve'])
     pocketBaseProcess = spawn(pocketbaseProdPath, ['serve', '--dir', pbDataPath])
   }

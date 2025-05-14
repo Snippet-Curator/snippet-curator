@@ -2,6 +2,10 @@
 FROM node:alpine AS builder
 WORKDIR /app
 
+# Setting PB URL environment
+ENV VITE_PB_URL=http://100.127.133.33:8090
+
+# Copy package.json and install
 COPY ./svelte-app/package.json ./
 RUN npm install
 
@@ -14,7 +18,11 @@ ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/po
 
 # Copy rest of the app
 COPY ./svelte-app ./
+# Add Pocketbase environment
+RUN echo "VITE_PB_URL=$VITE_PB_URL" > .env
+# Add pocketbase exec
 RUN unzip /tmp/pb.zip -d ./db
+# Copy migration and hooks files
 COPY ./electron-app/db/pb_migrations ./db/pb_migrations
 COPY ./electron-app/db/pb_hooks ./db/pb_hooks
 
@@ -35,7 +43,7 @@ COPY --from=builder /app/db/pb_hooks ./db/pb_hooks
 COPY --from=builder /app/db/pocketbase ./db/pocketbase
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
-RUN ls ./db/pb_migrations
+COPY --from=builder /app/.env ./
 
 # Startup script
 COPY start.sh /start.sh

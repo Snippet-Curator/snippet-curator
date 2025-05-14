@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import type { NoteList, Note } from '$lib/types';
 	import { Blank, NoteLoading } from '$lib/components/';
+	import { replacePbUrl } from '$lib/db.svelte';
 
 	type Props = {
 		isBulkEdit: boolean;
@@ -17,7 +18,7 @@
 			return;
 		}
 		selectedNotesID.push(checkedNoteID);
-	}
+	} 
 </script>
 
 {#snippet renderNotes(note: Note)}
@@ -27,7 +28,7 @@
 				><source src={note.thumbnail} />Your browser does not support the video tag.</video
 			>
 		{:else} -->
-		<img class="w-full" src={note.thumbnail} alt="" />
+		<img class="w-full" src={replacePbUrl(note.thumbnail)} alt="" />
 		<!-- {/if} -->
 	</figure>
 	<div id="card-body" class="card-body p-golden-lg w-full">

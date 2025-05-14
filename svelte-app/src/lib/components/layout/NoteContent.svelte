@@ -10,19 +10,19 @@
 
 	import { onMount } from 'svelte';
 	import { tryCatch } from '$lib/utils.svelte';
-	import pb from '$lib/db.svelte';
+	import pb, { replacePbUrl } from '$lib/db.svelte';
 
 	type Props = {
 		note: Note;
 	};
 
 	let { note }: Props = $props();
-	let content = $state(note.content);
-	let container;
+	// let content = $state(replacePbUrl(note.content));
+	// let container;
 	let iframe = $state();
-	let shadow;
+	// let shadow;
 	let doc = $state();
-	let styleTag = $state();
+	// let styleTag = $state();
 	let fontScale = $state(1);
 
 	let isOpen = $state(false);
@@ -37,6 +37,7 @@
 		selectedImage = src;
 		isOpen = true;
 	}
+
 
 	const customStyles = $state(`
 	  :root {
@@ -129,10 +130,9 @@
 	});
 
 	$effect(() => {
-		content = note.content;
 		const doc = iframe.contentDocument || iframe.contentWindow.document;
 		doc.open();
-		doc.write(note.content);
+		doc.write(replacePbUrl(note.content));
 		doc.close();
 
 		doc.documentElement.style.setProperty('--fontScale', fontScale);

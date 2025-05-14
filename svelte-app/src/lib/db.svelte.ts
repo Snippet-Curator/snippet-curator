@@ -3,8 +3,8 @@ import type { Notebook, Tag, Note, NoteRecord } from './types'
 import { getContext, setContext } from 'svelte'
 import { sidebarState, tryCatch } from './utils.svelte'
 
-const pb = new PocketBase('http://127.0.0.1:8090')
-
+const pbURL = import.meta.env.VITE_PB_URL || 'http://127.0.0.1:8090'
+const pb = new PocketBase(pbURL)
 
 export type NoteType = {
   type: 'tags' | 'notebooks' | 'default',
@@ -39,6 +39,11 @@ async function getTrashNotebook() {
   }
   return data
 }
+
+export function replacePbUrl(content: string){
+		if (pbURL == 'http://127.0.0.1:8090') return content
+		return content.replace(/http:\/\/127\.0\.0\.1:8090/g, pbURL)
+	}
 
 // export async function refreshStaleScores(daysOld = 3) {
 //   const cutoff = new Date(Date.now() - daysOld * 86400000).toISOString();
