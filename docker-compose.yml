@@ -1,22 +1,13 @@
-version: '3.8'
-
 services:
-  web:
+  recollect:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3795:3795"
-    depends_on:
-      - pocketbase
+      - 3795:5173 #svelte app
+      - 8090:8090 #pocketbase
+    volumes: 
+      - ${PB_DATA_PATH}:/app/db/pb_data
+    restart: on-failure:5
 
-  pocketbase:
-    image: ghcr.io/pocketbase/pocketbase:latest
-    ports:
-      - "8090:8090"
-    volumes:
-      - pb_data:/db/pb_data
-    command: ["serve", "--dir", "/pb_data"]
-
-volumes:
-  pb_data:
+# docker compose -p recollect -f docker-compose.yml up --build -d
