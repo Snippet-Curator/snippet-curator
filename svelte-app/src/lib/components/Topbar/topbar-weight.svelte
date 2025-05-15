@@ -48,10 +48,10 @@
 	});
 </script>
 
-<div class="tooltip tooltip-bottom z-30" data-tip="See More">
+<div class="md:tooltip md:tooltip-bottom z-30" data-tip="See More">
 	<button bind:this={upButton} class="btn btn-square" onclick={onUp}><ArrowUp size={18} /></button>
 </div>
-<div class="tooltip tooltip-bottom z-30" data-tip="See Less">
+<div class="md:tooltip md:tooltip-bottom z-30" data-tip="See Less">
 	<button bind:this={downButton} class="btn btn-square" onclick={onDown}
 		><ArrowDown size={18} />
 	</button>

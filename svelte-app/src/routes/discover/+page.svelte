@@ -112,7 +112,7 @@
 		</div>
 
 		<Navbar class="p-golden-md bg-base-100 flex flex-col items-end gap-y-2 rounded-md">
-			<div>
+			<div class="flex-row flex gap-x-2">
 				<Topbar.Weight onUp={upvote} onDown={downvote}></Topbar.Weight>
 				<Topbar.NavBtns
 					{currentIndex}

@@ -54,7 +54,7 @@
 	});
 </script>
 
-<div class="tooltip tooltip-bottom z-30" data-tip="Previous">
+<div class="md:tooltip md:tooltip-bottom" data-tip="Previous">
 	<button
 		bind:this={previousButton}
 		disabled={currentIndex == 0 && currentPage == 1}
@@ -62,7 +62,7 @@
 		onclick={onLeft}><ArrowLeft size={18} /></button
 	>
 </div>
-<div class="tooltip tooltip-bottom z-30" data-tip="Next">
+<div class="md:tooltip md:tooltip-bottom" data-tip="Next">
 	<button
 		bind:this={nextButton}
 		disabled={currentIndex == lastItemIndex && currentPage == totalPages}
