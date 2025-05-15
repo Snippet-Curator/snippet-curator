@@ -3,8 +3,10 @@
 	import { NoteContent, Delete, EditNotebook, EditTags, NoteLoading } from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
 	import * as Topbar from '$lib/components/Topbar/index';
+	import { getMobileState } from '$lib/utils.svelte';
 
 	const noteState = new NoteState(page.params.slug);
+	const mobileState = getMobileState();
 	let note = $derived(noteState.note);
 
 	let isDeleteOpen = $state(false);
@@ -31,14 +33,15 @@
 			<Topbar.Notebook bind:isOpen={isEditNotebookOpen} notebook={note.expand.notebook} />
 		{/if}
 
-		<Topbar.Rating
-			rating={note.rating}
-			action={(newRating) => {
-				noteState.changeRating(newRating);
-			}}
-		/>
-
-		<div class="divider divider-horizontal"></div>
+		{#if !mobileState.isMobile}
+			<Topbar.Rating
+				rating={note.rating}
+				action={(newRating) => {
+					noteState.changeRating(newRating);
+				}}
+			/>
+			<div class="divider divider-horizontal"></div>
+		{/if}
 
 		<Topbar.Archive
 			action={() => {

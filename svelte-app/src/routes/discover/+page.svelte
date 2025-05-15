@@ -77,7 +77,7 @@
 				<!-- {note.score.toFixed(2)} -->
 				<Topbar.Weight onUp={upvote} onDown={downvote}></Topbar.Weight>
 			{/if}
-			<div class="grow"></div>
+			<div class="hidden grow md:block"></div>
 
 			{#if note?.expand?.tags}
 				<Topbar.Tags tags={note.expand.tags} />
@@ -95,7 +95,7 @@
 					}}
 				/>
 			{/if}
-			<div class="divider divider-horizontal"></div>
+			<div class="divider divider-horizontal hidden md:flex"></div>
 
 			<Topbar.Archive
 				action={async () => {
@@ -106,6 +106,11 @@
 			<Topbar.Delete bind:isOpen={isDeleteOpen} />
 			<Topbar.Info {note} />
 		</Topbar.Root>
+
+		<div class="h-[calc(100vh-60px)]">
+			<NoteContent {note} />
+		</div>
+
 		<Navbar class="p-golden-md bg-base-100 flex flex-col items-end gap-y-2 rounded-md">
 			<div>
 				<Topbar.Weight onUp={upvote} onDown={downvote}></Topbar.Weight>
@@ -125,9 +130,6 @@
 				}}
 			/>
 		</Navbar>
-		<div class="h-[calc(100vh-60px)]">
-			<NoteContent {note} />
-		</div>
 	{:else}
 		<div class="grid h-screen place-items-center">
 			<!-- <NoteLoading /> -->

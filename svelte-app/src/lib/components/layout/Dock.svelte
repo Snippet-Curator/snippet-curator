@@ -33,12 +33,12 @@
 		class={page.url.hash == item.url ? 'dock-active' : ''}
 		onclick={() => goto(`${item.url}`)}
 	>
-		<Icon size={22} class="text-base-content/70" />
-		<span class="dock-label">{item.name}</span>
+		<Icon size={18} class="text-base-content/70" />
+		<!-- <span class="dock-label">{item.name}</span> -->
 	</button>
 {/snippet}
 
-<div class="dock md:hidden">
+<div class="dock dock-xs md:hidden">
 	{#each pages as page}
 		{@render bar(page)}
 	{/each}

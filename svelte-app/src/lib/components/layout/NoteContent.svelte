@@ -158,11 +158,11 @@
 	});
 </script>
 
-<div class="bg-base-100/90 sticky top-0 z-20 flex w-full px-8 py-4 backdrop-blur-2xl">
+<div class="bg-base-100/90 p-golden-sm md:p-golden-md z-20 flex w-full px-4 md:sticky md:top-0">
 	<div class="flex w-full">
-		<h2 class="card-title grow">{note.title}</h2>
+		<h2 class="card-title grow truncate">{note.title}</h2>
 		<div
-			class="text-base-content/20 hover:text-base-content flex items-center gap-x-4 transition-colors duration-300"
+			class="text-base-content/20 hover:text-base-content hidden items-center gap-x-4 transition-colors duration-300 md:flex"
 		>
 			<input
 				type="range"
@@ -181,7 +181,7 @@
 	</div>
 </div>
 
-<ScrollArea scrollHideDelay={200} type="scroll" class="h-full pb-20">
+<ScrollArea scrollHideDelay={200} type="scroll" class="mb-20 h-full">
 	<div class="card mx-auto mt-10 max-w-3xl px-10 lg:max-w-5xl">
 		<!-- <div class="card-body z-0">
 			<div class="relative" bind:this={container}></div>
@@ -242,4 +242,3 @@
 		</button>
 	</div>
 {/if}
-<div class="pb-20"></div>

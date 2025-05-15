@@ -11,7 +11,7 @@
 		{
 			display: 'h',
 			alternate: '0',
-			description: '0 star'
+			description: 'no star'
 		},
 		{
 			display: 'j',
@@ -21,22 +21,22 @@
 		{
 			display: 'k',
 			alternate: '2',
-			description: '2 star'
+			description: '2 stars'
 		},
 		{
 			display: 'l',
 			alternate: '3',
-			description: '3 star'
+			description: '3 stars'
 		},
 		{
 			display: ';',
 			alternate: '4',
-			description: '4 star'
+			description: '4 stars'
 		},
 		{
 			display: "'",
 			alternate: '5',
-			description: '5 star'
+			description: '5 stars'
 		}
 	];
 	const navigations: KBD[] = [
@@ -97,7 +97,7 @@
 		<div class="card">
 			<div class="card-body">
 				<div class="card-title text-xl">Keyboard Shortcuts</div>
-				<div class="gap-golden-md grid grid-cols-3">
+				<div class="gap-golden-md grid md:grid-cols-3">
 					{@render renderKBD(navigations, 'Discover Navigation')}
 					{@render renderKBD(ratings, 'Note Rating')}
 					{@render renderKBD(edits, 'Editing')}
