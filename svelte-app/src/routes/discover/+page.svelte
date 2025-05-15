@@ -74,9 +74,9 @@
 					onLeft={getPreviousNote}
 					onRight={getNextNote}
 				></Topbar.NavBtns>
-				<!-- {note.score.toFixed(2)} -->
 				<Topbar.Weight onUp={upvote} onDown={downvote}></Topbar.Weight>
 			{/if}
+			{note.score.toFixed(2)}
 			<div class="grow"></div>
 
 			{#if note?.expand?.tags}
