@@ -8,5 +8,5 @@
 >
 	<ArrowLeft size={15} />
 
-	<div>Back</div>
+	<div class="hidden md:block">Back</div>
 </button>

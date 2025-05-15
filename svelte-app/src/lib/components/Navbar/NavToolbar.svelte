@@ -8,7 +8,7 @@
 </script>
 
 {#if mobileState.isMobile}
-	<div class={cn('fixed bottom-20 right-8 z-30', className)}>
+	<div class={cn('bottom-15 fixed right-8 z-30', className)}>
 		{@render children()}
 	</div>
 {/if}
