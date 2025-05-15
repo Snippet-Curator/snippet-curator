@@ -19,7 +19,8 @@ function calculateNoteScore(rating, weight, lastOpened) {
   const weightNorm = normalize(weight ?? 0, 0, 10)
   const randomFactor = Math.random()
 
-  const score = (0.2 * ratingNorm + 0.6 * recencyNorm + 0.2 * weightNorm + 0.3 * randomFactor) * 100
+  const score =
+    (0.15 * ratingNorm + 0.65 * recencyNorm + 0.2 * weightNorm + 0.35 * randomFactor) * 100
 
   return score
 }

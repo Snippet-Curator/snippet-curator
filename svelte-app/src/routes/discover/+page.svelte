@@ -1,19 +1,14 @@
 <script lang="ts">
-	import {
-		NoteContent,
-		Delete,
-		EditNotebook,
-		EditTags,
-		Blank,
-		NoteLoading
-	} from '$lib/components/';
+	import { NoteContent, Delete, EditNotebook, EditTags, Navbar } from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { onMount } from 'svelte';
+	import { getMobileState } from '$lib/utils.svelte';
 
 	const noteState = new NoteState('discovery');
 
 	let note = $derived(noteState.note);
+	const mobileState = getMobileState();
 
 	let totalPages = $state(0);
 	let currentPage = $state(1);
@@ -70,16 +65,18 @@
 	{#if note}
 		<Topbar.Root>
 			<Topbar.SidebarIcon></Topbar.SidebarIcon>
-			<Topbar.NavBtns
-				{currentIndex}
-				{currentPage}
-				{totalPages}
-				{lastItemIndex}
-				onLeft={getPreviousNote}
-				onRight={getNextNote}
-			></Topbar.NavBtns>
-			<!-- {note.score.toFixed(2)} -->
-			<Topbar.Weight onUp={upvote} onDown={downvote}></Topbar.Weight>
+			{#if !mobileState.isMobile}
+				<Topbar.NavBtns
+					{currentIndex}
+					{currentPage}
+					{totalPages}
+					{lastItemIndex}
+					onLeft={getPreviousNote}
+					onRight={getNextNote}
+				></Topbar.NavBtns>
+				<!-- {note.score.toFixed(2)} -->
+				<Topbar.Weight onUp={upvote} onDown={downvote}></Topbar.Weight>
+			{/if}
 			<div class="grow"></div>
 
 			{#if note?.expand?.tags}
@@ -90,12 +87,14 @@
 				<Topbar.Notebook bind:isOpen={isEditNotebookOpen} notebook={note.expand.notebook} />
 			{/if}
 
-			<Topbar.Rating
-				rating={note.rating}
-				action={(newRating) => {
-					noteState.changeRating(newRating);
-				}}
-			/>
+			{#if !mobileState.isMobile}
+				<Topbar.Rating
+					rating={note.rating}
+					action={(newRating) => {
+						noteState.changeRating(newRating);
+					}}
+				/>
+			{/if}
 			<div class="divider divider-horizontal"></div>
 
 			<Topbar.Archive
@@ -107,6 +106,25 @@
 			<Topbar.Delete bind:isOpen={isDeleteOpen} />
 			<Topbar.Info {note} />
 		</Topbar.Root>
+		<Navbar class="p-golden-md bg-base-100 flex flex-col items-end gap-y-2 rounded-md">
+			<div>
+				<Topbar.Weight onUp={upvote} onDown={downvote}></Topbar.Weight>
+				<Topbar.NavBtns
+					{currentIndex}
+					{currentPage}
+					{totalPages}
+					{lastItemIndex}
+					onLeft={getPreviousNote}
+					onRight={getNextNote}
+				></Topbar.NavBtns>
+			</div>
+			<Topbar.Rating
+				rating={note.rating}
+				action={(newRating) => {
+					noteState.changeRating(newRating);
+				}}
+			/>
+		</Navbar>
 		<div class="h-[calc(100vh-60px)]">
 			<NoteContent {note} />
 		</div>

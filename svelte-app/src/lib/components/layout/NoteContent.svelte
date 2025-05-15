@@ -17,12 +17,9 @@
 	};
 
 	let { note }: Props = $props();
-	// let content = $state(replacePbUrl(note.content));
-	// let container;
+	let content = $derived.by(() => replacePbUrl(note.content));
 	let iframe = $state();
-	// let shadow;
 	let doc = $state();
-	// let styleTag = $state();
 	let fontScale = $state(1);
 
 	let isOpen = $state(false);
@@ -37,7 +34,6 @@
 		selectedImage = src;
 		isOpen = true;
 	}
-
 
 	const customStyles = $state(`
 	  :root {
@@ -132,7 +128,7 @@
 	$effect(() => {
 		const doc = iframe.contentDocument || iframe.contentWindow.document;
 		doc.open();
-		doc.write(replacePbUrl(note.content));
+		doc.write(content);
 		doc.close();
 
 		doc.documentElement.style.setProperty('--fontScale', fontScale);

@@ -43,10 +43,10 @@ function signalSavePage() {
   }
 }
 
-export class sidebarState {
-  isOpen = $state(true)
+export class mobileState {
+  isMobile = $state(false)
+  isSidebarOpen = $state(true)
 }
-
 
 // Types for the result object with discriminated union
 type Success<T> = {
@@ -83,12 +83,11 @@ export function debounce<T extends (...args: any[]) => void>(fn: T, delay: numbe
   };
 }
 
-
 export const searchState = changeSearchTerm()
 export const signalPageState = signalSavePage()
-export function setSideBarState() {
-  return setContext('sidebar', new sidebarState())
+export function setMobileState() {
+  return setContext('mobile', new mobileState())
 }
-export function getSideBarState() {
-  return getContext<ReturnType<typeof setSideBarState>>('sidebar')
+export function getMobileState() {
+  return getContext<ReturnType<typeof setMobileState>>('mobile')
 }

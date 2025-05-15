@@ -12,7 +12,6 @@
 		Archive
 	} from 'lucide-svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
-	// import { Toaster } from '$lib/components/ui/sonner/index';
 	import * as Resizable from '$lib/components/ui/resizable/index.js';
 
 	import {
@@ -25,17 +24,17 @@
 	} from '$lib/db.svelte';
 
 	import { Dock, Icon, NotebookList, TagList } from '$lib/components';
-	import { getSideBarState, setSideBarState } from '$lib/utils.svelte';
+	import { getMobileState, setMobileState } from '$lib/utils.svelte';
 
 	let { children } = $props();
 	setTagState();
 	setNotebookState();
 	setDefaultNotebooksState();
-	setSideBarState();
+	setMobileState();
 	const tagState = getTagState();
 	const notebookState = getNotebookState();
 	const defaultNotebooksState = getDefaultNotebooksState();
-	const sidebarState = getSideBarState();
+	const mobileState = getMobileState();
 
 	let screenWidth = window.innerWidth;
 
@@ -45,10 +44,11 @@
 
 	const updateScreenWidth = () => {
 		screenWidth = window.innerWidth;
+		mobileState.isMobile = screenWidth < 768 ? true : false;
+		// mobileState.isSidebarOpen = screenWidth < 768 ? false : true;
 		if (screenWidth < 768) {
-			sidebarState.isOpen = false;
+			mobileState.isSidebarOpen = false;
 		}
-		// Collapse below md breakpoint
 	};
 
 	type LayoutPage = {
@@ -83,6 +83,7 @@
 	let defaultNotebooks = $state();
 
 	onMount(async () => {
+		updateScreenWidth();
 		defaultNotebooks = getDefaultNotebooks();
 	});
 
@@ -93,7 +94,7 @@
 
 <Resizable.PaneGroup direction="horizontal" class="font-display max-h-screen min-h-screen w-full">
 	<Resizable.Pane
-		class="{sidebarState.isOpen
+		class="{mobileState.isSidebarOpen
 			? '-motion-translate-x-in-100 motion-duration-200'
 			: 'hidden'} menu bg-base-200 border-base-content/10 space-y-2 border-r"
 		defaultSize={16}
