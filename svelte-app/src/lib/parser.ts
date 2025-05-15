@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 
 import type { EnNote, EnMedia, EnResource } from './types';
-import pb from '$lib/db.svelte'
+import pb, { pbURL } from '$lib/db.svelte'
 import { tryCatch } from './utils.svelte';
 import { type PError } from './types';
 import type { RecordModel } from 'pocketbase';
@@ -19,6 +19,7 @@ const inboxNotebook = 'Inbox'
 const archiveNotebook = 'Archive'
 const trashNotebook = 'Trash'
 const baseURL = 'http://127.0.0.1:8090/api/files'
+const remoteURL = pbURL + '/api/files'
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -163,7 +164,7 @@ async function createThumbnail(recordID: string, resources) {
     }
 
     if (mimeType.includes('video') || mimeType == 'application/octet-stream') {
-      const videoURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
+      const videoURL = `${remoteURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
       const thumbnailFile = await getVideoThumb(videoURL)
       const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
         'attachments+': [thumbnailFile]

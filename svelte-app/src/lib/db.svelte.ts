@@ -3,12 +3,17 @@ import type { Notebook, Tag, Note, NoteRecord } from './types'
 import { getContext, setContext } from 'svelte'
 import { tryCatch } from './utils.svelte'
 
-const pbURL = import.meta.env.VITE_PB_URL || 'http://127.0.0.1:8090'
+export const pbURL = import.meta.env.VITE_PB_URL || 'http://127.0.0.1:8090'
 const pb = new PocketBase(pbURL)
 
 export type NoteType = {
   type: 'tags' | 'notebooks' | 'default',
   id?: string
+}
+
+export function replacePbUrl(content: string) {
+  if (pbURL == 'http://127.0.0.1:8090') return content
+  return content.replace(/http:\/\/127\.0\.0\.1:8090/g, pbURL)
 }
 
 export async function getAuth() {
@@ -39,59 +44,6 @@ async function getTrashNotebook() {
   }
   return data
 }
-
-export function replacePbUrl(content: string) {
-  if (pbURL == 'http://127.0.0.1:8090') return content
-  return content.replace(/http:\/\/127\.0\.0\.1:8090/g, pbURL)
-}
-
-// export async function refreshStaleScores(daysOld = 3) {
-//   const cutoff = new Date(Date.now() - daysOld * 86400000).toISOString();
-
-//   const start = performance.now();
-
-//   const { data: notes, error } = await tryCatch(pb.collection('notes').getFullList({
-//     filter: `last_score_updated < "${cutoff}" || last_score_updated = ""`,
-//   }))
-
-//   if (error) {
-//     console.error('Error while updating scale scores', error.message, error.data)
-//   }
-
-//   if (!notes) return
-
-//   await Promise.all(notes.map(note => {
-//     const score = calculateNoteScore(note.rating, note.weight, note.last_opened);
-
-//     const { data, error } = tryCatch(pb.collection('notes').update(note.id, {
-//       score,
-//       last_score_updated: new Date().toISOString(),
-//     }))
-
-//     if (error) {
-//       console.error('Error while updating scale score', note.title, error.message, error.data)
-//     }
-//   }))
-
-//   // for (const note of notes) {
-//   //   const score = calculateNoteScore(note.rating, note.weight, note.last_opened);
-
-//   //   const { data, error } = await tryCatch(pb.collection('notes').update(note.id, {
-//   //     score,
-//   //     last_score_updated: new Date().toISOString(),
-//   //   }))
-
-//   //   if (error) {
-//   //     console.error('Error while updating scale score', note.title, error.message, error.data)
-//   //   }
-//   // }
-
-//   const end = performance.now();
-//   const timer = (end - start).toFixed(2)
-
-//   console.log(`Refreshed ${notes.length} notes in ${timer} ms`)
-// }
-
 export class TagState {
   tags = $state<Tag[]>([])
   collectionName = 'tags'
