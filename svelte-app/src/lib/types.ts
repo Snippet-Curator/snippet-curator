@@ -23,7 +23,7 @@ export type Note = {
   attachments: string[]
   expand?: {
     notebook?: Notebook,
-    tags?: Tag
+    tags?: Tag[]
   }
   weight: number
   score: number

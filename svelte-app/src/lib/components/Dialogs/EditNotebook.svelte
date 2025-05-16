@@ -10,7 +10,7 @@
 		action: (selectedNotebookID: string) => void;
 	};
 
-	let { isOpen = $bindable(), action, currentNotebookID = '' }: Props = $props();
+	let { isOpen = $bindable(), action }: Props = $props();
 
 	let notebooks = $state<Notebook[]>();
 

@@ -1,77 +1,67 @@
 <script lang="ts">
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import * as Topbar from '$lib/components/Topbar/index';
 
 	type KBD = {
-		display: string;
-		alternate?: string;
+		displays: string[];
 		description: string;
 	};
 
 	const ratings: KBD[] = [
 		{
-			display: 'h',
-			alternate: '0',
+			displays: ['h', '0'],
 			description: 'no star'
 		},
 		{
-			display: 'j',
-			alternate: '1',
+			displays: ['j', '1'],
 			description: '1 star'
 		},
 		{
-			display: 'k',
-			alternate: '2',
+			displays: ['k', '2'],
 			description: '2 stars'
 		},
 		{
-			display: 'l',
-			alternate: '3',
+			displays: ['l', '3'],
 			description: '3 stars'
 		},
 		{
-			display: ';',
-			alternate: '4',
+			displays: [';', '4'],
 			description: '4 stars'
 		},
 		{
-			display: "'",
-			alternate: '5',
+			displays: ["'", '5'],
 			description: '5 stars'
 		}
 	];
 	const navigations: KBD[] = [
 		{
-			display: '←',
-			alternate: 'a',
-			description: 'Previous note'
-		},
-		{
-			display: '→',
-			alternate: 'd',
+			displays: ['→', 'd', 'space'],
 			description: 'Next note'
 		},
 		{
-			display: '↑',
-			alternate: 'w',
+			displays: ['←', 'a'],
+			description: 'Previous note'
+		},
+		{
+			displays: ['↑', 'w'],
 			description: 'See more'
 		},
 		{
-			display: '↓',
-			alternate: 's',
+			displays: ['↓', 's'],
 			description: 'See less'
 		}
 	];
 	const edits: KBD[] = [
 		{
-			display: 'b',
+			displays: ['b'],
 			description: 'Bulk edit'
 		},
 		{
-			display: 'n',
+			displays: ['n'],
 			description: 'Edit notebooks'
 		},
 		{
-			display: 't',
+			displays: ['t'],
 			description: 'Edit tags'
 		}
 	];
@@ -81,16 +71,23 @@
 	<div class="gap-golden-md flex flex-col">
 		<span class="text-lg">{title}</span>
 		{#each kbds as kbd}
-			<div class="gap-golden-md flex items-center">
-				<kbd class="kbd">{kbd.display}</kbd>
-				{#if kbd.alternate}
-					<kbd class="kbd">{kbd.alternate}</kbd>
-				{/if}
+			<div class="grid grid-cols-2">
 				{kbd.description}
+				<div class="gap-golden-md flex">
+					{#each kbd.displays as display}
+						<kbd class="kbd">{display}</kbd>
+					{/each}
+				</div>
 			</div>
 		{/each}
 	</div>
 {/snippet}
+
+<Topbar.Root>
+	<Topbar.SidebarIcon></Topbar.SidebarIcon>
+	<Topbar.Back />
+	<div class="grow"></div>
+</Topbar.Root>
 
 <ScrollArea class="h-[calc(100vh-60px)]">
 	<div class="p-golden-xl mx-auto max-w-5xl">

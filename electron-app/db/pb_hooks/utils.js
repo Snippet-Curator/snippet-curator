@@ -1,5 +1,5 @@
 function normalizeRating(val, min, max) {
-  if (val = 0) return 0.5
+  if ((val = 0)) return 0.5
   return Math.max(0, Math.min(1, (val - min) / (max - min)))
 }
 
@@ -10,7 +10,7 @@ function normalizeWeight(val, min, max) {
 function recencyScore(lastOpened) {
   const openedDate = new Date(lastOpened)
   if (isNaN(openedDate.getTime())) {
-    return 0.7
+    return 0.9
   }
   const daysAgo = (Date.now() - openedDate.getTime()) / (1000 * 60 * 60 * 24)
 

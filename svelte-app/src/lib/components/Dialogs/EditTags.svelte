@@ -1,125 +1,58 @@
 <script lang="ts">
-	import type { RecordModel } from 'pocketbase';
-	import { onDestroy, onMount } from 'svelte';
-
-	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import * as Dialog from '$lib/components/ui/dialog/index';
+	import * as Command from '$lib/components/ui/command/index.js';
 	import pb from '$lib/db.svelte';
 	import type { Tag } from '$lib/types';
+	import { onMount } from 'svelte';
 
 	type Props = {
 		isOpen: boolean;
-		action: (selectedTags: string[]) => void;
-		currentTags?: Tag[];
+		currentTags: Tag[];
+		add: (selectedTagID: string) => void;
+		remove: (selectedTagID: string) => void;
 	};
 
-	let { isOpen = $bindable(), currentTags = [], action }: Props = $props();
+	let { isOpen = $bindable(), add, remove, currentTags = [] }: Props = $props();
 
-	let tags = $state<RecordModel[]>();
-	let selectedTags = $state<string[]>([]);
-	let filteredTags = $state<RecordModel[]>([]);
-	let tagSearchTerm = $state<string>('');
+	let tagList: Tag[];
+	let currentTagList = $derived(new Set(currentTags.map((tag) => tag.id)));
 
-	async function getTags() {
-		return await pb.collection('tags').getFullList();
-	}
-
-	function filterTag() {
-		if (!tags) return;
-
-		if (!tagSearchTerm) {
-			filteredTags = tags;
-			return;
-		}
-
-		filteredTags = tags.filter((tag) => {
-			return tag.name.toLowerCase().includes(tagSearchTerm.toLowerCase());
-		});
-	}
-
-	function toggleTag(id: string) {
-		if (selectedTags.includes(id)) {
-			selectedTags = selectedTags.filter((tag) => tag !== id);
-		} else {
-			selectedTags.push(id);
-		}
-	}
-
-	function handler(event: KeyboardEvent) {
-		if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
-			return;
-		}
-
-		switch (event.key) {
-			case 't':
-				event.preventDefault();
-				isOpen = true;
-				break;
-		}
-	}
+	let tags = $derived.by(async () => {
+		return tagList.filter((tag) => !currentTagList.has(tag.id));
+	});
 
 	onMount(async () => {
-		tags = await getTags();
-		filteredTags = tags;
-		currentTags.forEach((tag) => {
-			selectedTags.push(tag.id);
-		});
-
-		document.addEventListener('keydown', handler);
-
-		onDestroy(() => {
-			document.removeEventListener('keydown', handler);
+		tagList = await pb.collection('tags').getFullList({
+			sort: `name`
 		});
 	});
 </script>
 
-<Dialog.Root open={isOpen}>
-	<Dialog.Content
-		onCloseAutoFocus={(e) => {
-			e.preventDefault();
-			isOpen = false;
-		}}
-	>
-		<Dialog.Header>
-			<Dialog.Title>Change Tags</Dialog.Title>
-			<Dialog.Description>Select Tags</Dialog.Description>
-		</Dialog.Header>
-
-		<input
-			type="text"
-			bind:value={tagSearchTerm}
-			class="input w-full"
-			oninput={() => filterTag()}
-		/>
-
-		<ScrollArea class="bg-base-200/30 p-golden-md h-[20vh] rounded-lg">
-			{#each filteredTags as tag}
-				<ul class="list">
-					<li class="list-row flex items-center">
-						<label for="">
-							<input
-								type="checkbox"
-								class="checkbox checkbox-md"
-								value={tag.id}
-								checked={selectedTags.includes(tag.id)}
-								onchange={() => toggleTag(tag.id)}
-							/>
-							{tag.name}
-						</label>
-					</li>
-				</ul>
+<Command.Dialog bind:open={isOpen}>
+	<Command.Input placeholder="Search Tags..." />
+	{#if currentTags}
+		<div class="gap-golden-sm p-golden-md flex flex-wrap">
+			{#each currentTags as currentTag}
+				<button onclick={() => remove(currentTag.id)} class="badge hover:badge-ghost text-nowrap"
+					>{currentTag.name} x</button
+				>
 			{/each}
-		</ScrollArea>
-
-		<div class="flex justify-end gap-x-2">
-			<button onclick={() => (isOpen = false)} class="btn">Close</button>
-			<button
-				onclick={() => {
-					action(selectedTags);
-					isOpen = false;
-				}}
-				class="btn btn-primary">Save</button
-			>
 		</div>
-	</Dialog.Content>
-</Dialog.Root>
+	{/if}
+	<Command.List>
+		<Command.Empty>No tag found.</Command.Empty>
+		<Command.Group heading="">
+			{#await tags then tags}
+				{#if tags}
+					{#each tags as tag}
+						<Command.Item
+							onSelect={() => {
+								add(tag.id);
+							}}
+							>{tag.name}
+						</Command.Item>
+					{/each}
+				{/if}
+			{/await}
+		</Command.Group>
+	</Command.List>
+</Command.Dialog>

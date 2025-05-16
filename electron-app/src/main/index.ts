@@ -102,7 +102,8 @@ function checkPbVersion() {
 
   const needsCopy = requiredFolders.some(folder => {
     console.log('path exists: ', path.join(userDataPath, folder), existsSync(path.join(userDataPath, folder)))
-    return !existsSync(path.join(userDataPath, folder))})
+    return !existsSync(path.join(userDataPath, folder))
+  })
 
   if (needsCopy) {
     console.log('no pb data folder found', needsCopy)
@@ -129,35 +130,35 @@ function checkPbVersion() {
 function runPocketbase() {
   return new Promise((resolve) => {
     if (is.dev) {
-    console.log('Starting Pocketbase dev...')
-    console.log('Dev path: ', pocketbaseDevPath)
-    pocketBaseProcess = spawn(pocketbaseDevPath, ['serve'])
-  } else {
-    checkPbVersion()
-    console.log('Starting Pocketbase prod...')
-    console.log('Production path: ', pocketbaseProdPath)
-    // pocketBaseProcess = spawn(pocketbaseProdPath, ['serve'])
-    pocketBaseProcess = spawn(pocketbaseProdPath, ['serve', '--dir', pbDataPath])
-  }
-
-  pocketBaseProcess.stdout.on('data', (data) => {
-    const output = data.toString()
-    console.log(`Pocketbase: ${output}`)
-
-    if (output.includes('Server started')){
-      resolve(pocketBaseProcess)
+      console.log('Starting Pocketbase dev...')
+      console.log('Dev path: ', pocketbaseDevPath)
+      pocketBaseProcess = spawn(pocketbaseDevPath, ['serve'])
+    } else {
+      checkPbVersion()
+      console.log('Starting Pocketbase prod...')
+      console.log('Production path: ', pocketbaseProdPath)
+      // pocketBaseProcess = spawn(pocketbaseProdPath, ['serve'])
+      pocketBaseProcess = spawn(pocketbaseProdPath, ['serve', '--dir', pbDataPath])
     }
+
+    pocketBaseProcess.stdout.on('data', (data) => {
+      const output = data.toString()
+      console.log(`Pocketbase: ${output}`)
+
+      if (output.includes('Server started')) {
+        resolve(pocketBaseProcess)
+      }
+    })
+
+    pocketBaseProcess.on('close', (code) => {
+      console.log(`Pocketbase exited with code ${code}`)
+    })
+
+    pocketBaseProcess.on('error', (err) => {
+      console.log('Failed to start Pocketbase: ', err)
+    })
   })
 
-  pocketBaseProcess.on('close', (code) => {
-    console.log(`Pocketbase exited with code ${code}`)
-  })
-
-  pocketBaseProcess.on('error', (err) => {
-    console.log('Failed to start Pocketbase: ', err)
-  })
-  })
-  
 }
 
 // This method will be called when Electron has finished

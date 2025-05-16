@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { NotelistState } from '$lib/db.svelte';
 	import { Archive, Trash2, Notebook as NotebookIcon, Tags } from 'lucide-svelte';
-	import { Delete, EditNotebook, EditTags } from '$lib/components/';
+	import { Delete, EditNotebook, EditBulkTags } from '$lib/components/';
 	import { onDestroy, onMount } from 'svelte';
 	import { page } from '$app/state';
 
@@ -34,6 +34,14 @@
 				break;
 		}
 	}
+
+	// async function getTags() {
+	// 	tags = await notelistState.getTags(selectedNotesID);
+	// 	return tags;
+	// }
+
+	let noteTags = $derived.by(async () => await notelistState.getTags(selectedNotesID));
+	let tags = $derived(notelistState.tags);
 
 	onMount(async () => {
 		// if page is a notebook slug, then get notebook name
@@ -112,10 +120,10 @@
 	}}
 />
 
-<EditTags
-	bind:isOpen={isEditTagsOpen}
-	action={async (selectedTags) => {
-		await notelistState.changeTags(selectedNotesID, selectedTags);
-		isBulkEdit = false;
-	}}
-/>
+{#await noteTags then noteTags}
+	<EditBulkTags
+		bind:isOpen={isEditTagsOpen}
+		addAll={(selectedTagIDs) => notelistState.addAllTags(selectedNotesID, selectedTagIDs)}
+		clearAll={() => notelistState.clearTags(selectedNotesID)}
+	/>
+{/await}

@@ -68,7 +68,8 @@
 	<EditTags
 		bind:isOpen={isEditTagsOpen}
 		currentTags={note.expand?.tags}
-		action={(selectedTags) => noteState.changeTags(selectedTags)}
+		add={(selectedTags) => noteState.addTag(selectedTags)}
+		remove={(selectedTags) => noteState.removeTag(selectedTags)}
 	/>
 
 	<EditNotebook

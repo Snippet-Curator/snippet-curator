@@ -1,5 +1,5 @@
-import PocketBase from 'pocketbase'
-import type { Notebook, Tag, Note, NoteRecord } from './types'
+import PocketBase, { type RecordModel } from 'pocketbase'
+import { type Notebook, type Tag, type Note, type NoteRecord, type PError } from './types'
 import { getContext, setContext } from 'svelte'
 import { tryCatch } from './utils.svelte'
 
@@ -44,6 +44,7 @@ async function getTrashNotebook() {
   }
   return data
 }
+
 export class TagState {
   tags = $state<Tag[]>([])
   collectionName = 'tags'
@@ -302,7 +303,6 @@ export class defaultNotebooksState {
   }
 }
 
-
 export class NotelistState {
   notes = $state<NoteRecord>({
     items: [],
@@ -318,6 +318,7 @@ export class NotelistState {
   notebookName = $state<string>()
   tagID = $state<string>()
   noteType = $state<'tags' | 'notebooks' | 'default'>()
+  tags = $state<Tag[]>()
 
   constructor(noteType: NoteType) {
     this.noteType = noteType.type
@@ -487,6 +488,50 @@ export class NotelistState {
     await this.getDefault()
   }
 
+  async getTags(selectedNotesID: string[]) {
+    let tagList: Tag[] = []
+    await Promise.all(selectedNotesID.map(async noteID => {
+      const { data, error } = await tryCatch<Note, PError>(pb.collection(this.viewCollectionName).getOne(noteID, {
+        expand: 'tags'
+      }))
+      if (error) {
+        console.error('Error getting tag: ', noteID, error)
+        return
+      }
+      const tags = data.expand?.tags ?? []
+      if (tags.length === 0) return
+      tagList.push(...tags)
+    }))
+    const uniqueTags = Object.values(
+      Object.fromEntries(tagList.map(tag => [tag.id, tag]))
+    )
+    this.tags = uniqueTags
+  }
+
+  async addAllTags(selectedNotesID: string[], selectedTagsID: string[]) {
+    await Promise.all(selectedNotesID.map(async noteID => {
+      const { data, error } = await tryCatch(pb.collection(this.collectionName).update(noteID, {
+        'tags+': selectedTagsID
+      }))
+      if (error) {
+        console.error('Error adding tag: ', noteID, error)
+      }
+    }))
+    await this.getDefault()
+  }
+
+  async clearTags(selectedNotesID: string[]) {
+    await Promise.all(selectedNotesID.map(async noteID => {
+      const { data, error } = await tryCatch(pb.collection(this.collectionName).update(noteID, {
+        'tags': []
+      }))
+      if (error) {
+        console.error('Error clearing tags: ', noteID, error)
+      }
+    }))
+    await this.getDefault()
+  }
+
   async updateOne(recordID: string, newName: string, parentNotebook: string) {
     if (parentNotebook && newName) {
       await pb.collection(this.collectionName).update(recordID, {
@@ -614,6 +659,26 @@ export class NoteState {
     }
     await this.getNote()
     // return data
+  }
+
+  async addTag(selectedTagID: string) {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.noteID, {
+      'tags+': selectedTagID
+    }))
+    if (error) {
+      console.error('Error adding tag: ', this.noteID, error)
+    }
+    await this.getNote()
+  }
+
+  async removeTag(selectedTagID: string) {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.noteID, {
+      'tags-': selectedTagID
+    }))
+    if (error) {
+      console.error('Error removing tag: ', this.noteID, error)
+    }
+    await this.getNote()
   }
 
   async changeRating(newRating: number) {

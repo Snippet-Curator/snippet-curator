@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import * as Tabs from '$lib/components/ui/tabs/index';
+	import * as Topbar from '$lib/components/Topbar/index';
 
 	import { EnImport, fileImport, htmlImport } from '$lib/parser';
 	import pb, { getDefaultNotebooksState, getNotebookState, getTagState } from '$lib/db.svelte';
@@ -129,6 +130,12 @@
 
 	const notebooks = notebookState.notebooks;
 </script>
+
+<Topbar.Root>
+	<Topbar.SidebarIcon></Topbar.SidebarIcon>
+	<Topbar.Back />
+	<div class="grow"></div>
+</Topbar.Root>
 
 <ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
 	<section class="gap-golden-xl p-golden-xl card mx-auto mt-10 grid max-w-5xl grid-cols-1">

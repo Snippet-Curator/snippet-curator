@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as Topbar from '$lib/components/Topbar/index';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { Archive, Trash2 } from 'lucide-svelte';
 
@@ -28,8 +29,14 @@
 	</div>
 {/snippet}
 
+<Topbar.Root>
+	<Topbar.SidebarIcon></Topbar.SidebarIcon>
+	<Topbar.Back />
+	<div class="grow"></div>
+</Topbar.Root>
+
 <ScrollArea class="h-[calc(100vh-60px)]">
-	<div class="mx-auto max-w-5xl p-golden-xl">
+	<div class="p-golden-xl mx-auto max-w-5xl">
 		<div class="flex items-center px-3">
 			<h1 class="grow">Notebooks</h1>
 			<button
