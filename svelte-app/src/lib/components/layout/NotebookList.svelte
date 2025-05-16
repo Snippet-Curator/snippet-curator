@@ -24,23 +24,7 @@
 	let isChangeParentOpen = $state(false);
 	let isNewNotebookOpen = $state(false);
 	let selectedNotebook = $state<Notebook>();
-	let notebookSearchTerm = $state<string>('');
-	let filteredNotebooks = $state(notebookState.notebooks);
-
-	function filterNotebook(ownNotebook: Notebook) {
-		if (!notebookSearchTerm) {
-			filteredNotebooks = notebookState.notebooks.filter(
-				(notebook) => !notebook.id.includes(ownNotebook.id)
-			);
-			return;
-		}
-		filteredNotebooks = notebookState.notebooks.filter((notebook) => {
-			return (
-				notebook.name.includes(notebookSearchTerm.toLowerCase()) &&
-				!notebook.id.includes(ownNotebook.id)
-			);
-		});
-	}
+	let flatNotebooks = $derived(notebookState.flatNotebooks);
 </script>
 
 {#snippet renderNotebook(notebook: Notebook)}
@@ -73,8 +57,6 @@
 			<ContextMenu.Item
 				onSelect={() => {
 					selectedNotebook = notebook;
-					// selectedParentNotebookID = notebook.parent;
-					filterNotebook(selectedNotebook);
 					isChangeParentOpen = true;
 				}}>Change Parent</ContextMenu.Item
 			>
@@ -139,11 +121,10 @@
 
 <ChangeParent
 	bind:isOpen={isChangeParentOpen}
-	renameType="Notebook"
-	bind:searchTerm={notebookSearchTerm}
-	filteredItems={filteredNotebooks}
-	filter={() => filterNotebook(selectedNotebook)}
-	cancel={() => notebookState.updateOnebyParent(selectedNotebook?.id, '')}
+	type="notebook"
+	fullList={flatNotebooks}
+	currentItemID={selectedNotebook?.id}
+	clear={() => notebookState.updateOnebyParent(selectedNotebook?.id, '')}
 	action={(selectedParentNotebookID) =>
 		notebookState.updateOnebyParent(selectedNotebook?.id, selectedParentNotebookID)}
 />

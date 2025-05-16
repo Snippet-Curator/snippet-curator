@@ -30,35 +30,7 @@
 
 <Command.Dialog bind:open={isOpen}>
 	<Command.Input bind:value={searchText} placeholder="Search Tags..." />
-	{#if selectedTags.length > 0}
-		<div class="gap-golden-sm p-golden-md flex flex-wrap">
-			{#each selectedTags as tag}
-				<button
-					onclick={() => {
-						selectedTags = selectedTags.filter((t) => t.id != tag.id);
-					}}
-					class="badge hover:badge-ghost text-nowrap">{tag.name} x</button
-				>
-			{/each}
-		</div>
-	{/if}
-	<div class="gap-x-golden-md p-golden-md border-b-base-content/10 flex w-full border-b">
-		<div class="grow"></div>
-		<button
-			onclick={() => {
-				clearAll();
-				isOpen = false;
-			}}
-			class="btn">Clear all existing note tags</button
-		>
-		<button
-			onclick={() => {
-				addAll([...uniqueSelectedTags]);
-				isOpen = false;
-			}}
-			class="btn btn-primary">Add tags to all notes</button
-		>
-	</div>
+
 	<Command.List>
 		<Command.Empty>No tag found.</Command.Empty>
 		<Command.Group heading="">
@@ -79,4 +51,33 @@
 			{/await}
 		</Command.Group>
 	</Command.List>
+	{#if selectedTags.length > 0}
+		<div class="gap-golden-sm p-golden-md border-t-base-content/10 flex flex-wrap border-t">
+			{#each selectedTags as tag}
+				<button
+					onclick={() => {
+						selectedTags = selectedTags.filter((t) => t.id != tag.id);
+					}}
+					class="badge hover:badge-ghost text-nowrap">{tag.name} x</button
+				>
+			{/each}
+		</div>
+	{/if}
+	<div class="gap-x-golden-md p-golden-md border-t-base-content/10 flex w-full border-t">
+		<div class="grow"></div>
+		<button
+			onclick={() => {
+				clearAll();
+				isOpen = false;
+			}}
+			class="btn">Clear all existing note tags</button
+		>
+		<button
+			onclick={() => {
+				addAll([...uniqueSelectedTags]);
+				isOpen = false;
+			}}
+			class="btn btn-primary">Add tags to all notes</button
+		>
+	</div>
 </Command.Dialog>

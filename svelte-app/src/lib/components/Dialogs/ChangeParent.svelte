@@ -1,86 +1,58 @@
 <script lang="ts">
-	import { ScrollArea } from '$lib/components/ui/scroll-area';
-
-	import * as Dialog from '$lib/components/ui/dialog/index';
+	import * as Command from '$lib/components/ui/command/index.js';
+	import type { Notebook, Tag } from '$lib/types';
 
 	type Props = {
 		isOpen: boolean;
-		renameType: string;
-		searchTerm: string;
-		filteredItems: [
-			{
-				name: string;
-				id: string;
-			}
-		];
-		cancel: () => void;
-		action: (selectedID: string) => void;
-		filter: () => void;
+		fullList: Tag[] | Notebook[];
+		currentItemID: string;
+		action: (selectedItem: string) => void;
+		clear: () => void;
+		type: 'notebook' | 'tag';
 	};
 
-	let {
-		isOpen = $bindable(),
-		renameType,
-		searchTerm = $bindable(),
-		filteredItems,
-		cancel,
-		action,
-		filter
-	}: Props = $props();
+	let { isOpen = $bindable(), fullList, currentItemID, action, clear, type }: Props = $props();
 
-	let selectedID = $state('');
+	let filteredList = $derived.by(() => {
+		console.log(fullList);
+		console.log(currentItemID);
+		return fullList.filter(
+			(item) => item.id != currentItemID && item.expand?.parent?.id != currentItemID
+		);
+	});
 </script>
 
-<Dialog.Root open={isOpen}>
-	<Dialog.Content
-		onCloseAutoFocus={(e) => {
-			e.preventDefault();
-			searchTerm = '';
-			isOpen = false;
-		}}
-	>
-		<Dialog.Header>
-			<Dialog.Title>Change Parent {renameType}</Dialog.Title>
-			<Dialog.Description>Select parent {renameType.toLowerCase()} to change</Dialog.Description>
-		</Dialog.Header>
-		<input type="text" bind:value={searchTerm} class="input w-full" oninput={filter} />
-		<ScrollArea class="bg-base-200/30 h-[30vh] rounded-lg">
-			{#each filteredItems as item}
-				<ul class="list">
-					<li class="list-row flex items-center">
-						<label for="">
-							<input
-								type="radio"
-								class="radio radio-sm mx-2"
-								name="radio-1"
-								bind:group={selectedID}
-								value={item.id}
-							/>
-							{item.name}
-						</label>
-					</li>
-				</ul>
-			{/each}
-		</ScrollArea>
+<Command.Dialog bind:open={isOpen}>
+	<Command.Input placeholder="Search {type}s..." />
 
-		<div class="flex justify-end gap-x-2">
-			<button onclick={() => (isOpen = false)} class="btn">Close</button>
-			<button
-				onclick={() => {
-					cancel();
-					searchTerm = '';
-					isOpen = false;
-				}}
-				class="btn">Clear Parent {renameType}</button
-			>
-			<button
-				onclick={() => {
-					action(selectedID);
-					searchTerm = '';
-					isOpen = false;
-				}}
-				class="btn btn-primary">Save</button
-			>
-		</div>
-	</Dialog.Content>
-</Dialog.Root>
+	<Command.List>
+		<Command.Empty>No {type} found.</Command.Empty>
+		<Command.Group heading="">
+			{#each filteredList as item}
+				<Command.Item
+					onSelect={() => {
+						action(item.id);
+						isOpen = false;
+					}}
+					>{item.name}
+				</Command.Item>
+			{/each}
+		</Command.Group>
+	</Command.List>
+	<div class="gap-x-golden-md p-golden-md border-b-base-content/10 flex w-full border-b">
+		<div class="grow"></div>
+		<button
+			onclick={() => {
+				isOpen = false;
+			}}
+			class="btn">Cancel</button
+		>
+		<button
+			onclick={() => {
+				clear();
+				isOpen = false;
+			}}
+			class="btn btn-primary">Clear Parent Notebook</button
+		>
+	</div>
+</Command.Dialog>

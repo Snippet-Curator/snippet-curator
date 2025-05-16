@@ -49,6 +49,7 @@ export class TagState {
   tags = $state<Tag[]>([])
   collectionName = 'tags'
   viewCollectionName = 'tags_with_note_counts'
+  flatTags = $state<Tag[]>([])
 
   constructor() {
     $effect(() => {
@@ -72,6 +73,8 @@ export class TagState {
     if (!records) {
       return
     }
+
+    this.flatTags = records
 
     const tagMap = new Map()
     records.forEach(tag => {
@@ -141,6 +144,7 @@ export class NotebookState {
   collectionName = 'notebooks'
   viewCollectionName = 'notebooks_with_note_counts'
   notebooks = $state<Notebook[]>([])
+  flatNotebooks = $state<Notebook[]>([])
 
   constructor() {
     $effect(() => {
@@ -157,7 +161,7 @@ export class NotebookState {
   async getAll() {
     const { data: records, error } = await tryCatch(pb.collection(this.viewCollectionName).getFullList({
       sort: 'name',
-      filter: 'name != "Archive" && name != "Trash"',
+      filter: 'name != "Inbox" && name != "Archive" && name != "Trash"',
       expand: 'parent'
     }))
 
@@ -168,6 +172,8 @@ export class NotebookState {
     if (!records) {
       return
     }
+
+    this.flatNotebooks = records
 
     const notebookMap = new Map()
     records.forEach(notebook => {

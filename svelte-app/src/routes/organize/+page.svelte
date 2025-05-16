@@ -80,6 +80,7 @@
 		</ul>
 	</div>
 </ScrollArea>
+<div class="mb-20"></div>
 
 <New
 	bind:isOpen={isNewTagOpen}
