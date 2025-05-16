@@ -75,7 +75,7 @@
 			>
 		</div>
 
-		<ul class="menu grid w-full grid-cols-1 gap-x-3 md:grid-cols-2 lg:grid-cols-3">
+		<ul class="menu w-full">
 			<TagList allowEdit={true} tags={tagState.tags} />
 		</ul>
 	</div>
