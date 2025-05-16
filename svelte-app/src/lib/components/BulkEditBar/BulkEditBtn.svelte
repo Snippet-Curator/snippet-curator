@@ -16,6 +16,7 @@
 
 		switch (event.key) {
 			case 'b':
+			case 'Escape':
 				event.preventDefault();
 				isBulkEdit = !isBulkEdit;
 				selectedNotesID = [];

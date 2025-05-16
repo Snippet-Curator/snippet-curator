@@ -12,6 +12,7 @@
 
 	let { isOpen = $bindable(), addAll, clearAll }: Props = $props();
 
+	let searchText = $state('');
 	let tagList: Tag[];
 	let selectedTags: Tag[] = $state([]);
 	let uniqueSelectedTags = $derived(new Set(selectedTags.map((tag) => tag.id)));
@@ -28,7 +29,7 @@
 </script>
 
 <Command.Dialog bind:open={isOpen}>
-	<Command.Input placeholder="Search Tags..." />
+	<Command.Input bind:value={searchText} placeholder="Search Tags..." />
 	{#if selectedTags.length > 0}
 		<div class="gap-golden-sm p-golden-md flex flex-wrap">
 			{#each selectedTags as tag}
@@ -68,6 +69,7 @@
 							onSelect={() => {
 								if (!selectedTags.some((t) => t.id === tag.id)) {
 									selectedTags.push(tag);
+									searchText = '';
 								}
 							}}
 							>{tag.name}
