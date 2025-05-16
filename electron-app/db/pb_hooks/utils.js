@@ -25,7 +25,7 @@ function calculateNoteScore(rating, weight, lastOpened) {
   const randomFactor = Math.random()
 
   const score =
-    (0.2 * ratingNorm + 0.4 * recencyNorm + 0.2 * weightNorm + 0.35 * randomFactor) * 100
+    (0.25 * ratingNorm + 0.4 * recencyNorm + 0.25 * weightNorm + 0.2 * randomFactor) * 100
 
   return score
 }
