@@ -9,27 +9,27 @@
 
 	const ratings: KBD[] = [
 		{
-			displays: ['h', '0'],
+			displays: ['0', 'h'],
 			description: 'no star'
 		},
 		{
-			displays: ['j', '1'],
+			displays: ['1', 'j'],
 			description: '1 star'
 		},
 		{
-			displays: ['k', '2'],
+			displays: ['2', 'k'],
 			description: '2 stars'
 		},
 		{
-			displays: ['l', '3'],
+			displays: ['3', 'l'],
 			description: '3 stars'
 		},
 		{
-			displays: [';', '4'],
+			displays: ['4', ';'],
 			description: '4 stars'
 		},
 		{
-			displays: ["'", '5'],
+			displays: ['5', "'"],
 			description: '5 stars'
 		}
 	];
@@ -58,7 +58,7 @@
 		},
 		{
 			displays: ['n'],
-			description: 'Edit notebooks'
+			description: 'Edit notebook'
 		},
 		{
 			displays: ['t'],
