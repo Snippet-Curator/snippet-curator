@@ -407,6 +407,7 @@ export class NotelistState {
   async getByFilter(sort = '-updated', customFilters) {
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       sort: sort,
+      expand: 'tags,notebook',
       filter: customFilters
     }))
 

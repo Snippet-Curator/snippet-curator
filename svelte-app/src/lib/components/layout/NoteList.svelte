@@ -18,7 +18,7 @@
 			return;
 		}
 		selectedNotesID.push(checkedNoteID);
-	} 
+	}
 </script>
 
 {#snippet renderNotes(note: Note)}
