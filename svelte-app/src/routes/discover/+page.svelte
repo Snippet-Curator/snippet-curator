@@ -76,7 +76,7 @@
 				></Topbar.NavBtns>
 				<Topbar.Weight onUp={upvote} onDown={downvote}></Topbar.Weight>
 			{/if}
-			{note.score.toFixed(2)}
+			<!-- {note.score.toFixed(2)} -->
 			<div class="hidden grow md:block"></div>
 
 			{#if note?.expand?.tags}

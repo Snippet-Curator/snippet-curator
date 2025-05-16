@@ -14,8 +14,6 @@
 	let { isOpen = $bindable(), fullList, currentItemID, action, clear, type }: Props = $props();
 
 	let filteredList = $derived.by(() => {
-		console.log(fullList);
-		console.log(currentItemID);
 		return fullList.filter(
 			(item) => item.id != currentItemID && item.expand?.parent?.id != currentItemID
 		);
