@@ -35,7 +35,7 @@ export async function makeDefaultNotebook() {
     if (error.data.data.name.code == "validation_not_unique") {
       console.log('Inbox already exists')
     } else {
-      console.log('Error making Inbox: ', error.message)
+      console.error('Error making Inbox: ', error.message)
     }
   }
 
@@ -47,7 +47,7 @@ export async function makeDefaultNotebook() {
     if (archiveError.data.data.name.code == "validation_not_unique") {
       console.log('Archive already exists')
     } else {
-      console.log('Error making Archive: ', archiveError.message)
+      console.error('Error making Archive: ', archiveError.message)
     }
   }
 
@@ -59,7 +59,7 @@ export async function makeDefaultNotebook() {
     if (trashError.data.data.name.code == "validation_not_unique") {
       console.log('Trash already exists')
     } else {
-      console.log('Error making Trash: ', trashError.message)
+      console.error('Error making Trash: ', trashError.message)
     }
   }
 }
@@ -134,33 +134,29 @@ async function getVideoThumb(videoUrl: string): Promise<File> {
   })
 }
 
-async function createThumbnail(recordID: string, resources) {
+async function createThumbnail(recordID: string, resources: File[]) {
   const { data, error } = await tryCatch(pb.collection(notesCollection).getFirstListItem(`id="${recordID}"`))
 
   if (error) {
     console.error('Error getting record: ', error.message)
   }
 
-  if (!data.attachments) return
+  if (!data || !data.attachments) {
+    console.error('Error: no attachments found')
+  }
 
   let thumbnailURL = ''
   let record = data
 
   for (const [index, resource] of resources.entries()) {
-    if (record.thumbnail) return
-    if (resource.size < 10000) return
+    if (!record) break
+    if (record.thumbnail) break
+    if (resource.size < 10000) continue
 
     const mimeType = resource.type
-    // takes care of difference between file import and evernote import
-
-    // if (resource.mime) {
-    //   mimeType = resource.mime
-    // } else if (resource.type) {
-    //   mimeType = resource.type
-    // }
 
     if (!mimeType.includes('image') && !mimeType.includes('video') && !mimeType.includes('application/octet-stream')) {
-      return
+      continue
     }
 
     if (mimeType.includes('video') || mimeType == 'application/octet-stream') {
@@ -172,9 +168,8 @@ async function createThumbnail(recordID: string, resources) {
       if (thumbError) {
         console.error('Error getting updated thumbnail record: ', thumbError.message)
       }
-      if (!thumbRecord) return
+      if (!thumbRecord) continue
       thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${thumbRecord.attachments.at(-1)}?thumb=500x0`
-      // thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
     }
 
     else if (mimeType == 'image/gif') {
@@ -226,7 +221,7 @@ function addMediaToContent(mimeType: string, fileURL: string, fileName: string) 
 }
 
 function createDescription(htmlContent: string, maxLength = 300) {
-  if (!htmlContent) return ''
+  if (!htmlContent) return null
 
   const strippedText = htmlContent
     .replace(/<[^>]+>/g, '') // Remove HTML tags
@@ -242,142 +237,142 @@ function createDescription(htmlContent: string, maxLength = 300) {
   return trimmedText.substring(0, maxLength);
 }
 
-export function sanitizeHTMLContent(content: string) {
-  const cleanContent = sanitizeHTML(content, {
-    parseStyleAttributes: false,
-    // allowedTags: sanitizeHTML.defaults.allowedTags.concat([
-    //   'img',
-    //   'form',
-    //   'code',
-    //   'style',
-    //   'video',
-    //   'source',
-    // ]),
-    allowedTags: false,
-    allowVulnerableTags: true,
-    // allowedAttributes: {
-    // '*': ['src', 'href', 'class', 'id'],
-    // 'a': ['href', 'type', 'target'],
-    // 'img': ['src', 'type'],
-    // 'video': ['style', 'controls'],
-    // 'audio': ['class', 'controls', 'style'],
-    // 'iframe': ['src', 'style'],
-    // 'source': ['src', 'type'],
-    // 'p': ['*'],
-    // 'div': ['*'],
-    // 'h1': ['*'],
-    // 'h2': ['*'],
-    // 'h3': ['*'],
-    // 'h4': ['*'],
-    // 'h5': ['*'],
-    // 'h6': ['*'],
-    //   '*': ['style', 'id', 'class', 'src', 'href', 'type', 'controls']
-    // },
-    allowedSchemes: ['data', 'http', 'https'],
-    transformTags: {
-      a: function (tagName, attribs) {
-        if (
-          !attribs.href ||
-          !attribs.href == undefined ||
-          attribs['href'] == '#' ||
-          attribs['href'].includes('javascript:')
-        ) {
-          return {
-            tagName: 'span',
-            attribs: attribs
-          };
-        }
-        return {
-          tagName: 'a',
-          attribs: attribs
-        };
-      },
-    },
-    // exclusiveFilter: function (frame) {
-    //   if (frame.tag == 'style') {
-    //     if (frame.text.includes('base64')) {
-    //       return true; // Exclude this <style> tag
-    //     }
-    //   }
-    //   if (frame.tag == 'link' && frame.attribs.href.includes('data:image/svg+xm')) {
-    //     return true;
-    //   }
-    //   return false;
-    // }
-  });
-  return cleanContent
-}
+// export function sanitizeHTMLContent(content: string) {
+//   const cleanContent = sanitizeHTML(content, {
+//     parseStyleAttributes: false,
+//     // allowedTags: sanitizeHTML.defaults.allowedTags.concat([
+//     //   'img',
+//     //   'form',
+//     //   'code',
+//     //   'style',
+//     //   'video',
+//     //   'source',
+//     // ]),
+//     allowedTags: false,
+//     allowVulnerableTags: true,
+//     // allowedAttributes: {
+//     // '*': ['src', 'href', 'class', 'id'],
+//     // 'a': ['href', 'type', 'target'],
+//     // 'img': ['src', 'type'],
+//     // 'video': ['style', 'controls'],
+//     // 'audio': ['class', 'controls', 'style'],
+//     // 'iframe': ['src', 'style'],
+//     // 'source': ['src', 'type'],
+//     // 'p': ['*'],
+//     // 'div': ['*'],
+//     // 'h1': ['*'],
+//     // 'h2': ['*'],
+//     // 'h3': ['*'],
+//     // 'h4': ['*'],
+//     // 'h5': ['*'],
+//     // 'h6': ['*'],
+//     //   '*': ['style', 'id', 'class', 'src', 'href', 'type', 'controls']
+//     // },
+//     allowedSchemes: ['data', 'http', 'https'],
+//     transformTags: {
+//       a: function (tagName, attribs) {
+//         if (
+//           !attribs.href ||
+//           !attribs.href == undefined ||
+//           attribs['href'] == '#' ||
+//           attribs['href'].includes('javascript:')
+//         ) {
+//           return {
+//             tagName: 'span',
+//             attribs: attribs
+//           };
+//         }
+//         return {
+//           tagName: 'a',
+//           attribs: attribs
+//         };
+//       },
+//     },
+//     // exclusiveFilter: function (frame) {
+//     //   if (frame.tag == 'style') {
+//     //     if (frame.text.includes('base64')) {
+//     //       return true; // Exclude this <style> tag
+//     //     }
+//     //   }
+//     //   if (frame.tag == 'link' && frame.attribs.href.includes('data:image/svg+xm')) {
+//     //     return true;
+//     //   }
+//     //   return false;
+//     // }
+//   });
+//   return cleanContent
+// }
 
-export function sanitizeContent(content: string) {
-  const cleanContent = sanitizeHTML(content, {
-    parseStyleAttributes: false,
-    allowedTags: sanitizeHTML.defaults.allowedTags.concat([
-      'img',
-      'form',
-      'svg',
-      'code',
-      'style',
-      'video',
-      'source',
-      'iframe'
-    ]),
-    // allowedTags: false,
-    allowVulnerableTags: true,
-    allowedAttributes: {
-      '*': ['style', 'id', 'class', 'src', 'href', 'type', 'controls']
-    },
-    allowedSchemes: ['data', 'http', 'https'],
-    transformTags: {
-      a: function (tagName, attribs) {
-        if (
-          !attribs.href ||
-          !attribs.href == undefined ||
-          attribs['href'] == '#' ||
-          attribs['href'].includes('javascript:')
-        ) {
-          return {
-            tagName: 'span',
-            attribs: attribs
-          };
-        }
-        return {
-          tagName: 'a',
-          attribs: attribs
-        };
-      },
-    },
+// export function sanitizeContent(content: string) {
+//   const cleanContent = sanitizeHTML(content, {
+//     parseStyleAttributes: false,
+//     allowedTags: sanitizeHTML.defaults.allowedTags.concat([
+//       'img',
+//       'form',
+//       'svg',
+//       'code',
+//       'style',
+//       'video',
+//       'source',
+//       'iframe'
+//     ]),
+//     // allowedTags: false,
+//     allowVulnerableTags: true,
+//     allowedAttributes: {
+//       '*': ['style', 'id', 'class', 'src', 'href', 'type', 'controls']
+//     },
+//     allowedSchemes: ['data', 'http', 'https'],
+//     transformTags: {
+//       a: function (tagName, attribs) {
+//         if (
+//           !attribs.href ||
+//           !attribs.href == undefined ||
+//           attribs['href'] == '#' ||
+//           attribs['href'].includes('javascript:')
+//         ) {
+//           return {
+//             tagName: 'span',
+//             attribs: attribs
+//           };
+//         }
+//         return {
+//           tagName: 'a',
+//           attribs: attribs
+//         };
+//       },
+//     },
 
-    // div: function (tagName, attribs) {
-    //   let newStyle =
-    //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;';
-    //   attribs.style = attribs.style ? `${attribs.style};${newStyle}` : newStyle;
-    //   return {
-    //     tagName: 'div',
-    //     attribs: attribs
-    //   };
-    // },
-    // pre: sanitizeHTML.simpleTransform('pre', {
-    //   style:
-    //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
-    // }),
-    // p: sanitizeHTML.simpleTransform('p', {
-    //   style:
-    //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
-    // })
+//     // div: function (tagName, attribs) {
+//     //   let newStyle =
+//     //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;';
+//     //   attribs.style = attribs.style ? `${attribs.style};${newStyle}` : newStyle;
+//     //   return {
+//     //     tagName: 'div',
+//     //     attribs: attribs
+//     //   };
+//     // },
+//     // pre: sanitizeHTML.simpleTransform('pre', {
+//     //   style:
+//     //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
+//     // }),
+//     // p: sanitizeHTML.simpleTransform('p', {
+//     //   style:
+//     //     'background-color: var(--color-base-100) !important; background: var(--color-base-100) !important; color: var(--color-base-content) !important;'
+//     // })
 
-  });
-  return cleanContent
-}
+//   });
+//   return cleanContent
+// }
 
 export class htmlImport {
-  title: string
+  title: string | 'Untitled'
   content: string
   parsedHTML: Document
-  source: string
-  sourceURL: string
+  source: string | null
+  sourceURL: string | null
   recordID: string
   added: string
-  description: string
+  description: string | null
   selectedNotebookdID: string
   HTMLparser: DOMParser
 
@@ -412,7 +407,11 @@ export class htmlImport {
       return description.getAttribute('content')
     }
 
-    return createDescription(this.parsedHTML.querySelector('meta[property="og:description"]')?.getAttribute('content') || '')
+    const ogDescription = this.parsedHTML.querySelector('meta[property="og:description"]')?.getAttribute('content')
+
+    if (!ogDescription) return null
+
+    return createDescription(ogDescription)
   }
 
   getSource() {
@@ -430,7 +429,7 @@ export class htmlImport {
       return 'SingleFile Save'
     }
 
-    return ''
+    return null
   }
 
   getSourceURL() {
@@ -442,18 +441,18 @@ export class htmlImport {
 
     const match = this.content.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
 
-    if (match) {
-      return match[1] || '';
+    if (!match || !match[1]) {
+      return null
     }
 
-    return ''
+    return match[1];
   }
 
   getAdded() {
     const added = this.parsedHTML.querySelector('meta[property="added"]')
 
     if (added && added.textContent) {
-      return added.getAttribute('content')
+      return added.getAttribute('content') || new Date().toISOString()
     }
 
     const match = this.content.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
@@ -466,10 +465,18 @@ export class htmlImport {
   }
 
   base64ToFile(base64: string, mimeType: string) {
+    let extension: string = ''
+    let filename: string = ''
+    let byteCharacters: string = ''
 
-    const extension = mimeType.split("/")[1];
-    const filename = `${crypto.randomUUID()}.${extension}`;
-    const byteCharacters = atob(base64);
+    try {
+      extension = mimeType.split("/")[1];
+      filename = `${crypto.randomUUID()}.${extension}`;
+      byteCharacters = atob(base64);
+    } catch (err) {
+      console.error('Error converting resource: ', err)
+    }
+
     const byteNumbers = new Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
       byteNumbers[i] = byteCharacters.charCodeAt(i);
@@ -484,7 +491,7 @@ export class htmlImport {
     const mediaMatch = /\bsrc=(['"])?(data:(?:image|font|video)\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+)\1?/g
 
     if (!fileContent) {
-      console.log('no file content')
+      console.error('Error: no file content')
       return
     }
 
@@ -493,17 +500,28 @@ export class htmlImport {
 
     for (const match of matches) {
       const openingQuote = match[1] || undefined
-      const dataURL = match[2]
+      const dataURL = match[2] || undefined
       const closingQuote = match[3] || undefined
+
+      if (!dataURL) {
+        console.error('Error: no dataURL')
+        continue
+      }
+
+      const mimeType = dataURL.split(';')[0].split(':')[1] || undefined
       const base64Data = dataURL.split(',')[1]
-      const mimeType = dataURL.split(';')[0].split(':')[1]
 
       if (!base64Data || !mimeType) {
-        console.log('Invalid data URL format')
+        console.error('Error: invalid data URL format')
         continue
       }
 
       const resourceFile = this.base64ToFile(base64Data, mimeType)
+
+      if (!resourceFile) {
+        console.error('Error converting resource file')
+        continue
+      }
 
       // upload to database
       const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
@@ -512,10 +530,11 @@ export class htmlImport {
 
       if (error) {
         console.error('Error uploading resource: ', error.message)
+        continue
       }
 
       if (!record) {
-        console.log('no record')
+        console.error('Error uploading file to database: ', error.message)
         continue
       }
 
@@ -705,7 +724,7 @@ export class EnImport {
   sourceURL: string
   tags: string[]
   recordID: string
-  description: string
+  description: string | null
   selectedNotebookdID: string
 
   constructor(fileContent: string, selectedNotebookID: string) {
@@ -744,8 +763,16 @@ export class EnImport {
   }
 
   convertResourceToFile(resource: EnResource) {
-    const binaryStr = atob(resource.data['#text']);
-    const byteArray = new Uint8Array(binaryStr.length)
+    let binaryStr: string = ''
+    let byteArray: Uint8Array<ArrayBuffer>
+
+    try {
+      binaryStr = atob(resource.data['#text']);
+      byteArray = new Uint8Array(binaryStr.length)
+    } catch (err) {
+      console.error('Error converting resource file')
+      return
+    }
 
     for (let i = 0; i < binaryStr.length; i++) {
       byteArray[i] = binaryStr.charCodeAt(i);
@@ -759,9 +786,9 @@ export class EnImport {
   }
 
   async uploadResources() {
-    let files = []
+    let files: File[] = []
     for (const [index, resource] of this.enResources.entries()) {
-      if (!resource) return
+      if (!resource) continue
 
       // converts to binary
       const binaryStr = atob(resource.data['#text']);
@@ -780,6 +807,9 @@ export class EnImport {
       console.log(resource)
       resource.name = record.attachments[index]
       resource.fileURL = `${baseURL}/${notesCollection}/${this.recordID}/${resource.name}`
+
+      if (!resource.file) continue
+
       files.push(resource.file)
     }
 
@@ -806,16 +836,18 @@ export class EnImport {
   }
 
   async addTags() {
-    if (this.tags.length == 1 && this.tags[0] == '') return ''
+    if (this.tags.length == 1 && this.tags[0] == '') return ['']
+
     const tagList: string[] = []
 
     const { data: existingTags, error } = await tryCatch<RecordModel[], PError>(pb.collection('tags').getFullList())
 
     if (error) {
       console.error('Unable to get all tags: ', error.message)
+      return ['']
     }
 
-    if (!existingTags) return []
+    if (!existingTags) return ['']
 
     const existingTagNames = new Set(existingTags.map((tag: { name: string }) => tag.name))
 
@@ -828,9 +860,10 @@ export class EnImport {
 
         if (newTagError) {
           console.error('Unable to make new tags: ', newTagError.message, tag)
+          return ['']
         }
 
-        if (!newTag) return
+        if (!newTag) return ['']
 
         tagList.push(newTag.id)
       }
@@ -868,7 +901,7 @@ export class EnImport {
 
     await this.uploadResources()
     this.replaceEnMedia()
-    this.content = sanitizeContent(this.content)
+    // this.content = sanitizeContent(this.content)
     this.description = createDescription(this.content)
 
     const data = {
@@ -912,7 +945,7 @@ export class fileImport {
     }))
 
     if (error) {
-      console.log(error.message)
+      console.error('Error adding attachments: ', error.message)
     }
 
     if (!record) return
@@ -923,7 +956,6 @@ export class fileImport {
   }
 
   async uploadToDB() {
-
 
     const skeletonData = {
       'title': this.title,

@@ -157,7 +157,7 @@
 					{/each}
 				</select>
 
-				<label for="file" class="fieldset-label text-sm">Max size 5GB</label>
+				<!-- <label for="file" class="fieldset-label text-sm">Max size 5GB</label> -->
 
 				<button onclick={importFiles} class="btn btn-neutral">Import</button>
 			</div>

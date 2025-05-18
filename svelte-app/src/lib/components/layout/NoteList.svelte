@@ -32,7 +32,10 @@
 		<!-- {/if} -->
 	</figure>
 	<div id="card-body" class="card-body p-golden-lg w-full">
-		<div id="card-title" class="card-title text-pretty break-words text-left">
+		<div
+			id="card-title"
+			class="card-title overflow-hidden text-ellipsis text-pretty break-words text-left"
+		>
 			{note.title}
 		</div>
 
