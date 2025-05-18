@@ -168,7 +168,10 @@ app.whenReady().then(async () => {
 
   // run pocketbase
   try {
+    const start = performance.now()
     await runPocketbase()
+    const end = performance.now()
+    console.log(`Notes updated in ${(end - start).toFixed(2)} ms`)
   } catch (err) {
     console.error('Failed to start Pocketbase')
     app.quit()

@@ -26,7 +26,9 @@ function recentlySeenPenalty(lastOpened) {
 
   // Full penalty if seen within last hour, fades out over 12 hours
   const decayFactor = Math.min(1, hoursAgo / 12)
-  return decayFactor // 0 (just seen) → 1 (not seen in 12+ hours)
+  // cap full penalty at 1%
+  const adjustedDecay = Math.max(0.1, decayFactor)
+  return adjustedDecay // 0 (just seen) → 1 (not seen in 12+ hours)
 }
 
 function calculateNoteScore(rating, weight, lastOpened) {
