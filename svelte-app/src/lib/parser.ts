@@ -800,11 +800,18 @@ export class EnImport {
       resource.file = this.convertResourceToFile(resource)
 
       // upload to database
-      const record = await pb.collection(notesCollection).update(this.recordID, {
+      const { data: record, error: uploadError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
         'attachments+': [resource.file]
-      })
+      }))
 
-      console.log(resource)
+      if (uploadError) {
+        console.error('Error updating record: ', uploadError.message, uploadError.data)
+        continue
+      }
+
+      if (!record) continue
+
+      // console.log(resource)
       resource.name = record.attachments[index]
       resource.fileURL = `${baseURL}/${notesCollection}/${this.recordID}/${resource.name}`
 
@@ -893,7 +900,7 @@ export class EnImport {
       if (error.data.data.title.code == "validation_not_unique") {
         throw new Error('Skipped duplicate note')
       }
-      console.log(error.message)
+      console.log('Error uploading file: ', error.message, error.data)
       throw (error)
     }
 
@@ -913,7 +920,7 @@ export class EnImport {
     const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
 
     if (updatedError) {
-      console.error('Error updating record: ', updatedError.message)
+      console.error('Error updating record: ', updatedError.message, error.data)
     }
   }
 }
