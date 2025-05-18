@@ -56,5 +56,5 @@ onBootstrap((e) => {
 
   updateNotes()
 
-  cronAdd('scheduled-score-updates', '0 * * * *', updateNotes)
+  cronAdd('scheduled-score-updates', '0 */6 * * *', updateNotes)
 })
