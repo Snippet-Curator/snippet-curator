@@ -18,15 +18,26 @@ function recencyScore(lastOpened) {
   return Math.min(1, Math.log(1 + daysAgo) / 6.217)
 }
 
+function recentlySeenPenalty(lastOpened) {
+  const openedDate = new Date(lastOpened)
+  if (isNaN(openedDate.getTime())) return 1 // unrated → no penalty
+
+  const hoursAgo = (Date.now() - openedDate.getTime()) / (1000 * 60 * 60)
+
+  // Full penalty if seen within last hour, fades out over 12 hours
+  const decayFactor = Math.min(1, hoursAgo / 12)
+  return decayFactor // 0 (just seen) → 1 (not seen in 12+ hours)
+}
+
 function calculateNoteScore(rating, weight, lastOpened) {
   const ratingNorm = normalizeRating(rating ?? 0, 1, 5)
   const recencyNorm = recencyScore(lastOpened ?? new Date())
   const weightNorm = normalizeWeight(weight ?? 0, 0, 10)
   const randomFactor = Math.random()
 
-  const score =
-    (0.25 * ratingNorm + 0.4 * recencyNorm + 0.25 * weightNorm + 0.2 * randomFactor) * 100
-
+  const rawScore =
+    (0.3 * ratingNorm + 0.4 * recencyNorm + 0.25 * weightNorm + 0.15 * randomFactor) / 1.1
+  const score = rawScore * recentlySeenPenalty(lastOpened) * 100
   return score
 }
 
