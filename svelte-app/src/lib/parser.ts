@@ -4,10 +4,9 @@ import sanitizeHTML from 'sanitize-html';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 
-import type { EnNote, EnMedia, EnResource } from './types';
+import type { EnNote, EnMedia, EnResource, Resource, PError } from './types';
 import pb, { pbURL } from '$lib/db.svelte'
 import { tryCatch } from './utils.svelte';
-import { type PError } from './types';
 import type { RecordModel } from 'pocketbase';
 
 
@@ -196,6 +195,24 @@ async function createThumbnail(recordID: string, resources: File[]) {
 
 }
 
+async function getFileHash(file: File) {
+  const arrayBuffer = await file.arrayBuffer();
+  const hash = SparkMD5.ArrayBuffer.hash(arrayBuffer);
+  return hash;
+}
+
+function getPocketbaseResource(file: File, hash: string, url: string) {
+  const resource: Resource = {
+    name: file.name,
+    size: file.size,
+    hash: hash,
+    type: file.type,
+    fileURL: url,
+    lastUpdated: new Date().toISOString(),
+  }
+  return resource
+}
+
 function addMediaToContent(mimeType: string, fileURL: string, fileName: string) {
   if (mimeType.includes('image')) {
     return `<img src=${fileURL} type=${mimeType}>`;
@@ -377,6 +394,7 @@ export class htmlImport {
   description: string | null
   selectedNotebookdID: string
   HTMLparser: DOMParser
+  resources: Resource[]
 
   constructor(fileContent: string, selectedNotebookID: string) {
     this.HTMLparser = new DOMParser()
@@ -389,6 +407,7 @@ export class htmlImport {
     this.added = this.getAdded()
     this.recordID = ''
     this.selectedNotebookdID = selectedNotebookID
+    this.resources = []
     // const { parsedHTML, title, sourceURL, added } = this.parseHTML(fileContent)
     // this.parsedHTML = parsedHTML
   }
@@ -470,11 +489,13 @@ export class htmlImport {
     let extension: string = ''
     let filename: string = ''
     let byteCharacters: string = ''
+    let hash: string = ''
 
     try {
       extension = mimeType.split("/")[1];
       filename = `${crypto.randomUUID()}.${extension}`;
       byteCharacters = atob(base64);
+      hash = SparkMD5.hashBinary(byteCharacters);
     } catch (err) {
       console.error('Error converting resource: ', err)
     }
@@ -485,8 +506,12 @@ export class htmlImport {
     }
     const byteArray = new Uint8Array(byteNumbers);
 
-    return new File([byteArray], filename, { type: mimeType });
+    return {
+      file: new File([byteArray], filename, { type: mimeType }),
+      hash: hash
+    }
   }
+
 
   async replaceResources(fileContent: string) {
     // replaces src with image and font with pocketbase file links. Href is skipped
@@ -518,7 +543,7 @@ export class htmlImport {
         continue
       }
 
-      const resourceFile = this.base64ToFile(base64Data, mimeType)
+      const { file: resourceFile, hash } = this.base64ToFile(base64Data, mimeType)
 
       if (!resourceFile) {
         console.error('Error converting resource file')
@@ -541,8 +566,12 @@ export class htmlImport {
       }
 
       const newURL = `src=${baseURL}\/${notesCollection}\/${this.recordID}\/${record.attachments.at(-1)}`
-
+      const resourceURL = `${baseURL}\/${notesCollection}\/${this.recordID}\/${record.attachments.at(-1)}`
       const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments.at(-1)}`
+
+      // add to list of resources
+      const resource = getPocketbaseResource(resourceFile, hash, resourceURL)
+      this.resources.push(resource)
 
       // replace media with new URL
       if (newURL) {
@@ -627,6 +656,7 @@ export class htmlImport {
     const data = {
       'content': this.content,
       'original_content': this.content,
+      'resources': this.resources,
     }
 
     const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
@@ -880,6 +910,29 @@ export class EnImport {
     return tagList
   }
 
+  getPocketbaseResources(enResources: EnResource[]) {
+    let resources: Resource[] = []
+    for (const enResource of enResources) {
+      const resource: Resource = {
+        name: enResource.name,
+        size: enResource.file?.size,
+        hash: enResource.hash,
+        type: enResource.mime,
+        fileURL: enResource.fileURL,
+        lastUpdated: new Date().toISOString(),
+        sourceURL: enResource['resource-attributes']['source-url'],
+        width: enResource.width,
+        height: enResource.height,
+        latitude: enResource['resource-attributes'].latitude,
+        longitude: enResource['resource-attributes'].longitude,
+        timestamp: enResource['resource-attributes'].timestamp,
+        cameraMake: enResource['resource-attributes']['camera-make']
+      }
+      resources.push(resource)
+    }
+    return resources
+  }
+
   async uploadToDB() {
     const tags = await this.addTags()
     const sources = [{
@@ -912,11 +965,13 @@ export class EnImport {
     this.replaceEnMedia()
     // this.content = sanitizeContent(this.content)
     this.description = createDescription(this.content)
+    const resources = this.getPocketbaseResources(this.enResources)
 
     const data = {
       'content': this.content,
       'original_content': this.content,
-      'description': this.description
+      'description': this.description,
+      'resources': resources
     }
 
     const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
@@ -988,10 +1043,13 @@ export class fileImport {
 
     await this.uploadResources()
     this.content = addMediaToContent(this.mimeType, this.fileURL, this.file.name)
+    const hash = await getFileHash(this.file)
+    const resource = getPocketbaseResource(this.file, hash, this.fileURL)
 
     const data = {
       'content': this.content,
       'original_content': this.content,
+      'resources': [resource]
     }
 
     const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))

@@ -6,7 +6,8 @@ export type Resource = {
   hash: string
   type: string
   lastUpdated: string
-  sourceURL: string
+  fileURL: string // this is pocketbase url
+  sourceURL?: string
   width?: number
   height?: number
   timestamp?: string
@@ -124,7 +125,11 @@ export type EnResource = {
   mime: string,
   "resource-attributes": {
     "file-name": string,
-    "source-url": string
+    "source-url": string,
+    'camera-make'?: string,
+    timestamp?: string,
+    latitude?: number
+    longitude?: number
   }
 }
 
