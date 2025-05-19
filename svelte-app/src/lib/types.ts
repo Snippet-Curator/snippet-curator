@@ -1,13 +1,40 @@
+// ------ Pocketbase ------
+// attachments
+export type Resource = {
+  name: string
+  size: number
+  hash: string
+  type: string
+  lastUpdated: string
+  sourceURL: string
+  width?: number
+  height?: number
+  timestamp?: string
+  latitude?: number
+  longitude?: number
+  cameraMake?: string
+}
 
-export interface Props {
+export type PError = {
   data: {
-    note?: Note
-    notes?: Note[]
-    notebook?: Notebook
-    notebooks?: Notebook[]
-    tag?: Tag
-    tags?: Tag[]
-  }
+    data: {
+      added: {
+        code: string,
+        message: string
+      },
+      title: {
+        code: string,
+        message: string
+      },
+      name: {
+        code: string,
+        message: string
+      },
+    },
+
+  },
+  message: string,
+  status: number,
 }
 
 export type Note = {
@@ -69,6 +96,20 @@ export type NoteList = {
   items: Note[]
 }
 
+// ------ Frontend ------
+export interface Props {
+  data: {
+    note?: Note
+    notes?: Note[]
+    notebook?: Notebook
+    notebooks?: Notebook[]
+    tag?: Tag
+    tags?: Tag[]
+  }
+}
+
+// ------ Evernote ------ 
+
 export type EnResource = {
   data: {
     "#text": string
@@ -78,6 +119,7 @@ export type EnResource = {
   fileURL?: string,
   name?: string,
   height: number,
+  size?: number,
   width: number,
   mime: string,
   "resource-attributes": {
@@ -115,24 +157,3 @@ export type EnNote = {
   }
 }
 
-export type PError = {
-  data: {
-    data: {
-      added: {
-        code: string,
-        message: string
-      },
-      title: {
-        code: string,
-        message: string
-      },
-      name: {
-        code: string,
-        message: string
-      },
-    },
-
-  },
-  message: string,
-  status: number,
-}
