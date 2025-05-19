@@ -160,16 +160,17 @@ async function createThumbnail(recordID: string, resources: File[]) {
     }
 
     if (mimeType.includes('video') || mimeType == 'application/octet-stream') {
-      const videoURL = `${remoteURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
-      const thumbnailFile = await getVideoThumb(videoURL)
-      const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
-        'attachments+': [thumbnailFile]
-      }))
-      if (thumbError) {
-        console.error('Error getting updated thumbnail record: ', thumbError.message)
-      }
-      if (!thumbRecord) continue
-      thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${thumbRecord.attachments.at(-1)}?thumb=500x0`
+      // const videoURL = `${remoteURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
+      // const thumbnailFile = await getVideoThumb(videoURL)
+      // const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
+      //   'attachments+': [thumbnailFile]
+      // }))
+      // if (thumbError) {
+      //   console.error('Error getting updated thumbnail record: ', thumbError.message)
+      // }
+      // if (!thumbRecord) continue
+      // thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${thumbRecord.attachments.at(-1)}?thumb=500x0`
+      thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
     }
 
     else if (mimeType == 'image/gif') {
