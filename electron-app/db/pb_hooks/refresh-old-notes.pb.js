@@ -8,6 +8,7 @@ onBootstrap((e) => {
   function updateNotes() {
     const cutoff = new Date(Date.now() - daysOld * 86400000).toISOString()
     const today = new Date(Date.now()).toISOString()
+    const before = new Date()
 
     const notes = arrayOf(
       new DynamicModel({
@@ -50,8 +51,9 @@ onBootstrap((e) => {
         })
         .execute()
     }
+    const after = new Date()
 
-    console.log(`Updated scores for ${notes.length} notes`)
+    console.log(`Updated scores for ${notes.length} notes in ${after - before} ms`)
   }
 
   updateNotes()
