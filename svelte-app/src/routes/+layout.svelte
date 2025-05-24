@@ -73,11 +73,11 @@
 			icon: Settings,
 			url: '#/settings'
 		},
-		{
-			name: 'Test',
-			icon: Settings,
-			url: '#/test'
-		}
+		// {
+		// 	name: 'Test',
+		// 	icon: Settings,
+		// 	url: '#/test'
+		// }
 	];
 
 	let defaultNotebooks = $state();

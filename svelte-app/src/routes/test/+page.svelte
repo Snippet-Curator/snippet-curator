@@ -56,7 +56,7 @@
 
 	async function getFiles() {
 		const { data, error } = await tryCatch(
-			pb.collection('notes_without_content').getList(1, 1, {
+			pb.collection('notes_without_content').getList(1, 30, {
 				filter: `resources=null`
 			})
 		);
@@ -64,9 +64,9 @@
 		if (error) {
 			console.error('Error getting notes: ', error);
 		}
-		console.log(data);
 		// for each record update attachments
 		for (const file of data.items) {
+			console.log('updating: ', file)
 			const noteURL = `${baseURL}${file.id}`;
 			await updateAttachments(file.attachments, noteURL, file.id);
 		}
