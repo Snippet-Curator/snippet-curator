@@ -911,7 +911,11 @@ export class EnImport {
 
       if (!resource || resource.length === 0) return ''
 
-      return addMediaToContent(resource[0].mime, resource[0].fileURL, resource[0]["resource-attributes"]['file-name'])
+      if (!resource[0].fileURL) return
+
+      const fileName = resource[0]["resource-attributes"]['file-name'] || 'untitled'
+
+      return addMediaToContent(resource[0].mime, resource[0].fileURL, fileName)
     }
 
     this.content = this.content.replace(mediaMatch, replaceMedia);
