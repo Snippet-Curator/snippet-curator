@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog/index';
+	import { onDestroy, onMount } from 'svelte';
 
 	type Props = {
 		isOpen: boolean;
@@ -11,6 +12,24 @@
 	let { isOpen = $bindable(), currentName, renameType, action }: Props = $props();
 
 	let newName = $state('');
+
+	function handler(event: KeyboardEvent) {
+		switch (event.key) {
+			case 'Enter':
+				action(newName);
+				newName = '';
+				isOpen = false;
+				break;
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener('keydown', handler);
+
+		onDestroy(() => {
+			document.removeEventListener('keydown', handler);
+		});
+	});
 </script>
 
 <Dialog.Root open={isOpen}>
@@ -39,6 +58,7 @@
 			<button
 				onclick={() => {
 					action(newName);
+					newName = '';
 					isOpen = false;
 				}}
 				class="btn btn-primary">Save</button
