@@ -918,6 +918,7 @@ export class EnImport {
   }
 
   async addTags() {
+    if (!this.tags) return ['']
     if (this.tags.length == 1 && this.tags[0] == '') return ['']
 
     const tagList: string[] = []
@@ -956,10 +957,8 @@ export class EnImport {
   getPocketbaseResources(enResources: EnResource[] | null) {
     if (!enResources) return
     if (enResources.length === 0) return
-    console.log(enResources)
     let resources: Resource[] = []
     for (const enResource of enResources) {
-      console.log('resource: ', enResource)
       const resource: Resource = {
         name: enResource.name,
         size: enResource.file?.size,
