@@ -111,7 +111,7 @@ export class TagState {
       })
     )
     if (error) {
-      console.error('Error while creating new tag: ', error)
+      console.error('Error while creating new tag: ', error.data)
     }
     await this.getAll()
   }
@@ -123,7 +123,7 @@ export class TagState {
       })
     )
     if (error) {
-      console.error('Error while updating tag name: ', error)
+      console.error('Error while updating tag name: ', error.message, error.data)
     }
     await this.getAll()
   }
@@ -133,9 +133,8 @@ export class TagState {
       'parent': parentTagID
     }))
     if (error) {
-      console.error('Error while updating parent tag: ', error)
+      console.error('Error while updating parent tag: ', error.message)
     }
-    console.log('updated parent: ', data)
     await this.getAll()
   }
 }

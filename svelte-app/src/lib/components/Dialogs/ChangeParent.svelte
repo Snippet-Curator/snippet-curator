@@ -50,7 +50,7 @@
 				clear();
 				isOpen = false;
 			}}
-			class="btn btn-primary">Clear Parent Notebook</button
+			class="btn btn-primary">Clear Parent {type}</button
 		>
 	</div>
 </Command.Dialog>
