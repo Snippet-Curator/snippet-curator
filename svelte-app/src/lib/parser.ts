@@ -214,6 +214,16 @@ function getPocketbaseResource(file: File, hash: string, url: string) {
 }
 
 function addMediaToContent(mimeType: string, fileURL: string, fileName: string) {
+  if (!fileURL) {
+    console.error('No file URL')
+    return ''
+  }
+
+  if (!fileName) {
+    console.error('No fileName provided')
+    return ''
+  }
+
   if (mimeType.includes('image')) {
     return `<img src=${fileURL} type=${mimeType}>`;
   }
@@ -744,9 +754,8 @@ export class htmlImport {
 
 export class EnImport {
   enNote: EnNote
-  enMedias: EnMedia[]
-  xmlResource: EnResource | EnResource[]
-  enResources: EnResource[]
+  enMedias: EnMedia[] | null
+  enResources: EnResource[] | null
 
   title: string
   content: string
@@ -754,7 +763,7 @@ export class EnImport {
   updated: string
   source: string
   sourceURL: string
-  tags: string[]
+  tags: string[] | null
   recordID: string
   description: string | null
   selectedNotebookdID: string
@@ -768,18 +777,16 @@ export class EnImport {
 
     this.enNote = xmlNote
     this.content = xmlContent
-    this.enMedias = Array.isArray(xmlMedia) ? xmlMedia : [xmlMedia]
+    this.enMedias = this.getEnMedias(xmlMedia)
+    this.tags = this.getTags()
 
-    const tags = this.enNote['en-export'].note.tag || ''
-    this.xmlResource = xmlNote["en-export"]['note']['resource']
-    this.enResources = Array.isArray(this.xmlResource) ? this.xmlResource : [this.xmlResource]
+    this.enResources = this.getEnResources()
     this.title = this.enNote['en-export'].note.title
-    this.added = dayjs(this.enNote['en-export'].note.created, 'YYYYMMDDTHHmmss[Z]').toISOString()
+    this.added = this.getAdded()
     this.updated = this.enNote['en-export'].note.updated
-    this.source = this.enNote['en-export'].note['note-attributes'].source
-    this.sourceURL = this.enNote['en-export'].note['note-attributes']['source-url']
-    this.tags = Array.isArray(tags) ? tags : [tags]
-    this.description = ''
+    this.source = this.getSource()
+    this.sourceURL = this.getSourceURL()
+    this.description = createDescription(this.content)
   }
 
   parseEnex(fileContent: string) {
@@ -792,6 +799,39 @@ export class EnImport {
       xmlMedia,
       xmlContent
     }
+  }
+
+  getEnMedias(xmlMedia: EnMedia | EnMedia[]) {
+    if (!xmlMedia) return null
+    return Array.isArray(xmlMedia) ? xmlMedia : [xmlMedia]
+  }
+
+  getTags() {
+    const tags = this.enNote['en-export'].note.tag
+    if (!tags) return null
+    return Array.isArray(tags) ? tags : [tags]
+  }
+
+  getEnResources() {
+    const resources = this.enNote["en-export"]['note']['resource']
+    if (!resources) return null
+    return Array.isArray(resources) ? resources : [resources]
+  }
+
+  getSource() {
+    return this.enNote['en-export'].note['note-attributes'].source
+  }
+
+  getSourceURL() {
+    return this.enNote['en-export'].note['note-attributes']['source-url']
+  }
+
+  getAdded() {
+    const addedDate = this.enNote['en-export'].note.created
+    if (!addedDate) {
+      return new Date().toISOString()
+    }
+    return dayjs(addedDate, 'YYYYMMDDTHHmmss[Z]').toISOString()
   }
 
   convertResourceToFile(resource: EnResource) {
@@ -819,6 +859,7 @@ export class EnImport {
 
   async uploadResources() {
     let files: File[] = []
+    if (!this.enResources || this.enResources.length === 0) return
     for (const [index, resource] of this.enResources.entries()) {
       if (!resource) continue
 
@@ -859,14 +900,16 @@ export class EnImport {
     // replaces en-media with regular html tags within content
     const mediaMatch = /<en-media[^>]+?hash="([a-zA-Z0-9]+)"[^>]*\/?>/g
 
-    if (this.enResources.length == 0) return
+    if (!this.enResources || this.enResources.length === 0) return
+
+    const enResources = this.enResources
 
     const replaceMedia = (match: string, hash: string) => {
-      const resource = this.enResources.filter((resource) => {
+      const resource = enResources.filter((resource) => {
         return resource.hash == hash
       })
 
-      if (resource.length == 0) return
+      if (!resource || resource.length === 0) return ''
 
       return addMediaToContent(resource[0].mime, resource[0].fileURL, resource[0]["resource-attributes"]['file-name'])
     }
@@ -910,9 +953,13 @@ export class EnImport {
     return tagList
   }
 
-  getPocketbaseResources(enResources: EnResource[]) {
+  getPocketbaseResources(enResources: EnResource[] | null) {
+    if (!enResources) return
+    if (enResources.length === 0) return
+    console.log(enResources)
     let resources: Resource[] = []
     for (const enResource of enResources) {
+      console.log('resource: ', enResource)
       const resource: Resource = {
         name: enResource.name,
         size: enResource.file?.size,
@@ -964,7 +1011,6 @@ export class EnImport {
     await this.uploadResources()
     this.replaceEnMedia()
     // this.content = sanitizeContent(this.content)
-    this.description = createDescription(this.content)
     const resources = this.getPocketbaseResources(this.enResources)
 
     const data = {

@@ -157,7 +157,7 @@ export type EnNote = {
         "source-url": string
       },
       tag: string | string[],
-      resource: EnResource | EnResource[]
+      resource?: EnResource | EnResource[]
     }
   }
 }
