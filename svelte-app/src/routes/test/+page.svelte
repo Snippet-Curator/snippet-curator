@@ -15,7 +15,7 @@
 
 	async function getFiles() {
 		const { data, error } = await tryCatch(
-			pb.collection('notes').getList(1, 100, {
+			pb.collection('notes').getList(1, 1000, {
 				filter: `created>'2025-05-23'`
 			})
 		);
