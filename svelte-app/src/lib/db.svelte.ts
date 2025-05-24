@@ -199,7 +199,7 @@ export class NotebookState {
       })
     )
     if (error) {
-      console.error('Error while creating new notebook: ', error)
+      console.error('Error while creating new notebook: ', error.data, error.message)
     }
     await this.getAll()
   }
