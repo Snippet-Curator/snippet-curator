@@ -6,7 +6,12 @@
 
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
-	import pb, { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
+	import pb, {
+		getDefaultNotebooksState,
+		getNotelistState,
+		setNotelistState,
+		type NoteType
+	} from '$lib/db.svelte';
 	import {
 		Pagination,
 		NoteList,
@@ -19,7 +24,12 @@
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { searchState, signalPageState } from '$lib/utils.svelte';
 
-	const query = PocketbaseQuery.getInstance<{ title: string; content: string; tags: string }>();
+	const query = PocketbaseQuery.getInstance<{
+		title: string;
+		content: string;
+		tags: string;
+		notebook: string;
+	}>();
 
 	let searchInput = $state('');
 	let isBulkEdit = $state(false);
@@ -33,6 +43,7 @@
 	};
 	setNotelistState(notebookID, noteType);
 	const notelistState = getNotelistState(notebookID);
+	const defaultNotebookState = getDefaultNotebooksState();
 
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
 
@@ -63,7 +74,7 @@
 			searchedTag = '';
 		}
 
-		let customFilters = query
+		const customFilters = query
 			.like('title', searchInput)
 			.or()
 			.like('content', searchInput)
@@ -71,11 +82,13 @@
 			.like('tags', searchedTag.id)
 			.build();
 
+		const finalFilter = `(${customFilters}) && notebook!="${defaultNotebookState.trashID}"`;
+
 		if (searchState.searchTerm != searchInput) {
 			notelistState.clickedPage = 1;
 		}
 
-		await notelistState.getByFilter('-updated', customFilters);
+		await notelistState.getByFilter('-updated', finalFilter);
 		searchState.searchTerm = searchInput;
 	}
 
