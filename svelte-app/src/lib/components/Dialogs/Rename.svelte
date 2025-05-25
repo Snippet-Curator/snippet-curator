@@ -58,6 +58,7 @@
 		<div class="flex justify-end gap-x-2">
 			<button onclick={() => (isOpen = false)} class="btn">Close</button>
 			<button
+				disabled={newName === ''}
 				onclick={() => {
 					action(newName);
 					newName = '';
