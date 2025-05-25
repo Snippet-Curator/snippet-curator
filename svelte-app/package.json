@@ -57,6 +57,7 @@
 		"spark-md5": "^3.0.2",
 		"svelte-image-viewer": "^4.0.0",
 		"tailwindcss-motion": "^1.1.0",
-		"tw-golden-spacing": "^4.0.0"
+		"tw-golden-spacing": "^4.0.0",
+		"uuid": "^11.1.0"
 	}
 }

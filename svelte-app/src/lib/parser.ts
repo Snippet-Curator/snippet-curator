@@ -1,5 +1,6 @@
 import { XMLParser } from 'fast-xml-parser'
 import SparkMD5 from 'spark-md5';
+import { v4 as uuidv4 } from 'uuid'
 import sanitizeHTML from 'sanitize-html';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat'
@@ -503,7 +504,7 @@ export class htmlImport {
 
     try {
       extension = mimeType.split("/")[1];
-      filename = `${crypto.randomUUID()}.${extension}`;
+      filename = `${uuidv4()}.${extension}`;
       byteCharacters = atob(base64);
       hash = SparkMD5.hashBinary(byteCharacters);
     } catch (err) {
