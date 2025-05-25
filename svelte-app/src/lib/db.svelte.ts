@@ -256,15 +256,18 @@ export class defaultNotebooksState {
   trash = $state<Note>()
   trashID = $state<string>('')
   trashCount = $state<number>(0)
+  totalNoteCount = $state<number>(0)
   viewCollectionName = 'notebooks_with_note_counts'
 
   constructor() {
     $effect(() => {
       pb.collection('notebooks').subscribe('*', async () => {
         this.getAll()
+        this.getAllCounts()
       });
       pb.collection('notes').subscribe('*', async () => {
         this.getAll()
+        this.getAllCounts()
       });
     })
   }
@@ -305,6 +308,20 @@ export class defaultNotebooksState {
     this.trashCount = trash.note_count
     this.trashID = trash.id
 
+  }
+
+  async getAllCounts() {
+    const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getFullList({
+      filter: 'name != "Trash"',
+    }))
+
+    if (error) {
+      console.error('Error while getting all notebooks: ', error.message)
+    }
+
+    this.totalNoteCount = data.reduce((total: number, current: { note_count: number }) => {
+      return current.note_count + total
+    }, 0)
   }
 }
 

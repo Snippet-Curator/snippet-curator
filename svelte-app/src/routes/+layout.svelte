@@ -40,6 +40,7 @@
 
 	async function getDefaultNotebooks() {
 		await defaultNotebooksState.getAll();
+		await defaultNotebooksState.getAllCounts();
 	}
 
 	const updateScreenWidth = () => {
@@ -111,8 +112,13 @@
 			<a class={page.url.hash == '#/discover' ? 'menu-active' : ''} href="#/discover">Discover</a>
 		</li>
 		<li>
-			<a class={page.url.hash == '#/' || page.url.hash == '' ? 'menu-active' : ''} href="#/"
-				>Search</a
+			<a
+				class="{page.url.hash == '#/' || page.url.hash == ''
+					? 'menu-active'
+					: ''} flex w-full justify-between"
+				href="#/"
+			>
+				<span>Search</span> {defaultNotebooksState.totalNoteCount}</a
 			>
 		</li>
 		{#await defaultNotebooks then}
