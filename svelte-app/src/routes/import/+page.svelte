@@ -128,7 +128,7 @@
 		});
 	}
 
-	const notebooks = notebookState.notebooks;
+	const notebooks = $derived(notebookState.flatNotebooks);
 </script>
 
 <Topbar.Root>
