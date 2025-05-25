@@ -98,9 +98,9 @@
 			<div class="divider divider-horizontal hidden md:flex"></div>
 
 			<Topbar.Archive
-				action={async () => {
-					await noteState.archiveNote();
-					window.history.back();
+				action={() => {
+					noteState.archiveNote();
+					getNextNote();
 				}}
 			/>
 			<Topbar.Delete bind:isOpen={isDeleteOpen} />
@@ -145,7 +145,7 @@
 			name="Note"
 			action={() => {
 				noteState.softDeleteNote();
-				window.history.back();
+				getNextNote();
 			}}>this note</Delete
 		>
 
