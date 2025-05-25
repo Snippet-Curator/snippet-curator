@@ -29,22 +29,21 @@
 
 {#snippet renderNotebook(notebook: Notebook)}
 	<div class=" flex w-full items-center justify-between">
-		<a
-			href="#/notebook/{notebook.id}"
-			class="{page.url.hash == `#/notebook/${notebook.id}`
-				? 'badge-neutral'
-				: ''} badge hover:badge-neutral mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
-		>
-			<NotebookIcon size={15} />
+		<a href="#/notebook/{notebook.id}" class="w-full items-center gap-x-2 text-nowrap px-3 py-1">
+			<!-- <NotebookIcon size={15} /> -->
 			{notebook.name}
 		</a>
-		<span class="text-base-content/60">{notebook.note_count}</span>
+		<span class="">{notebook.note_count}</span>
 	</div>
 {/snippet}
 
 {#snippet renderNotebookSection(notebook: Notebook)}
 	<ContextMenu.Root>
-		<ContextMenu.Trigger class="flex cursor-auto items-center justify-between p-0 pr-2">
+		<ContextMenu.Trigger
+			class="{page.url.hash == `#/notebook/${notebook.id}`
+				? ' bg-neutral text-neutral-content'
+				: ''} my-1 flex cursor-auto items-center justify-between rounded-md p-0 pr-2"
+		>
 			{@render renderNotebook(notebook)}
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
