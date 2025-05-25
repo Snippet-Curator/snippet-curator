@@ -161,13 +161,23 @@ async function createThumbnail(recordID: string, resources: File[]) {
 
     if (mimeType.includes('video') || mimeType == 'application/octet-stream') {
       const videoURL = `${remoteURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
-      const thumbnailFile = await getVideoThumb(videoURL)
+
+      const { data: thumbFile, error: thumbFileError } = await tryCatch(getVideoThumb(videoURL))
+
+      if (thumbFileError) {
+        console.error('Error generating thumbfile: ', thumbFileError.message)
+        continue
+      }
+
       const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
-        'attachments+': [thumbnailFile]
+        'attachments+': [thumbFile]
       }))
+
       if (thumbError) {
         console.error('Error getting updated thumbnail record: ', thumbError.message)
+        continue
       }
+
       if (!thumbRecord) continue
       thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${thumbRecord.attachments.at(-1)}?thumb=500x0`
       // uses video itself as thumbnail:
@@ -225,19 +235,20 @@ function addMediaToContent(mimeType: string, fileURL: string, fileName: string) 
     return ''
   }
 
-  if (mimeType.includes('image')) {
+  if (mimeType.includes('image') || ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff', 'tif'].some((ext) => fileName.includes(ext.toLowerCase()))) {
     return `<img src=${fileURL} type=${mimeType}>`;
   }
 
-  if (mimeType.includes('video')) {
+  if (fileName.includes('svg')) {
+    return `<img src=${fileURL} type='svg' />`
+  }
+
+  if (mimeType.includes('video') || ['mp4', 'webm', 'mov', 'avi', 'mkv', '3gp', 'ogg'].some((ext) => fileName.includes(ext))) {
     return `<video style='width:100%' controls><source src=${fileURL} type=${mimeType} />Your browser does not support the video tag.</video>`
   }
 
-  if (mimeType == 'application/octet-stream') {
-    return `<video style='width:100%' controls><source src=${fileURL} />Your browser does not support the video tag.</video>`
-  }
 
-  if (mimeType == 'audio/mpeg') {
+  if (mimeType == 'audio/mpeg' || ['mp3', 'wav', 'aac'].some((ext) => fileName.includes(ext))) {
     return `<div style="text-align: center;"><audio class="audio-player" controls style="width: 80vw; max-width: 400px;"><source src=${fileURL} type=${mimeType}><a href=${fileURL} target="_blank">${fileName}</a>.</audio></div>`
   }
 
