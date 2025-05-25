@@ -95,11 +95,9 @@
 </script>
 
 <Topbar.Root>
-	<div class="flex w-full items-center justify-around gap-x-2">
-		<Topbar.SidebarIcon></Topbar.SidebarIcon>
-		<Search bind:searchInput />
-		<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
-	</div>
+	<Topbar.SidebarIcon></Topbar.SidebarIcon>
+	<Search bind:searchInput />
+	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
 </Topbar.Root>
 
 <ScrollArea scrollHideDelay={200} class="relative mb-20 h-[calc(100vh-60px)] overflow-y-auto">
