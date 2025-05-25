@@ -45,7 +45,7 @@
 
 	onMount(async () => {
 		// if page is a notebook slug, then get notebook name
-		if (page.params.slug) {
+		if (notelistState.noteType == 'notebooks') {
 			const currentNotebook = await notelistState.getCurrentNotebook(page.params.slug);
 			currentNotebookName = currentNotebook.name;
 		}
