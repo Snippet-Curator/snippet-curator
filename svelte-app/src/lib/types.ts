@@ -44,6 +44,7 @@ export type Note = {
   content: string
   notebook: string
   added: string
+  last_opened: string
   created: string
   updated: string
   source: string
@@ -60,10 +61,11 @@ export type Note = {
   thumbnail: string,
   sources?: [
     {
-      source?: string,
-      source_url?: string
+      source: string,
+      source_url: string
     }
   ]
+  resources?: Resource[]
 }
 
 export type NoteRecord = {

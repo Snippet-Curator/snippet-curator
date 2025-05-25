@@ -14,6 +14,7 @@
 	let isEditNotebookOpen = $state(false);
 
 	const initialLoading = noteState.getNote();
+	noteState.updateLastOpened();
 </script>
 
 {#await initialLoading}

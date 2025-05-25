@@ -616,14 +616,18 @@ export class NoteState {
 
     this.note = record
 
-    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.note.id, {
+    this.updateLastOpened()
+
+  }
+
+  async updateLastOpened() {
+    const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.noteID, {
       last_opened: new Date(),
     }))
 
     if (error) {
       console.error('Error updating note last opened date: ', error.message)
     }
-
   }
 
   async deleteNote() {
