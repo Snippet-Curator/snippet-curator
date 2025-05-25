@@ -15,7 +15,7 @@
 
 	async function getFiles() {
 		const { data, error } = await tryCatch(
-			pb.collection('notes').getList(1, 1000, {
+			pb.collection('notes').getList(1, 1, {
 				filter: `created>'2025-05-23'`
 			})
 		);
@@ -27,7 +27,7 @@
 		for (const file of data.items) {
 			console.log('deleting: ', file.title);
 			// const noteURL = `${baseURL}${file.id}`;
-			await deleteFile(file.id);
+			// await deleteFile(file.id);
 		}
 	}
 
