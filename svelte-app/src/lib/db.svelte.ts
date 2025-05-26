@@ -61,10 +61,12 @@ export class TagState {
   }
 
   async getAll() {
+    // const start = performance.now()
     const { data: records, error } = await tryCatch(pb.collection(this.viewCollectionName).getFullList({
       sort: 'name',
       expand: 'parent'
     }))
+
 
     if (error) {
       console.error('Error while getting all tags: ', error.message)
@@ -73,6 +75,8 @@ export class TagState {
     if (!records) {
       return
     }
+    // const mid = performance.now()
+    // console.log(`after db: ${mid - start} ms`)
 
     this.flatTags = records
 
@@ -91,6 +95,8 @@ export class TagState {
       }
     })
 
+    // const end = performance.now()
+    // console.log('tags updated in: ', end - start, 'ms')
     this.tags = rootTags
   }
 
@@ -158,6 +164,7 @@ export class NotebookState {
   }
 
   async getAll() {
+    // const start = performance.now()
     const { data: records, error } = await tryCatch(pb.collection(this.viewCollectionName).getFullList({
       sort: 'name',
       filter: 'name != "Inbox" && name != "Archive" && name != "Trash"',
@@ -188,6 +195,8 @@ export class NotebookState {
         rootNotebooks.push(notebook)
       }
     })
+    // const end = performance.now()
+    // console.log(`notebooks in ${end - start} ms`)
     this.notebooks = rootNotebooks
   }
 
