@@ -434,7 +434,9 @@ export class NotelistState {
     return this.notes
   }
 
-  async getByFilter(sort = '-updated', customFilters: string) {
+  async getByFilter(sort = '-created', customFilters: string) {
+    const start = performance.now()
+    // console.log(customFilters)
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getList(this.clickedPage, 24, {
       sort: sort,
       expand: 'tags,notebook',
@@ -444,6 +446,8 @@ export class NotelistState {
     if (error) {
       console.error('Unable to get notes by filter ', error.message)
     }
+    const end = performance.now()
+    console.log(`search complete in ${end - start} ms`)
 
     this.notes = data
     return this.notes

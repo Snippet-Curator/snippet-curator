@@ -125,7 +125,7 @@
 		{#if isBulkEdit}
 			<BulkToolbar bind:isBulkEdit bind:selectedNotesID {notelistState} />
 		{/if}
-		{#if notelistState.notes}
+		{#if notelistState.notes.totalItems > 0}
 			<NoteList {isBulkEdit} bind:selectedNotesID notes={notelistState.notes} />
 		{:else if searchInput}
 			<div class="grid h-full place-items-center">No Notes Found.</div>
