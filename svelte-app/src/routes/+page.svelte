@@ -75,20 +75,24 @@
 		}
 
 		const customFilters = query
+			.openBracket()
 			.like('title', searchInput)
 			.or()
 			.like('content', searchInput)
 			.or()
 			.like('tags', searchedTag.id)
+			.closeBracket()
+			.and()
+			.notEqual('notebook', defaultNotebookState.trashID)
 			.build();
 
-		const finalFilter = `(${customFilters}) && notebook!="${defaultNotebookState.trashID}"`;
+		// const finalFilter = `(${customFilters}) && notebook!="${defaultNotebookState.trashID}"`;
 
 		if (searchState.searchTerm != searchInput) {
 			notelistState.clickedPage = 1;
 		}
 
-		await notelistState.getByFilter('-updated', finalFilter);
+		await notelistState.getByFilter('-updated', customFilters);
 		searchState.searchTerm = searchInput;
 	}
 

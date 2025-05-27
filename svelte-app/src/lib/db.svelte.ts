@@ -443,7 +443,7 @@ export class NotelistState {
     }))
 
     if (error) {
-      console.error('Unable to get notes by filter ', error)
+      console.error('Unable to get notes by filter ', error.message)
     }
 
     this.notes = data
