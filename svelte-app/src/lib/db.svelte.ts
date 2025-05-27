@@ -385,15 +385,20 @@ export class NotelistState {
 
     if (!archiveNotebook || !trashNotebook) return
 
+    const start = performance.now()
+
     const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getList(this.clickedPage, 24, {
       sort: sort,
       filter: `notebook!="${archiveNotebook.id}" && notebook!="${trashNotebook.id}"`,
-      expand: 'notebook, tags'
+      expand: 'notebook, tags',
     }))
 
     if (error) {
       console.error('Unable to get notes by page ', error)
     }
+
+    const end = performance.now()
+    console.log(`Default notes seen in ${end - start} ms`)
 
     this.notes = data
     return this.notes
