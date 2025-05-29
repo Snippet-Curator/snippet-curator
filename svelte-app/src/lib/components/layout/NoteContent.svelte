@@ -182,7 +182,7 @@
 </div>
 
 <ScrollArea scrollHideDelay={200} type="scroll" class="mb-20 h-full">
-	<div class="card mx-2 mt-10 max-w-3xl md:px-10 lg:max-w-5xl">
+	<div class="card mx-auto mt-10 max-w-3xl px-2 md:px-10 lg:max-w-5xl">
 		<!-- <div class="card-body z-0">
 			<div class="relative" bind:this={container}></div>
 		</div> -->
