@@ -480,7 +480,7 @@ export class NotelistState {
 
     await Promise.all(recordIDs.map(async recordID => {
       const { data, error } = await pb.collection(this.collectionName).update(recordID, {
-        notebook: trashNotebook.id
+        status: 'deleted'
       })
 
       if (error) {
@@ -495,7 +495,7 @@ export class NotelistState {
 
     await Promise.all(recordIDs.map(async recordID => {
       const { data, error } = await pb.collection(this.collectionName).update(recordID, {
-        notebook: archiveNotebook.id
+        status: 'archived'
       })
 
       if (error) {
@@ -676,7 +676,7 @@ export class NoteState {
     const trashNotebook = await getTrashNotebook()
 
     const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.note.id, {
-      notebook: trashNotebook.id
+      status: 'deleted'
     }))
 
     if (error) {
