@@ -2,35 +2,28 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	import { signalPageState } from '$lib/utils.svelte';
-	import {
-		getDefaultNotebooksState,
-		getNotelistState,
-		setNotelistState,
-		type NoteType
-	} from '$lib/db.svelte';
+	import { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
 	import { Pagination, NoteList, BulkToolbar, BulkEditBtn, Delete, Blank } from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
 
 	import { page } from '$app/state';
 
-	let notebookID = $derived(page.params.slug);
 	let isBulkEdit = $state(false);
 	let isEmptyTrashOpen = $state(false);
 	let selectedNotesID = $state<string[]>([]);
 
 	const noteType: NoteType = {
-		type: 'notebooks',
+		type: 'default',
 		id: page.params.slug
 	};
 
-	setNotelistState(notebookID, noteType);
-	const notelistState = getNotelistState(notebookID);
-	const defaultNotebooksState = getDefaultNotebooksState();
+	setNotelistState('archived', noteType);
+	const notelistState = getNotelistState('archived');
 
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash) ?? 1);
 
 	async function updatePage() {
-		await notelistState.getByNotebook(notebookID);
+		await notelistState.getArchived();
 		signalPageState.updatePageData(page.url.hash, notelistState.clickedPage);
 	}
 
@@ -38,10 +31,9 @@
 
 	$effect(() => {
 		// console.log('Slug changed:', page.params.slug);
-		notelistState.notebookID = notebookID;
+		// notelistState.notebookID = notebookID;
 		notelistState.clickedPage = savedPage ? savedPage : 1;
 		initialLoading = updatePage();
-		console.log(notelistState.notes);
 	});
 </script>
 
@@ -49,9 +41,7 @@
 	<Topbar.SidebarIcon></Topbar.SidebarIcon>
 	<Topbar.Back />
 	<div class="grow"></div>
-	{#if notebookID == defaultNotebooksState.trashID}
-		<Topbar.Empty bind:isOpen={isEmptyTrashOpen} />
-	{/if}
+	<Topbar.Empty bind:isOpen={isEmptyTrashOpen} />
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
 </Topbar.Root>
 

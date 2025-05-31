@@ -157,13 +157,6 @@
 			</li>
 		{/snippet}
 
-		{#await defaultNotebooks then}
-			{@render renderBottomPages(
-				'Archive',
-				`#/notebook/${defaultNotebooksState.archiveID}`,
-				Archive
-			)}
-		{/await}
 		{#each bottomPages as page}
 			{@render renderBottomPages(page.name, page.url, page.icon)}
 		{/each}

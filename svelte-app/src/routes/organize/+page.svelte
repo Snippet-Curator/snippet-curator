@@ -11,9 +11,6 @@
 	const tagState = getTagState();
 	const defaultNotebooksState = getDefaultNotebooksState();
 
-	let notebookArchive = $derived(defaultNotebooksState.archive);
-	let notebookTrash = $derived(defaultNotebooksState.trash);
-
 	let isNewNotebookOpen = $state(false);
 	let isNewTagOpen = $state(false);
 </script>
@@ -50,16 +47,10 @@
 		<div class="card">
 			<ul class="menu w-full">
 				<NotebookList allowEdit={true} notebooks={notebookState.notebooks} />
-				{#if notebookArchive}
-					<li class="ml-0 mr-4 pl-0">
-						{@render renderNotebook(notebookArchive, Archive)}
-					</li>
-				{/if}
-				{#if notebookTrash}
-					<li class="ml-0 mr-4 pl-0">
-						{@render renderNotebook(notebookTrash, Trash2)}
-					</li>
-				{/if}
+
+				<li class="ml-0 mr-4 pl-0"><a href="#/archive"><Archive size={18} />Archive</a></li>
+
+				<li class="ml-0 mr-4 pl-0"><a href="#/trash"><Trash2 size={18} />Trash</a></li>
 			</ul>
 		</div>
 

@@ -16,8 +16,6 @@ dayjs.extend(customParseFormat)
 const notesCollection = 'notes'
 const notebookCollection = 'notebooks'
 const inboxNotebook = 'Inbox'
-const archiveNotebook = 'Archive'
-const trashNotebook = 'Trash'
 const baseURL = 'http://127.0.0.1:8090/api/files'
 const remoteURL = pbURL + '/api/files'
 
@@ -38,40 +36,8 @@ export async function makeDefaultNotebook() {
       console.error('Error making Inbox: ', error.message)
     }
   }
-
-  const { data: archiveData, error: archiveError } = await tryCatch<RecordModel, PError>(pb.collection(notebookCollection).create({
-    name: archiveNotebook
-  }))
-
-  if (archiveError) {
-    if (archiveError.data.data.name.code == "validation_not_unique") {
-      console.log('Archive already exists')
-    } else {
-      console.error('Error making Archive: ', archiveError.message)
-    }
-  }
-
-  const { data: trashData, error: trashError } = await tryCatch<RecordModel, PError>(pb.collection(notebookCollection).create({
-    name: trashNotebook
-  }))
-
-  if (trashError) {
-    if (trashError.data.data.name.code == "validation_not_unique") {
-      console.log('Trash already exists')
-    } else {
-      console.error('Error making Trash: ', trashError.message)
-    }
-  }
 }
 
-async function getDefaultNotebook() {
-  const { data, error } = await tryCatch(pb.collection(notebookCollection).getFirstListItem(`name="${inboxNotebook}"`))
-
-  if (error) {
-    console.error('Inbox notebook not found: ', error)
-  }
-  return data
-}
 
 async function getVideoThumb(videoUrl: string): Promise<File> {
 

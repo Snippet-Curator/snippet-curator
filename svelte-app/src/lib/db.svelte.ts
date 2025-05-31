@@ -21,29 +21,6 @@ export async function getAuth() {
   console.log("Logged in to Pocket client: ", pb.authStore.isValid)
 }
 
-async function getArchiveNotebook() {
-  const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Archive"'))
-
-  if (error) {
-    console.log('Error getting Archive Notebook: ', error.message)
-    // return pb.collection('notebooks').create({
-    //   name: 'Archive'
-    // })
-  }
-  return data
-}
-
-async function getTrashNotebook() {
-  const { data, error } = await tryCatch(pb.collection('notebooks').getFirstListItem('name="Trash"'))
-
-  if (error) {
-    console.error('Error getting Trash Notebook: ', error.message)
-    // return pb.collection('notebooks').create({
-    //   name: 'Trash'
-    // })
-  }
-  return data
-}
 
 export class TagState {
   tags = $state<Tag[]>([])
@@ -167,7 +144,7 @@ export class NotebookState {
     // const start = performance.now()
     const { data: records, error } = await tryCatch(pb.collection(this.viewCollectionName).getFullList({
       sort: 'name',
-      filter: 'name != "Inbox" && name != "Archive" && name != "Trash"',
+      filter: 'name != "Inbox"',
       expand: 'parent'
     }))
 
@@ -259,12 +236,6 @@ export class defaultNotebooksState {
   inbox = $state<Note>()
   inboxID = $state<string>('')
   inboxCount = $state<number>(0)
-  archive = $state<Note>()
-  archiveID = $state<string>('')
-  archiveCount = $state<number>(0)
-  trash = $state<Note>()
-  trashID = $state<string>('')
-  trashCount = $state<number>(0)
   totalNoteCount = $state<number>(0)
   viewCollectionName = 'notebooks_with_note_counts'
 
@@ -289,48 +260,23 @@ export class defaultNotebooksState {
       console.error('Error while getting inbox: ', error.message)
     }
 
-    const { data: archive, error: archiveError } = await tryCatch(pb.collection(this.viewCollectionName).getFirstListItem(`name="Archive"`))
-
-    if (archiveError) {
-      console.error('Error while getting Archive: ', archiveError.message)
-    }
-
-    const { data: trash, error: trashError } = await tryCatch(pb.collection(this.viewCollectionName).getFirstListItem(`name="Trash"`))
-
-    if (trashError) {
-      console.error('Error while getting Trash: ', trashError.message)
-    }
-
-    if (!inbox || !archive || !trash) {
+    if (!inbox) {
       return
     }
 
     this.inbox = inbox
     this.inboxCount = inbox.note_count
     this.inboxID = inbox.id
-
-    this.archive = archive
-    this.archiveCount = archive.note_count
-    this.archiveID = archive.id
-
-    this.trash = trash
-    this.trashCount = trash.note_count
-    this.trashID = trash.id
-
   }
 
   async getAllCounts() {
-    const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getFullList({
-      filter: 'name != "Trash"',
-    }))
+    const { data, error } = await tryCatch(pb.collection('notes').getList(1, 1))
 
     if (error) {
       console.error('Error while getting all notebooks: ', error.message)
     }
 
-    this.totalNoteCount = data.reduce((total: number, current: { note_count: number }) => {
-      return current.note_count + total
-    }, 0)
+    this.totalNoteCount = data.totalItems
   }
 }
 
@@ -380,16 +326,11 @@ export class NotelistState {
   }
 
   async getByPage(sort = '-created') {
-    const archiveNotebook = await getArchiveNotebook()
-    const trashNotebook = await getTrashNotebook()
-
-    if (!archiveNotebook || !trashNotebook) return
-
     const start = performance.now()
 
     const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getList(this.clickedPage, 24, {
       sort: sort,
-      filter: `notebook!="${archiveNotebook.id}" && notebook!="${trashNotebook.id}"`,
+      filter: `status="active"`,
       expand: 'notebook, tags',
     }))
 
@@ -406,7 +347,35 @@ export class NotelistState {
 
   async getByNotebook(notebookID: string) {
     const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getList(this.clickedPage, 24, {
-      filter: `notebook="${notebookID}"`,
+      filter: `notebook="${notebookID}" && status="active"`,
+      expand: 'tags,notebook',
+      sort: '-created',
+    }))
+
+    if (error) {
+      console.error('Error getting notes: ', error)
+    }
+    this.notes = data
+    return this.notes
+  }
+
+  async getArchived() {
+    const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getList(this.clickedPage, 24, {
+      filter: `status="archived"`,
+      expand: 'tags,notebook',
+      sort: '-created',
+    }))
+
+    if (error) {
+      console.error('Error getting notes: ', error)
+    }
+    this.notes = data
+    return this.notes
+  }
+
+  async getDeleted() {
+    const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getList(this.clickedPage, 24, {
+      filter: `status="deleted"`,
       expand: 'tags,notebook',
       sort: '-created',
     }))
@@ -419,10 +388,8 @@ export class NotelistState {
   }
 
   async getByTag(tagID: string) {
-    const archiveNotebook = await getArchiveNotebook()
-    const trashNotebook = await getTrashNotebook()
     const { data, error } = await tryCatch(pb.collection(this.viewCollectionName).getList(this.clickedPage, 24, {
-      filter: `tags~"${tagID}" && notebook!="${archiveNotebook.id}" && notebook!="${trashNotebook.id}"`,
+      filter: `tags~"${tagID}" && status="active"`,
       expand: 'tags,notebook',
       sort: '-created',
     }))
@@ -458,14 +425,12 @@ export class NotelistState {
   }
 
   async emptyTrash() {
-    const trashNotebook = await getTrashNotebook()
-
     const { data, error } = await tryCatch(pb.collection(this.collectionName).getFullList({
-      filter: `notebook="${trashNotebook.id}"`,
+      filter: `status="deleted"`,
     }))
 
     if (error) {
-      console.error('Unable to delete note: ', error)
+      console.error('Unable to get deleted notes: ', error)
     }
 
     if (!data) return
@@ -491,8 +456,6 @@ export class NotelistState {
   }
 
   async archiveMultiple(recordIDs: string[]) {
-    const archiveNotebook = await getArchiveNotebook()
-
     await Promise.all(recordIDs.map(async recordID => {
       const { data, error } = await pb.collection(this.collectionName).update(recordID, {
         status: 'archived'
@@ -764,10 +727,8 @@ export class NoteState {
   }
 
   async archiveNote() {
-    const archiveNotebook = await getArchiveNotebook()
-
     const { data, error } = await tryCatch(pb.collection(this.collectionName).update(this.note.id, {
-      notebook: archiveNotebook.id
+      status: 'archived'
     }))
 
     if (error) {
