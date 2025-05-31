@@ -41,7 +41,6 @@
 		notelistState.notebookID = notebookID;
 		notelistState.clickedPage = savedPage ? savedPage : 1;
 		initialLoading = updatePage();
-		console.log(notelistState.notes);
 	});
 </script>
 
@@ -49,9 +48,9 @@
 	<Topbar.SidebarIcon></Topbar.SidebarIcon>
 	<Topbar.Back />
 	<div class="grow"></div>
-	{#if notebookID == defaultNotebooksState.trashID}
-		<Topbar.Empty bind:isOpen={isEmptyTrashOpen} />
-	{/if}
+
+	<Topbar.Empty bind:isOpen={isEmptyTrashOpen} />
+
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
 </Topbar.Root>
 

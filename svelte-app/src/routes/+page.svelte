@@ -28,7 +28,7 @@
 		title: string;
 		content: string;
 		tags: string;
-		notebook: string;
+		status: 'active' | 'archived' | 'deleted';
 	}>();
 
 	let searchInput = $state('');
@@ -82,11 +82,9 @@
 			.or()
 			.like('tags', searchedTag.id)
 			.closeBracket()
-			.and()
-			.notEqual('notebook', defaultNotebookState.trashID)
+			// .and()
+			// .equal('status', 'active')
 			.build();
-
-		// const finalFilter = `(${customFilters}) && notebook!="${defaultNotebookState.trashID}"`;
 
 		if (searchState.searchTerm != searchInput) {
 			notelistState.clickedPage = 1;
