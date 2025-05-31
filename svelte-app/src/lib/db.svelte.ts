@@ -367,7 +367,7 @@ export class NotelistState {
     }))
 
     if (error) {
-      console.error('Unable to get notes by page ', error)
+      console.error('Unable to get notes by page ', error.message)
     }
 
     const end = performance.now()
@@ -437,7 +437,7 @@ export class NotelistState {
     const start = performance.now()
     // console.log(customFilters)
     const { data, error } = await tryCatch(pb.collection(notesCollection).getList(this.clickedPage, 24, {
-      sort: sort,
+      sort: '-created',
       expand: 'tags,notebook',
       filter: customFilters
     }))

@@ -35,7 +35,6 @@
 	let isBulkEdit = $state(false);
 	let selectedNotesID = $state<string[]>([]);
 	let isLoading = $state(true);
-	// let scrollElement;
 
 	let notebookID = 'homepage';
 	const noteType: NoteType = {
@@ -46,24 +45,42 @@
 	const defaultNotebookState = getDefaultNotebooksState();
 
 	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
+	const saveCurrentPage = () =>
+		signalPageState.updatePageData(page.url.hash, notelistState.clickedPage);
 
 	isLoading = false;
 
 	async function updatePage() {
-		if (searchInput == '') {
-			if (searchState.searchTerm != searchInput) {
-				notelistState.clickedPage = 1;
-				await notelistState.getDefault();
-			}
+		console.log('updating page');
+		if (!searchInput && searchState.searchTerm) {
+			console.log('no search input');
+			notelistState.clickedPage = 1;
 			await notelistState.getDefault();
 			searchState.searchTerm = '';
-			// saves current page
-			signalPageState.updatePageData(page.url.hash, notelistState.clickedPage);
 			return;
 		}
+
+		if (!searchInput) {
+			console.log('no search input, new page');
+			await notelistState.getDefault();
+			searchState.searchTerm = '';
+			saveCurrentPage();
+			return;
+		}
+
+		if (searchInput === searchState.searchTerm) {
+			console.log('default search');
+			await searchNotes();
+			saveCurrentPage();
+			return;
+		}
+
+		console.log('searching');
+		notelistState.clickedPage = 1;
 		await searchNotes();
-		signalPageState.updatePageData(page.url.hash, notelistState.clickedPage);
-		// scrollElement.scrollTo({ top: 0 });
+		saveCurrentPage();
+		searchState.searchTerm = searchInput;
+		return;
 	}
 
 	async function searchNotes() {
@@ -82,16 +99,11 @@
 			.or()
 			.like('tags', searchedTag.id)
 			.closeBracket()
-			// .and()
-			// .equal('status', 'active')
+			.and()
+			.equal('status', 'active')
 			.build();
 
-		if (searchState.searchTerm != searchInput) {
-			notelistState.clickedPage = 1;
-		}
-
 		await notelistState.getByFilter('-updated', customFilters);
-		searchState.searchTerm = searchInput;
 	}
 
 	let initialLoading = $state();
@@ -119,7 +131,7 @@
 	{#await initialLoading}
 		<NoteLoading />
 	{:then}
-		<Pagination {notelistState} changePage={updatePage} currentID={notebookID} />
+		<Pagination {notelistState} changePage={updatePage} />
 		{#if isBulkEdit}
 			<BulkToolbar bind:isBulkEdit bind:selectedNotesID {notelistState} />
 		{/if}

@@ -9,7 +9,6 @@
 
 	const notebookState = getNotebookState();
 	const tagState = getTagState();
-	const defaultNotebooksState = getDefaultNotebooksState();
 
 	let isNewNotebookOpen = $state(false);
 	let isNewTagOpen = $state(false);
