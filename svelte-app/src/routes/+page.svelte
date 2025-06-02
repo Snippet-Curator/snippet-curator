@@ -79,11 +79,10 @@
 	let initialLoading = $state();
 
 	onMount(async () => {
-		// gets search state
 		if (searchState.searchTerm) {
 			searchInput = searchState.searchTerm;
 		}
-		initialLoading = updatePage(notelistState.clickedPage);
+		initialLoading = updatePage(savedPage);
 	});
 </script>
 
@@ -93,6 +92,7 @@
 		bind:searchInput
 		searchNotes={(searchInput) => searchNotes(searchInput, 1)}
 		clearNote={() => {
+			searchState.searchTerm = '';
 			updatePage(1);
 		}}
 	/>
