@@ -91,3 +91,7 @@ export function setMobileState() {
 export function getMobileState() {
   return getContext<ReturnType<typeof setMobileState>>('mobile')
 }
+
+
+export const saveCurrentPage = (newPage: number) =>
+  signalPageState.updatePageData(page.url.hash, newPage);

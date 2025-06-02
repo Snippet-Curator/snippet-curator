@@ -2,16 +2,19 @@
 	import { CircleX, Search } from 'lucide-svelte';
 
 	type Props = {
+		searchNotes: (searchInput: string) => void;
+		clearNote: () => void;
 		searchInput: string;
 	};
 
-	let { searchInput = $bindable() }: Props = $props();
+	let { searchNotes, searchInput = $bindable(), clearNote }: Props = $props();
 </script>
 
 <div class="relative w-full px-2">
 	<input
 		type="text"
 		bind:value={searchInput}
+		oninput={() => searchNotes(searchInput)}
 		placeholder="Search..."
 		class="input relative w-full pl-10 pr-10"
 	/>
@@ -23,6 +26,7 @@
 			class="absolute right-5 top-1/2 z-30 -translate-y-1/2 hover:cursor-pointer"
 			onclick={() => {
 				searchInput = '';
+				clearNote();
 			}}
 		>
 			<CircleX size={18} />

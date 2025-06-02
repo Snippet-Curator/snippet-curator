@@ -6,12 +6,7 @@
 
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
-	import pb, {
-		getDefaultNotebooksState,
-		getNotelistState,
-		setNotelistState,
-		type NoteType
-	} from '$lib/db.svelte';
+	import pb, { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
 	import {
 		Pagination,
 		NoteList,
@@ -22,7 +17,7 @@
 		NoteLoading
 	} from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
-	import { searchState, signalPageState } from '$lib/utils.svelte';
+	import { saveCurrentPage, searchState, signalPageState } from '$lib/utils.svelte';
 
 	const query = PocketbaseQuery.getInstance<{
 		title: string;
@@ -42,48 +37,21 @@
 	};
 	setNotelistState(notebookID, noteType);
 	const notelistState = getNotelistState(notebookID);
-	const defaultNotebookState = getDefaultNotebooksState();
 
-	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
-	const saveCurrentPage = () =>
-		signalPageState.updatePageData(page.url.hash, notelistState.clickedPage);
+	const savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
 
-	isLoading = false;
-
-	async function updatePage() {
-		console.log('updating page');
-		if (!searchInput && searchState.searchTerm) {
-			console.log('no search input');
-			notelistState.clickedPage = 1;
-			await notelistState.getDefault();
-			searchState.searchTerm = '';
-			return;
-		}
+	const updatePage = async (newPage: number) => {
+		saveCurrentPage(newPage);
 
 		if (!searchInput) {
-			console.log('no search input, new page');
-			await notelistState.getDefault();
-			searchState.searchTerm = '';
-			saveCurrentPage();
+			await notelistState.getByPage(newPage);
 			return;
 		}
 
-		if (searchInput === searchState.searchTerm) {
-			console.log('default search');
-			await searchNotes();
-			saveCurrentPage();
-			return;
-		}
+		await searchNotes(searchInput, newPage);
+	};
 
-		console.log('searching');
-		notelistState.clickedPage = 1;
-		await searchNotes();
-		saveCurrentPage();
-		searchState.searchTerm = searchInput;
-		return;
-	}
-
-	async function searchNotes() {
+	const searchNotes = async (searchInput: string, page: number) => {
 		let searchedTag;
 		try {
 			searchedTag = await pb.collection('tags').getFirstListItem(`name~"${searchInput}"`);
@@ -103,27 +71,31 @@
 			.equal('status', 'active')
 			.build();
 
-		await notelistState.getByFilter('-updated', customFilters);
-	}
+		await notelistState.getByFilter(customFilters, page);
+		searchState.searchTerm = searchInput;
+	};
 
+	isLoading = false;
 	let initialLoading = $state();
 
 	onMount(async () => {
-		// gets from signal search on mount only
+		// gets search state
 		if (searchState.searchTerm) {
 			searchInput = searchState.searchTerm;
 		}
-		notelistState.clickedPage = savedPage ? savedPage : 1;
-	});
-
-	$effect(() => {
-		initialLoading = updatePage();
+		initialLoading = updatePage(notelistState.clickedPage);
 	});
 </script>
 
 <Topbar.Root>
 	<Topbar.SidebarIcon></Topbar.SidebarIcon>
-	<Search bind:searchInput />
+	<Search
+		bind:searchInput
+		searchNotes={(searchInput) => searchNotes(searchInput, 1)}
+		clearNote={() => {
+			updatePage(1);
+		}}
+	/>
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
 </Topbar.Root>
 
@@ -131,7 +103,11 @@
 	{#await initialLoading}
 		<NoteLoading />
 	{:then}
-		<Pagination {notelistState} changePage={updatePage} />
+		<Pagination
+			currentPage={notelistState.notes.page}
+			totalPages={notelistState.notes.totalPages}
+			changePage={(newPage: number) => updatePage(newPage)}
+		/>
 		{#if isBulkEdit}
 			<BulkToolbar bind:isBulkEdit bind:selectedNotesID {notelistState} />
 		{/if}

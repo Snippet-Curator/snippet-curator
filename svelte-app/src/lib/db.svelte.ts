@@ -338,9 +338,9 @@ export class NotelistState {
     }
   }
 
-  async getDefault() {
+  async getDefault(newPage: number) {
     if (this.noteType == 'default') {
-      this.getByPage()
+      this.getByPage(newPage)
     } else if (this.noteType == 'notebooks') {
       this.getByNotebook(this.notebookID)
     } else if (this.noteType == 'tags') {
@@ -357,11 +357,11 @@ export class NotelistState {
     return data
   }
 
-  async getByPage(sort = '-created') {
+  async getByPage(newPage = 1) {
     const start = performance.now()
 
-    const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(this.clickedPage, 24, {
-      sort: sort,
+    const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(newPage, 24, {
+      sort: 'created',
       filter: `status="active"`,
       expand: 'notebook, tags',
     }))
@@ -377,8 +377,8 @@ export class NotelistState {
     return this.notes
   }
 
-  async getByNotebook(notebookID: string) {
-    const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(this.clickedPage, 24, {
+  async getByNotebook(notebookID: string, page: number) {
+    const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(page, 24, {
       filter: `notebook="${notebookID}" && status="active"`,
       expand: 'tags,notebook',
       sort: '-created',
@@ -419,8 +419,8 @@ export class NotelistState {
     return this.notes
   }
 
-  async getByTag(tagID: string) {
-    const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(this.clickedPage, 24, {
+  async getByTag(tagID: string, page: number) {
+    const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(page, 24, {
       filter: `tags~"${tagID}" && status="active"`,
       expand: 'tags,notebook',
       sort: '-created',
@@ -433,10 +433,10 @@ export class NotelistState {
     return this.notes
   }
 
-  async getByFilter(sort = '-created', customFilters: string) {
+  async getByFilter(customFilters: string, page) {
     const start = performance.now()
     // console.log(customFilters)
-    const { data, error } = await tryCatch(pb.collection(notesCollection).getList(this.clickedPage, 24, {
+    const { data, error } = await tryCatch(pb.collection(notesCollection).getList(page, 24, {
       sort: '-created',
       expand: 'tags,notebook',
       filter: customFilters
@@ -610,6 +610,7 @@ export class NoteState {
   }
 
   async getDiscoverNoteList(page = 1) {
+    const start = performance.now()
     const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(page, 100, {
       expand: 'notebook,tags',
       sort: '-score'
@@ -618,6 +619,8 @@ export class NoteState {
     if (error) {
       console.error('Error getting discover note: ', error.data)
     }
+    const end = performance.now()
+    console.log(`Returned Discover List in ${end - start} ms`)
 
     this.noteList = data
     return data
