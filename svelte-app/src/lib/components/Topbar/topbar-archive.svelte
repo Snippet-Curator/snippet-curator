@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { Archive } from 'lucide-svelte';
+	import { Archive, ArchiveRestore } from 'lucide-svelte';
 	import { onDestroy, onMount } from 'svelte';
 
 	type Props = {
-		action: () => void;
+		archive: () => void;
+		unarchive: () => void;
+		noteStatus: 'active' | 'archived' | 'deleted';
 	};
 
-	let { action }: Props = $props();
+	let { archive, noteStatus, unarchive }: Props = $props();
 
 	function handler(event: KeyboardEvent) {
 		if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
@@ -27,11 +29,19 @@
 	});
 </script>
 
-<div class="tooltip tooltip-bottom z-30" data-tip="Archive">
-	<button
-		onclick={() => {
-			action();
-		}}
-		class="btn btn-ghost flex items-center gap-x-2"><Archive size={18} /></button
-	>
-</div>
+{#snippet renderArchived(archived: string, Icon, archiveAction: () => void)}
+	<div class="tooltip tooltip-bottom z-30" data-tip={archived}>
+		<button
+			onclick={() => {
+				archiveAction();
+			}}
+			class="btn btn-ghost flex items-center gap-x-2"><Icon size={18} /></button
+		>
+	</div>
+{/snippet}
+
+{#if noteStatus === 'active'}
+	{@render renderArchived('Archive', Archive, archive)}
+{:else if noteStatus === 'archived'}
+	{@render renderArchived('Un-Archive', ArchiveRestore, unarchive)}
+{:else if noteStatus === 'deleted'}{/if}

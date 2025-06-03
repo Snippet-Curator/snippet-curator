@@ -47,6 +47,7 @@ export type Note = {
   last_opened: string
   created: string
   updated: string
+  status: 'active' | 'archived' | 'deleted'
   source: string
   source_url: string
   attachments: string[]

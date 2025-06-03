@@ -762,6 +762,16 @@ export class NoteState {
       console.error('Unable to archive note: ', error)
     }
   }
+
+  async unArchiveNote() {
+    const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+      status: 'active'
+    }))
+
+    if (error) {
+      console.error('Unable to archive note: ', error)
+    }
+  }
 }
 
 

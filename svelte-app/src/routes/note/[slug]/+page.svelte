@@ -45,12 +45,17 @@
 		{/if}
 
 		<Topbar.Archive
-			action={() => {
+			noteStatus={noteState.note.status}
+			archive={() => {
 				noteState.archiveNote();
 				window.history.back();
 			}}
+			unarchive={() => {
+				noteState.unArchiveNote();
+				window.history.back();
+			}}
 		/>
-		<Topbar.Delete bind:isOpen={isDeleteOpen} />
+		<Topbar.Delete noteStatus={noteState.note.status} bind:isOpen={isDeleteOpen} />
 		<Topbar.Info {note} />
 	</Topbar.Root>
 	<div class="h-[calc(100vh-60px)]">
