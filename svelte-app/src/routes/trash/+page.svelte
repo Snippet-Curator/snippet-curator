@@ -25,6 +25,7 @@
 	const updatePage = async (newPage: number) => {
 		await notelistState.getDeleted(newPage);
 		saveCurrentPage(newPage);
+		notelistState.clickedPage = newPage;
 	};
 
 	let initialLoading = $state<Promise<void>>();

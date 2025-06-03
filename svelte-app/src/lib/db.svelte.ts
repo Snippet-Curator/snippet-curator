@@ -342,9 +342,9 @@ export class NotelistState {
     if (this.noteType == 'default') {
       this.getByPage(newPage)
     } else if (this.noteType == 'notebooks') {
-      this.getByNotebook(this.notebookID)
+      this.getByNotebook(this.notebookID, newPage)
     } else if (this.noteType == 'tags') {
-      this.getByTag(this.tagID)
+      this.getByTag(this.tagID, newPage)
     }
   }
 
@@ -577,6 +577,7 @@ export class NotelistState {
         console.error('Error adding tag: ', noteID, error)
       }
     }))
+    console.log(this.clickedPage, 'clickedpage')
     await this.getDefault(this.clickedPage)
   }
 

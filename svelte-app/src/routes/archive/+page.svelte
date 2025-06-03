@@ -23,8 +23,9 @@
 	const savedPage = $derived(signalPageState.savedPages.get(page.url.hash) ?? 1);
 
 	const updatePage = async (newPage: number) => {
-		await notelistState.getArchived();
+		await notelistState.getArchived(newPage);
 		saveCurrentPage(newPage);
+		notelistState.clickedPage = newPage;
 	};
 
 	let initialLoading = $state<Promise<void>>();

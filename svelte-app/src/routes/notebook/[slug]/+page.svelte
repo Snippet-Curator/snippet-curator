@@ -24,6 +24,7 @@
 	const savedPage = $derived(signalPageState.savedPages.get(page.url.hash) ?? 1);
 
 	const updatePage = async (newPage: number) => {
+		notelistState.clickedPage = newPage;
 		await notelistState.getByNotebook(notebookID, newPage);
 		saveCurrentPage(newPage);
 	};
