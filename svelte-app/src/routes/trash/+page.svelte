@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
-	import { signalPageState } from '$lib/utils.svelte';
+	import { saveCurrentPage, signalPageState } from '$lib/utils.svelte';
 	import { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
-	import { Pagination, NoteList, BulkToolbar, BulkEditBtn, Delete, Blank } from '$lib/components/';
+	import { Pagination, NoteList, BulkToolbar, BulkEditBtn, Delete } from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
 
 	import { page } from '$app/state';
@@ -20,18 +20,17 @@
 	setNotelistState('deleted', noteType);
 	const notelistState = getNotelistState('deleted');
 
-	let savedPage = $derived(signalPageState.savedPages.get(page.url.hash) ?? 1);
+	const savedPage = $derived(signalPageState.savedPages.get(page.url.hash) ?? 1);
 
-	async function updatePage() {
+	const updatePage = async (newPage: number) => {
 		await notelistState.getDeleted();
-		signalPageState.updatePageData(page.url.hash, notelistState.clickedPage);
-	}
+		saveCurrentPage(newPage);
+	};
 
 	let initialLoading = $state<Promise<void>>();
 
 	$effect(() => {
-		notelistState.clickedPage = savedPage ? savedPage : 1;
-		initialLoading = updatePage();
+		initialLoading = updatePage(savedPage);
 	});
 </script>
 
@@ -47,7 +46,11 @@
 	{#await initialLoading}
 		<br />
 	{:then}
-		<Pagination {notelistState} changePage={updatePage} />
+		<Pagination
+			currentPage={notelistState.notes.page}
+			totalPages={notelistState.notes.totalPages}
+			changePage={(newPage: number) => updatePage(newPage)}
+		/>
 		{#if isBulkEdit}
 			<BulkToolbar bind:isBulkEdit {selectedNotesID} {notelistState} />
 		{/if}
