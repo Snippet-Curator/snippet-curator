@@ -9,9 +9,15 @@
 		selectedNotesID: string[];
 		notelistState: NotelistState;
 		isBulkEdit: boolean;
+		bulkStatus: 'default' | 'archive' | 'trash';
 	};
 
-	let { selectedNotesID = $bindable(), notelistState, isBulkEdit = $bindable() }: Props = $props();
+	let {
+		selectedNotesID = $bindable(),
+		notelistState,
+		bulkStatus,
+		isBulkEdit = $bindable()
+	}: Props = $props();
 
 	let isDeleteOpen = $state(false);
 	let isEditNotebookOpen = $state(false);
@@ -34,11 +40,6 @@
 				break;
 		}
 	}
-
-	// async function getTags() {
-	// 	tags = await notelistState.getTags(selectedNotesID);
-	// 	return tags;
-	// }
 
 	let noteTags = $derived.by(async () => await notelistState.getTags(selectedNotesID));
 	let tags = $derived(notelistState.tags);
@@ -80,7 +81,7 @@
 				class="btn"><Tags size={18} class="text-base-content/60" />Edit Tags</button
 			>
 			<!-- <button class="btn"><Merge size={18} class="text-base-content/60" />Merge</button> -->
-			{#if currentNotebookName != 'Trash'}
+			{#if bulkStatus === 'default'}
 				<button
 					onclick={() => {
 						notelistState.archiveMultiple(selectedNotesID);
@@ -88,13 +89,27 @@
 					}}
 					class="btn"><Archive size={18} class="text-base-content/60" />Archive</button
 				>
-			{/if}
-			{#if currentNotebookName != 'Trash'}
 				<button
 					onclick={() => {
 						isDeleteOpen = true;
 					}}
 					class="btn"><Trash2 size={18} class="text-base-content/60" />Delete</button
+				>
+			{:else if bulkStatus === 'archive'}
+				<button
+					onclick={() => {
+						notelistState.unArchiveMultiple(selectedNotesID);
+						isBulkEdit = false;
+					}}
+					class="btn"><Archive size={18} class="text-base-content/60" />Restore</button
+				>
+			{:else if bulkStatus === 'trash'}
+				<button
+					onclick={() => {
+						notelistState.unSoftDeleteMultiple(selectedNotesID);
+						isBulkEdit = false;
+					}}
+					class="btn"><Trash2 size={18} class="text-base-content/60" />Restore</button
 				>
 			{/if}
 			<button onclick={() => (isBulkEdit = false)} class="btn btn-soft">Cancel</button>

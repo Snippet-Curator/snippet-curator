@@ -391,8 +391,8 @@ export class NotelistState {
     return this.notes
   }
 
-  async getArchived() {
-    const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(this.clickedPage, 24, {
+  async getArchived(page: number) {
+    const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(page, 24, {
       filter: `status="archived"`,
       expand: 'tags,notebook',
       sort: '-created',
@@ -405,8 +405,8 @@ export class NotelistState {
     return this.notes
   }
 
-  async getDeleted() {
-    const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(this.clickedPage, 24, {
+  async getDeleted(page: number) {
+    const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(page, 24, {
       filter: `status="deleted"`,
       expand: 'tags,notebook',
       sort: '-created',
@@ -482,7 +482,20 @@ export class NotelistState {
         console.error('Unable to delete note: ', error)
       }
     }))
-    await this.getDefault()
+    await this.getDefault(this.clickedPage)
+  }
+
+  async unSoftDeleteMultiple(recordIDs: string[]) {
+    await Promise.all(recordIDs.map(async recordID => {
+      const { data, error } = await pb.collection(notesCollection).update(recordID, {
+        status: 'active'
+      })
+
+      if (error) {
+        console.error('Unable to restore deleted note: ', error)
+      }
+    }))
+    await this.getDeleted(this.clickedPage)
   }
 
   async archiveMultiple(recordIDs: string[]) {
@@ -495,7 +508,20 @@ export class NotelistState {
         console.error('Unable to archive note: ', error)
       }
     }))
-    await this.getDefault()
+    await this.getDefault(this.clickedPage)
+  }
+
+  async unArchiveMultiple(recordIDs: string[]) {
+    await Promise.all(recordIDs.map(async recordID => {
+      const { data, error } = await pb.collection(notesCollection).update(recordID, {
+        status: 'active'
+      })
+
+      if (error) {
+        console.error('Unable to un-archive note: ', error)
+      }
+    }))
+    await this.getArchived(this.clickedPage)
   }
 
   async changeNotebook(selectedNotesID: string[], newNotebookID: string) {
@@ -507,7 +533,7 @@ export class NotelistState {
         console.error('Error changing notebook: ', noteID, error)
       }
     }))
-    await this.getDefault()
+    await this.getDefault(this.clickedPage)
   }
 
   async changeTags(selectedNotesID: string[], selectedTags: string[]) {
@@ -519,7 +545,7 @@ export class NotelistState {
         console.error('Error changing tags: ', noteID, error)
       }
     }))
-    await this.getDefault()
+    await this.getDefault(this.clickedPage)
   }
 
   async getTags(selectedNotesID: string[]) {
@@ -551,7 +577,7 @@ export class NotelistState {
         console.error('Error adding tag: ', noteID, error)
       }
     }))
-    await this.getDefault()
+    await this.getDefault(this.clickedPage)
   }
 
   async clearTags(selectedNotesID: string[]) {
@@ -563,7 +589,7 @@ export class NotelistState {
         console.error('Error clearing tags: ', noteID, error)
       }
     }))
-    await this.getDefault()
+    await this.getDefault(this.clickedPage)
   }
 
   async updateOne(recordID: string, newName: string, parentNotebook: string) {

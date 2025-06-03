@@ -41,9 +41,6 @@
 	<Topbar.SidebarIcon></Topbar.SidebarIcon>
 	<Topbar.Back />
 	<div class="grow"></div>
-
-	<Topbar.Empty bind:isOpen={isEmptyTrashOpen} />
-
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
 </Topbar.Root>
 
@@ -57,7 +54,7 @@
 			changePage={(newPage: number) => updatePage(newPage)}
 		/>
 		{#if isBulkEdit}
-			<BulkToolbar bind:isBulkEdit {selectedNotesID} {notelistState} />
+			<BulkToolbar bulkStatus="default" bind:isBulkEdit {selectedNotesID} {notelistState} />
 		{/if}
 		{#if notelistState.notes.totalItems > 0}
 			<NoteList {isBulkEdit} bind:selectedNotesID notes={notelistState.notes} />

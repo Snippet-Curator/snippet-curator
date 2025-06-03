@@ -23,7 +23,7 @@
 	const savedPage = $derived(signalPageState.savedPages.get(page.url.hash) ?? 1);
 
 	const updatePage = async (newPage: number) => {
-		await notelistState.getDeleted();
+		await notelistState.getDeleted(newPage);
 		saveCurrentPage(newPage);
 	};
 
@@ -52,7 +52,7 @@
 			changePage={(newPage: number) => updatePage(newPage)}
 		/>
 		{#if isBulkEdit}
-			<BulkToolbar bind:isBulkEdit {selectedNotesID} {notelistState} />
+			<BulkToolbar bind:isBulkEdit bulkStatus="trash" {selectedNotesID} {notelistState} />
 		{/if}
 		{#if notelistState.notes.totalItems > 0}
 			<NoteList {isBulkEdit} bind:selectedNotesID notes={notelistState.notes} />

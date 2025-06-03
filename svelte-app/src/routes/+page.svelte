@@ -42,6 +42,7 @@
 
 	const updatePage = async (newPage: number) => {
 		saveCurrentPage(newPage);
+		notelistState.clickedPage = newPage;
 
 		if (!searchInput) {
 			await notelistState.getByPage(newPage);
@@ -109,7 +110,7 @@
 			changePage={(newPage: number) => updatePage(newPage)}
 		/>
 		{#if isBulkEdit}
-			<BulkToolbar bind:isBulkEdit bind:selectedNotesID {notelistState} />
+			<BulkToolbar bind:isBulkEdit bulkStatus="default" bind:selectedNotesID {notelistState} />
 		{/if}
 		{#if notelistState.notes.totalItems > 0}
 			<NoteList {isBulkEdit} bind:selectedNotesID notes={notelistState.notes} />
