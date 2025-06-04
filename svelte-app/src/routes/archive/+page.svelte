@@ -13,7 +13,7 @@
 	let selectedNotesID = $state<string[]>([]);
 
 	const noteType: NoteType = {
-		type: 'default',
+		type: 'archive',
 		id: page.params.slug
 	};
 
@@ -63,12 +63,3 @@
 		{/if}
 	{/await}
 </ScrollArea>
-
-<Delete
-	bind:isOpen={isEmptyTrashOpen}
-	name="Notes Permanently"
-	action={() => {
-		notelistState.emptyTrash();
-		window.history.back();
-	}}>these notes</Delete
->

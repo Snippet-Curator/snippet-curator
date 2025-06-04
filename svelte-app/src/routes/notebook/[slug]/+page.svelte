@@ -64,12 +64,3 @@
 		{/if}
 	{/await}
 </ScrollArea>
-
-<Delete
-	bind:isOpen={isEmptyTrashOpen}
-	name="Notes Permanently"
-	action={() => {
-		notelistState.emptyTrash();
-		window.history.back();
-	}}>these notes</Delete
->

@@ -13,7 +13,7 @@
 	let selectedNotesID = $state<string[]>([]);
 
 	const noteType: NoteType = {
-		type: 'default',
+		type: 'trash',
 		id: page.params.slug
 	};
 

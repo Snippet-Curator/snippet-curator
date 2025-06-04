@@ -85,6 +85,7 @@
 				<button
 					onclick={() => {
 						notelistState.archiveMultiple(selectedNotesID);
+
 						isBulkEdit = false;
 					}}
 					class="btn"><Archive size={18} class="text-base-content/60" />Archive</button
@@ -99,9 +100,16 @@
 				<button
 					onclick={() => {
 						notelistState.unArchiveMultiple(selectedNotesID);
+
 						isBulkEdit = false;
 					}}
 					class="btn"><Archive size={18} class="text-base-content/60" />Restore</button
+				>
+				<button
+					onclick={() => {
+						isDeleteOpen = true;
+					}}
+					class="btn"><Trash2 size={18} class="text-base-content/60" />Delete</button
 				>
 			{:else if bulkStatus === 'trash'}
 				<button
@@ -121,16 +129,17 @@
 <Delete
 	bind:isOpen={isDeleteOpen}
 	name="Notes"
-	action={async () => {
-		await notelistState.softDeleteMultiple(selectedNotesID);
+	action={() => {
+		notelistState.softDeleteMultiple(selectedNotesID);
+
 		isBulkEdit = false;
 	}}>these notes?</Delete
 >
 
 <EditNotebook
 	bind:isOpen={isEditNotebookOpen}
-	action={async (selectedNotebookID) => {
-		await notelistState.changeNotebook(selectedNotesID, selectedNotebookID);
+	action={(selectedNotebookID) => {
+		notelistState.changeNotebook(selectedNotesID, selectedNotebookID);
 		isBulkEdit = false;
 	}}
 />

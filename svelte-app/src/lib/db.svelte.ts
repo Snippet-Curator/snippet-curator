@@ -16,7 +16,7 @@ const superUser = 'admin@pocketbase.com'
 const superUserPass = 'amiodarone'
 
 export type NoteType = {
-  type: 'tags' | 'notebooks' | 'default',
+  type: 'tags' | 'notebooks' | 'default' | 'archive' | 'trash',
   id?: string
 }
 
@@ -327,7 +327,7 @@ export class NotelistState {
   notebookID = $state<string>()
   notebookName = $state<string>()
   tagID = $state<string>()
-  noteType = $state<'tags' | 'notebooks' | 'default'>()
+  noteType = $state<NoteType['type']>()
   tags = $state<Tag[]>()
 
   constructor(noteType: NoteType) {
@@ -340,12 +340,16 @@ export class NotelistState {
   }
 
   async getDefault(newPage: number) {
-    if (this.noteType == 'default') {
+    if (this.noteType === 'default') {
       this.getByPage(newPage)
-    } else if (this.noteType == 'notebooks') {
+    } else if (this.noteType === 'notebooks') {
       this.getByNotebook(this.notebookID, newPage)
-    } else if (this.noteType == 'tags') {
+    } else if (this.noteType === 'tags') {
       this.getByTag(this.tagID, newPage)
+    } else if (this.noteType === 'archive') {
+      this.getArchived(newPage)
+    } else if (this.noteType === 'trash') {
+      this.getDeleted(newPage)
     }
   }
 
@@ -496,7 +500,7 @@ export class NotelistState {
         console.error('Unable to restore deleted note: ', error)
       }
     }))
-    await this.getDeleted(this.clickedPage)
+    await this.getDefault(this.clickedPage)
   }
 
   async archiveMultiple(recordIDs: string[]) {
@@ -522,7 +526,7 @@ export class NotelistState {
         console.error('Unable to un-archive note: ', error)
       }
     }))
-    await this.getArchived(this.clickedPage)
+    await this.getDefault(this.clickedPage)
   }
 
   async changeNotebook(selectedNotesID: string[], newNotebookID: string) {
@@ -593,25 +597,6 @@ export class NotelistState {
     await this.getDefault(this.clickedPage)
   }
 
-  async updateOne(recordID: string, newName: string, parentNotebook: string) {
-    if (parentNotebook && newName) {
-      await pb.collection(notesCollection).update(recordID, {
-        'name': newName,
-        'parent': parentNotebook
-      })
-    }
-    else if (newName) {
-      await pb.collection(notesCollection).update(recordID, {
-        'name': newName
-      })
-    }
-    else if (parentNotebook) {
-      await pb.collection(notesCollection).update(recordID, {
-        'parent': parentNotebook
-      })
-    }
-    await this.getAll()
-  }
 }
 
 export class NoteState {
