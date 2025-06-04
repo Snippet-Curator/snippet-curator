@@ -54,7 +54,15 @@
 			changePage={(newPage: number) => updatePage(newPage)}
 		/>
 		{#if isBulkEdit}
-			<BulkToolbar bind:isBulkEdit bulkStatus="archive" {selectedNotesID} {notelistState} />
+			<BulkToolbar
+				updatePage={() => {
+					updatePage(notelistState.clickedPage);
+				}}
+				bind:isBulkEdit
+				isArchive
+				{selectedNotesID}
+				{notelistState}
+			/>
 		{/if}
 		{#if notelistState.notes.totalItems > 0}
 			<NoteList {isBulkEdit} bind:selectedNotesID notes={notelistState.notes} />

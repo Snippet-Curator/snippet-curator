@@ -93,6 +93,16 @@ export class TagState {
     await this.getAll()
   }
 
+  async getOne(tagID: string) {
+    const { data, error } = await tryCatch(pb.collection(tagsCollection).getOne(tagID))
+
+    if (error) {
+      console.error('Error getting tag: ', error)
+    }
+
+    return data
+  }
+
   async createOnebyName(newName: string) {
     const { data, error } = await tryCatch(
       pb.collection(tagsCollection).create({
@@ -362,6 +372,7 @@ export class NotelistState {
     return data
   }
 
+
   async getByPage(newPage = 1) {
     const start = performance.now()
 
@@ -487,7 +498,7 @@ export class NotelistState {
         console.error('Unable to delete note: ', error)
       }
     }))
-    await this.getDefault(this.clickedPage)
+    // await this.getDefault(this.clickedPage)
   }
 
   async unSoftDeleteMultiple(recordIDs: string[]) {
@@ -500,7 +511,7 @@ export class NotelistState {
         console.error('Unable to restore deleted note: ', error)
       }
     }))
-    await this.getDefault(this.clickedPage)
+    // await this.getDefault(this.clickedPage)
   }
 
   async archiveMultiple(recordIDs: string[]) {
@@ -513,7 +524,7 @@ export class NotelistState {
         console.error('Unable to archive note: ', error)
       }
     }))
-    await this.getDefault(this.clickedPage)
+    // await this.getDefault(this.clickedPage)
   }
 
   async unArchiveMultiple(recordIDs: string[]) {
@@ -526,7 +537,7 @@ export class NotelistState {
         console.error('Unable to un-archive note: ', error)
       }
     }))
-    await this.getDefault(this.clickedPage)
+    // await this.getDefault(this.clickedPage)
   }
 
   async changeNotebook(selectedNotesID: string[], newNotebookID: string) {
@@ -538,40 +549,40 @@ export class NotelistState {
         console.error('Error changing notebook: ', noteID, error)
       }
     }))
-    await this.getDefault(this.clickedPage)
+    // await this.getDefault(this.clickedPage)
   }
 
-  async changeTags(selectedNotesID: string[], selectedTags: string[]) {
-    await Promise.all(selectedNotesID.map(async noteID => {
-      const { data, error } = await tryCatch(pb.collection(notesCollection).update(noteID, {
-        tags: selectedTags
-      }))
-      if (error) {
-        console.error('Error changing tags: ', noteID, error)
-      }
-    }))
-    await this.getDefault(this.clickedPage)
-  }
+  // async changeTags(selectedNotesID: string[], selectedTags: string[]) {
+  //   await Promise.all(selectedNotesID.map(async noteID => {
+  //     const { data, error } = await tryCatch(pb.collection(notesCollection).update(noteID, {
+  //       tags: selectedTags
+  //     }))
+  //     if (error) {
+  //       console.error('Error changing tags: ', noteID, error)
+  //     }
+  //   }))
+  //   await this.getDefault(this.clickedPage)
+  // }
 
-  async getTags(selectedNotesID: string[]) {
-    let tagList: Tag[] = []
-    await Promise.all(selectedNotesID.map(async noteID => {
-      const { data, error } = await tryCatch<Note, PError>(pb.collection(viewNotesCollection).getOne(noteID, {
-        expand: 'tags'
-      }))
-      if (error) {
-        console.error('Error getting tag: ', noteID, error)
-        return
-      }
-      const tags = data.expand?.tags ?? []
-      if (tags.length === 0) return
-      tagList.push(...tags)
-    }))
-    const uniqueTags = Object.values(
-      Object.fromEntries(tagList.map(tag => [tag.id, tag]))
-    )
-    this.tags = uniqueTags
-  }
+  // async getTags(selectedNotesID: string[]) {
+  //   let tagList: Tag[] = []
+  //   await Promise.all(selectedNotesID.map(async noteID => {
+  //     const { data, error } = await tryCatch<Note, PError>(pb.collection(viewNotesCollection).getOne(noteID, {
+  //       expand: 'tags'
+  //     }))
+  //     if (error) {
+  //       console.error('Error getting tag: ', noteID, error)
+  //       return
+  //     }
+  //     const tags = data.expand?.tags ?? []
+  //     if (tags.length === 0) return
+  //     tagList.push(...tags)
+  //   }))
+  //   const uniqueTags = Object.values(
+  //     Object.fromEntries(tagList.map(tag => [tag.id, tag]))
+  //   )
+  //   this.tags = uniqueTags
+  // }
 
   async addAllTags(selectedNotesID: string[], selectedTagsID: string[]) {
     await Promise.all(selectedNotesID.map(async noteID => {
@@ -582,7 +593,7 @@ export class NotelistState {
         console.error('Error adding tag: ', noteID, error)
       }
     }))
-    await this.getDefault(this.clickedPage)
+    // await this.getDefault(this.clickedPage)
   }
 
   async clearTags(selectedNotesID: string[]) {
@@ -594,7 +605,7 @@ export class NotelistState {
         console.error('Error clearing tags: ', noteID, error)
       }
     }))
-    await this.getDefault(this.clickedPage)
+    // await this.getDefault(this.clickedPage)
   }
 
 }

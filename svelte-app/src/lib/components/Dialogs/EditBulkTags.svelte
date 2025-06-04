@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	import * as Command from '$lib/components/ui/command/index.js';
+
 	import { getTagState } from '$lib/db.svelte';
 	import type { Tag } from '$lib/types';
 
@@ -7,17 +10,26 @@
 		isOpen: boolean;
 		addAll: (selectedTagIDs: string[]) => void;
 		clearAll: () => void;
+		currentTagID?: string;
 	};
 
-	let { isOpen = $bindable(), addAll, clearAll }: Props = $props();
+	let { isOpen = $bindable(), addAll, clearAll, currentTagID = '' }: Props = $props();
 
 	const tagState = getTagState();
+
 	let searchText = $state('');
 	let selectedTags: Tag[] = $state([]);
-	let uniqueSelectedTags = $derived(new Set(selectedTags.map((tag) => tag.id)));
 
-	let tags = $derived.by(() => {
+	const uniqueSelectedTags = $derived(new Set(selectedTags.map((tag) => tag.id)));
+	const tags = $derived.by(() => {
 		return tagState.flatTags.filter((tag) => !uniqueSelectedTags.has(tag.id));
+	});
+
+	onMount(async () => {
+		if (currentTagID) {
+			const currentTag = await tagState.getOne(currentTagID);
+			selectedTags.push(currentTag);
+		}
 	});
 </script>
 
