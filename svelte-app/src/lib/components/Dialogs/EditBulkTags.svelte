@@ -38,7 +38,7 @@
 	{/if}
 
 	<Command.List>
-		<Command.Empty class="px-2">
+		<Command.Empty class="px-2 py-1">
 			<button
 				onclick={async () => {
 					const newTag = await tagState.createOnebyName(searchText);
@@ -51,7 +51,7 @@
 				class="bg-primary/30 mx-auto w-full rounded-md py-3">Click to create {searchText}</button
 			>
 		</Command.Empty>
-		<Command.Group heading="">
+		<Command.Group>
 			{#await tags then tags}
 				{#if tags}
 					{#each tags as tag}

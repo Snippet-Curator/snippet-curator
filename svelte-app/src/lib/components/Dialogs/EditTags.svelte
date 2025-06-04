@@ -32,8 +32,8 @@
 		</div>
 	{/if}
 	<Command.List>
-		<Command.Empty>No tag found.</Command.Empty>
-		<Command.Group heading="">
+		<Command.Empty class="px-2 py-1">No tag found.</Command.Empty>
+		<Command.Group>
 			{#await tags then tags}
 				{#if tags}
 					{#each tags as tag}
