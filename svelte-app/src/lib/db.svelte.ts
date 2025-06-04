@@ -362,7 +362,7 @@ export class NotelistState {
     const start = performance.now()
 
     const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(newPage, 24, {
-      sort: 'created',
+      sort: '-created',
       filter: `status="active"`,
       expand: 'notebook, tags',
     }))
