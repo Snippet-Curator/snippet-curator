@@ -40,8 +40,8 @@
 		class="dropdown-content border-base-content/20 bg-base-100 rounded-box p-golden-md min-w-80 border shadow-sm"
 	>
 		<div class="gap-golden-md grid grid-cols-3 p-2">
-			<div>status</div>
-			<div class="col-span-2">{note.status}</div>
+			<!-- <div>status</div>
+			<div class="col-span-2">{note.status}</div> -->
 			<div>Last Opened</div>
 			<div class="col-span-2">{lastOpened}</div>
 			<div>Created</div>

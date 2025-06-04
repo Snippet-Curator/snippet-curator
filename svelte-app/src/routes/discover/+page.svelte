@@ -98,12 +98,17 @@
 			<div class="divider divider-horizontal hidden md:flex"></div>
 
 			<Topbar.Archive
-				action={() => {
+				noteStatus={note.status}
+				archive={() => {
 					noteState.archiveNote();
 					getNextNote();
 				}}
+				unarchive={() => {
+					noteState.unArchiveNote();
+					getNextNote();
+				}}
 			/>
-			<Topbar.Delete bind:isOpen={isDeleteOpen} />
+			<Topbar.Delete noteStatus={note.status} bind:isOpen={isDeleteOpen} />
 			<Topbar.Info {note} />
 		</Topbar.Root>
 

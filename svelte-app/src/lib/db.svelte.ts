@@ -103,6 +103,7 @@ export class TagState {
       console.error('Error while creating new tag: ', error.data)
     }
     await this.getAll()
+    return data
   }
 
   async updateOnebyName(recordID: string, newName: string) {
@@ -577,7 +578,6 @@ export class NotelistState {
         console.error('Error adding tag: ', noteID, error)
       }
     }))
-    console.log(this.clickedPage, 'clickedpage')
     await this.getDefault(this.clickedPage)
   }
 
