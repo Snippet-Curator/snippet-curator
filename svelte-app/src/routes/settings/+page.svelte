@@ -49,6 +49,14 @@
 		{
 			displays: ['↓', 's'],
 			description: 'See less'
+		},
+		{
+			displays: ['shift + a'],
+			description: 'Archive note'
+		},
+		{
+			displays: ['del'],
+			description: 'Delete note'
 		}
 	];
 	const edits: KBD[] = [
@@ -63,6 +71,14 @@
 		{
 			displays: ['t'],
 			description: 'Edit tags'
+		},
+		{
+			displays: ['shift + a'],
+			description: 'Archive note'
+		},
+		{
+			displays: ['del'],
+			description: 'Delete note'
 		}
 	];
 </script>

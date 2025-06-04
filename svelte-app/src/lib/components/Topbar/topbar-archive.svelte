@@ -16,7 +16,7 @@
 		}
 
 		if (event.shiftKey && event.key === 'A') {
-			action();
+			archive();
 		}
 	}
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Inbox, Trash2 } from 'lucide-svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	type Props = {
 		isOpen: boolean;
@@ -7,6 +8,24 @@
 	};
 
 	let { isOpen = $bindable(), noteStatus }: Props = $props();
+
+	function handler(event: KeyboardEvent) {
+		if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+			return;
+		}
+
+		if (event.key === 'Delete') {
+			isOpen = true;
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener('keydown', handler);
+
+		onDestroy(() => {
+			document.removeEventListener('keydown', handler);
+		});
+	});
 </script>
 
 {#snippet renderArchived(status: string, Icon)}
