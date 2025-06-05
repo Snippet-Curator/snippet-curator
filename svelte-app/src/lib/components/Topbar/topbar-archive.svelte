@@ -11,8 +11,14 @@
 	let { archive, noteStatus, unarchive }: Props = $props();
 
 	function handler(event: KeyboardEvent) {
-		if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
-			return;
+		const target = event.target as HTMLElement;
+
+		switch (target.tagName) {
+			case 'INPUT':
+			case 'TEXTAREA':
+			case 'BUTTON':
+			case 'DIV':
+				return;
 		}
 
 		if (event.shiftKey && event.key === 'A') {
