@@ -17,16 +17,15 @@
 		switch (target.tagName) {
 			case 'INPUT':
 			case 'TEXTAREA':
-			case 'BUTTON':
 			case 'DIV':
 				return;
 		}
 
+		if (selectedNotesID.length === 0) return;
+
 		if (event.shiftKey && event.key === 'A') {
 			event.preventDefault();
-			if (selectedNotesID.length > 0) {
-				archive();
-			}
+			archive();
 			return;
 		}
 	}
