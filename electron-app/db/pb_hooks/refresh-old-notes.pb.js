@@ -26,7 +26,7 @@ onBootstrap((e) => {
       e.app
         .db()
         .newQuery(
-          'SELECT id, title, rating, weight, last_score_updated FROM notes WHERE last_score_updated < {:cutoff}'
+          'SELECT id, title, rating, weight, last_score_updated, last_opened FROM notes WHERE last_score_updated < {:cutoff}'
         )
         .bind({
           cutoff: cutoff
@@ -37,7 +37,7 @@ onBootstrap((e) => {
     }
 
     for (const note of notes) {
-      const newScore = calculateNoteScore(note.rating, note.weight, note.lastOpened)
+      const newScore = calculateNoteScore(note.rating, note.weight, note.last_opened)
 
       e.app
         .db()
