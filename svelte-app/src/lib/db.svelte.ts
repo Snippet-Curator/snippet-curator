@@ -636,7 +636,8 @@ export class NoteState {
     const start = performance.now()
     const { data, error } = await tryCatch(pb.collection(viewNotesCollection).getList(page, 100, {
       expand: 'notebook,tags',
-      sort: '-score'
+      sort: '-score',
+      filter: `status="active"`,
     }))
 
     if (error) {

@@ -14,8 +14,9 @@ function recencyScore(lastOpened) {
   }
   const daysAgo = (Date.now() - openedDate.getTime()) / (1000 * 60 * 60 * 24)
 
-  // normalize with 7 such that notes older than 1,000 days will give 0.99
-  return Math.min(1, Math.log(1 + daysAgo) / 6.217)
+  // Sigmoid curve: older = closer to 1, recent = closer to 0
+  // Steep change around 30 days
+  return 1 - 1 / (1 + Math.exp((daysAgo - 30) / 10))
 }
 
 function recentlySeenPenalty(lastOpened) {
@@ -38,7 +39,7 @@ function calculateNoteScore(rating, weight, lastOpened) {
   const randomFactor = Math.random()
 
   const rawScore =
-    (0.3 * ratingNorm + 0.4 * recencyNorm + 0.25 * weightNorm + 0.15 * randomFactor) / 1.1
+    (0.3 * ratingNorm + 0.3 * recencyNorm + 0.25 * weightNorm + 0.3 * randomFactor) / 1.15
   const score = rawScore * recentlySeenPenalty(lastOpened) * 100
   return score
 }
