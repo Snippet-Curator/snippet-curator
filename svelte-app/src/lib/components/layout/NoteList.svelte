@@ -78,7 +78,7 @@
 							}}
 							class="{selectedNotesID.includes(note.id)
 								? ' bg-primary/50 opacity-100'
-								: ''} card bg-base-100 card-border w-full border opacity-70 transition-colors duration-100 hover:cursor-pointer"
+								: ''} card bg-base-100 card-border w-full border opacity-70 duration-100 hover:cursor-pointer"
 						>
 							{@render renderNotes(note)}
 						</button>
