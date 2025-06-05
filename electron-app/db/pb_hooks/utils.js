@@ -10,7 +10,7 @@ function normalizeWeight(val, min, max) {
 function recencyScore(lastOpened) {
   const openedDate = new Date(lastOpened)
   if (isNaN(openedDate.getTime())) {
-    return 1
+    return 0.3 + Math.random() * 0.7
   }
   const daysAgo = (Date.now() - openedDate.getTime()) / (1000 * 60 * 60 * 24)
 
