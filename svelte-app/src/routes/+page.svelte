@@ -69,7 +69,7 @@
 			.like('tags', searchedTag.id)
 			.closeBracket()
 			.and()
-			.equal('status', 'active')
+			.anyEqual('status', 'active,archived')
 			.build();
 
 		await notelistState.getByFilter(customFilters, page);

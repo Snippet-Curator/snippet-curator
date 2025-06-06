@@ -42,16 +42,16 @@
 		{#await initialLoading then}
 			<div class="gap-golden-md grid grid-cols-1 md:grid-cols-2">
 				{@render renderSetting(
-					'ratingWeight',
-					'Rating Weight',
-					settingState.ratingWeight,
-					'Weight of note rating in score calculation. Higher rated notes will be ranked higher.'
-				)}
-				{@render renderSetting(
 					'recencyWeight',
 					'Recency Weight',
 					settingState.recencyWeight,
 					'Weight of how recently a note was seen. Older notes will be ranked higher.'
+				)}
+				{@render renderSetting(
+					'ratingWeight',
+					'Rating Weight',
+					settingState.ratingWeight,
+					'Weight of note rating in score calculation. Higher rated notes will be ranked higher.'
 				)}
 				{@render renderSetting(
 					'weightWeight',
