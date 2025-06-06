@@ -20,7 +20,7 @@
 		</div>
 		<input
 			type="number"
-			class="input col-span-2 col-start-10"
+			class="input col-span-2 col-start-10 text-right"
 			min="0"
 			max="1"
 			value={initialValue}
