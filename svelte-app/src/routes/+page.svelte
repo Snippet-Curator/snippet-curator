@@ -53,6 +53,11 @@
 	};
 
 	const searchNotes = async (searchInput: string, page: number) => {
+		if (!searchInput) {
+			searchState.searchTerm = '';
+			updatePage(1);
+			return;
+		}
 		let searchedTag;
 		try {
 			searchedTag = await pb.collection('tags').getFirstListItem(`name~"${searchInput}"`);
@@ -69,7 +74,11 @@
 			.like('tags', searchedTag.id)
 			.closeBracket()
 			.and()
-			.anyEqual('status', 'active,archived')
+			.openBracket()
+			.equal('status', 'active')
+			.or()
+			.equal('status', 'archived')
+			.closeBracket()
 			.build();
 
 		await notelistState.getByFilter(customFilters, page);
