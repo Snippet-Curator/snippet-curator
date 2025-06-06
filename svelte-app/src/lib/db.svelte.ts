@@ -104,10 +104,11 @@ export class TagState {
         return data
     }
 
-    async createOnebyName(newName: string) {
+    async createOnebyName(newName: string, parentTagID?: string) {
         const { data, error } = await tryCatch(
             pb.collection(tagsCollection).create({
-                'name': newName
+                'name': newName,
+                'parent': parentTagID
             })
         )
         if (error) {
@@ -224,10 +225,11 @@ export class NotebookState {
 
     }
 
-    async createOnebyName(newName: string) {
+    async createOnebyName(newName: string, parentNotebookID?: string) {
         const { data, error } = await tryCatch(
             pb.collection(notebooksCollection).create({
-                'name': newName
+                'name': newName,
+                'parent': parentNotebookID
             })
         )
         if (error) {

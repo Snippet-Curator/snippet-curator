@@ -68,6 +68,7 @@
 			<ContextMenu.Separator />
 			<ContextMenu.Item
 				onSelect={() => {
+					selectedNotebook = notebook;
 					isNewNotebookOpen = true;
 				}}>New</ContextMenu.Item
 			>
@@ -131,5 +132,5 @@
 <New
 	bind:isOpen={isNewNotebookOpen}
 	newType="Notebook"
-	action={(newNotebookName) => notebookState.createOnebyName(newNotebookName)}
+	action={(newNotebookName) => notebookState.createOnebyName(newNotebookName, selectedNotebook.id)}
 />

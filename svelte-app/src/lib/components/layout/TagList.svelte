@@ -74,6 +74,7 @@
 			<ContextMenu.Separator />
 			<ContextMenu.Item
 				onSelect={() => {
+					selectedTag = tag;
 					isNewTagOpen = true;
 				}}>New</ContextMenu.Item
 			>
@@ -132,5 +133,5 @@
 <New
 	bind:isOpen={isNewTagOpen}
 	newType="Tag"
-	action={(newTagName) => tagState.createOnebyName(newTagName)}
+	action={(newTagName) => tagState.createOnebyName(newTagName, selectedTag.id)}
 />

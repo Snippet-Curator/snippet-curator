@@ -37,7 +37,7 @@
 		<Command.Empty class="px-2 py-1">
 			<button
 				onclick={async () => {
-					const newTag = await tagState.createOnebyName(searchText);
+					const newTag = await tagState.createOnebyName(searchText, '');
 					if (!newTag) {
 						return;
 					}
