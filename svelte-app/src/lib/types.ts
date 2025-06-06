@@ -100,6 +100,12 @@ export type NoteList = {
   items: Note[]
 }
 
+export type Setting = {
+  id: string
+  name: string
+  value: number
+}
+
 // ------ Frontend ------
 export interface Props {
   data: {

@@ -1,9 +1,26 @@
 onBootstrap((e) => {
   e.next()
-
   const calculateNoteScore = require(`${__hooks}/utils.js`).calculateNoteScore
+  const findSettingbyName = require(`${__hooks}/utils.js`).findSettingbyName
 
-  const daysOld = 0
+  const ratingWeight = findSettingbyName('ratingWeight')
+  const recencyWeight = findSettingbyName('recencyWeight')
+  const weightWeight = findSettingbyName('weightWeight')
+  const randomWeight = findSettingbyName('randomWeight')
+  const fullPenaltyWindow = findSettingbyName('fullPenaltyWindow')
+  const decayWindow = findSettingbyName('decayWindow')
+  const daysOld = findSettingbyName('daysOld')
+
+  if (
+    !ratingWeight ||
+    !recencyWeight ||
+    !weightWeight ||
+    !randomWeight ||
+    !fullPenaltyWindow ||
+    !decayWindow ||
+    !daysOld
+  )
+    return
 
   function updateNotes() {
     const cutoff = new Date(Date.now() - daysOld * 86400000).toISOString()
@@ -37,7 +54,17 @@ onBootstrap((e) => {
     }
 
     for (const note of notes) {
-      const newScore = calculateNoteScore(note.rating, note.weight, note.last_opened)
+      const newScore = calculateNoteScore(
+        note.rating,
+        note.weight,
+        note.last_opened,
+        ratingWeight,
+        recencyWeight,
+        weightWeight,
+        randomWeight,
+        fullPenaltyWindow,
+        decayWindow
+      )
 
       e.app
         .db()
