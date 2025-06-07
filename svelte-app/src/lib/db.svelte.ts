@@ -318,7 +318,7 @@ export class defaultNotebooksState {
     }
 
     async getAllCounts() {
-        const { data, error } = await tryCatch(pb.collection('notes').getList(1, 1))
+        const { data, error } = await tryCatch(pb.collection(notesCollection).getList(1, 1))
 
         if (error) {
             console.error('Error while getting all notebooks: ', error.message)
