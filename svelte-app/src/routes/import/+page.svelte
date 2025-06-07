@@ -4,13 +4,12 @@
 	import * as Topbar from '$lib/components/Topbar/index';
 
 	import { EnImport, fileImport, htmlImport } from '$lib/parser';
-	import pb, { getDefaultNotebooksState, getNotebookState, getTagState } from '$lib/db.svelte';
+	import pb, { getNotebookState, getTagState } from '$lib/db.svelte';
 
 	const decoder = new TextDecoder('utf-8');
 
 	const notebookState = getNotebookState();
 	const tagState = getTagState();
-	const defaultNotebookState = getDefaultNotebooksState();
 
 	let files: File[] = [];
 	let listOfErrors = $state<
@@ -63,7 +62,7 @@
 
 	async function uploadFile(file: File) {
 		if (selectedNotebookID?.startsWith('Import') || !selectedNotebookID) {
-			selectedNotebookID = defaultNotebookState.inboxID;
+			selectedNotebookID = notebookState.inboxID;
 		}
 
 		const decodedText = decoder.decode(await file.arrayBuffer());
@@ -118,13 +117,14 @@
 
 		await notebookState.getAll();
 		await tagState.getAll();
-		await defaultNotebookState.getAll();
+		await notebookState.getAll();
 
 		// resubscribe
 		await pb.collection('notes').subscribe('*', async () => {
 			notebookState.getAll();
+			notebookState.getInbox();
+			notebookState.getAllCounts();
 			tagState.getAll();
-			defaultNotebookState.getAll();
 		});
 	}
 

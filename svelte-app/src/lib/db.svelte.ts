@@ -145,6 +145,7 @@ export class NotebookState {
     inbox = $state<Note>()
     inboxID = $state<string>('')
     inboxCount = $state(0)
+    totalNoteCount = $state(0)
     notebooks = $state<Notebook[]>([])
     flatNotebooks = $state<Notebook[]>([])
 
@@ -153,9 +154,13 @@ export class NotebookState {
             this.getAll()
             pb.collection(notebooksCollection).subscribe('*', async () => {
                 this.getAll()
+                this.getInbox()
+                this.getAllCounts()
             });
             pb.collection(notesCollection).subscribe('*', async () => {
                 this.getAll()
+                this.getInbox()
+                this.getAllCounts()
             });
         })
     }
@@ -164,7 +169,7 @@ export class NotebookState {
         // const start = performance.now()
         const { data: records, error } = await tryCatch(pb.collection(viewNotebooksCollection).getFullList({
             sort: 'name',
-            filter: 'name != "Inbox"',
+            // filter: 'name != "Inbox"',
             expand: 'parent'
         }))
 
@@ -210,19 +215,18 @@ export class NotebookState {
 
         this.inbox = inbox
         this.inboxID = inbox.id
+        this.inboxCount = inbox.note_count
+        return inbox
+    }
 
-        const { data: unorganized, error: unorgError } = await tryCatch(pb.collection(viewNotesCollection).getList(1, 1, {
-            filter: `notebook = ''`
-        }))
+    async getAllCounts() {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).getList(1, 1))
 
-        if (unorgError) {
-            console.error('Error while getting unorganized items: ', unorgError.message)
+        if (error) {
+            console.error('Error while getting all notebooks: ', error.message)
         }
 
-        const noteCount = inbox.note_count + unorganized?.totalItems
-        console.log(noteCount)
-        this.inboxCount = noteCount
-
+        this.totalNoteCount = data.totalItems
     }
 
     async createOnebyName(newName: string, parentNotebookID?: string) {
@@ -235,7 +239,6 @@ export class NotebookState {
         if (error) {
             console.error('Error while creating new notebook: ', error.data, error.message)
         }
-        await this.getAll()
     }
 
     async getOneByName(notebookName: string) {
@@ -249,13 +252,35 @@ export class NotebookState {
     }
 
     async delete(recordID: string) {
+        const { data: recordsToMove, error: errorsToMove } = await tryCatch(pb.collection(viewNotesCollection).getFullList({
+            filter: `notebook = '${recordID}'`
+        }))
+
+        if (errorsToMove) {
+            console.error('Error getting records to move: ', errorsToMove)
+            return
+        }
+
+        if (!this.inbox) {
+            await this.getInbox()
+        }
+
+        for (const record of recordsToMove) {
+            const { data: recordToMove, error: errorToMove } = await tryCatch(pb.collection(notesCollection).update(record.id, {
+                'notebook': this.inboxID
+            }))
+
+            if (errorToMove) {
+                console.error('Error moving record: ', errorToMove.message)
+                continue
+            }
+        }
+
         const { data, error } = await tryCatch(pb.collection(notebooksCollection).delete(recordID))
 
         if (error) {
             console.error('Error while deleting notebook: ', error)
         }
-
-        await this.getAll()
     }
 
     async updateOnebyName(recordID: string, newName: string) {
@@ -267,7 +292,7 @@ export class NotebookState {
         if (error) {
             console.error('Error while updating notebook name: ', error)
         }
-        await this.getAll()
+        // await this.getAll()
     }
 
     async updateOnebyParent(recordID: string, parentNotebook: string) {
@@ -277,56 +302,56 @@ export class NotebookState {
         if (error) {
             console.error('Error while updating parent notebook: ', error)
         }
-        await this.getAll()
+        // await this.getAll()
     }
 }
 
-export class defaultNotebooksState {
-    inbox = $state<Note>()
-    inboxID = $state<string>('')
-    inboxCount = $state<number>(0)
-    totalNoteCount = $state<number>(0)
+// export class defaultNotebooksState {
+//     inbox = $state<Note>()
+//     inboxID = $state<string>('')
+//     inboxCount = $state<number>(0)
+//     totalNoteCount = $state<number>(0)
 
-    constructor() {
-        $effect(() => {
-            pb.collection(notebooksCollection).subscribe('*', async () => {
-                this.getAll()
-                this.getAllCounts()
-            });
-            pb.collection(notesCollection).subscribe('*', async () => {
-                this.getAll()
-                this.getAllCounts()
-            });
-        })
-    }
+//     constructor() {
+//         $effect(() => {
+//             pb.collection(notebooksCollection).subscribe('*', async () => {
+//                 this.getAll()
+//                 this.getAllCounts()
+//             });
+//             pb.collection(notesCollection).subscribe('*', async () => {
+//                 this.getAll()
+//                 this.getAllCounts()
+//             });
+//         })
+//     }
 
-    async getAll() {
+//     async getAll() {
 
-        const { data: inbox, error } = await tryCatch(pb.collection(viewNotebooksCollection).getFirstListItem(`name="Inbox"`))
+//         const { data: inbox, error } = await tryCatch(pb.collection(viewNotebooksCollection).getFirstListItem(`name="Inbox"`))
 
-        if (error) {
-            console.error('Error while getting inbox: ', error.message)
-        }
+//         if (error) {
+//             console.error('Error while getting inbox: ', error.message)
+//         }
 
-        if (!inbox) {
-            return
-        }
+//         if (!inbox) {
+//             return
+//         }
 
-        this.inbox = inbox
-        this.inboxCount = inbox.note_count
-        this.inboxID = inbox.id
-    }
+//         this.inbox = inbox
+//         this.inboxCount = inbox.note_count
+//         this.inboxID = inbox.id
+//     }
 
-    async getAllCounts() {
-        const { data, error } = await tryCatch(pb.collection(notesCollection).getList(1, 1))
+//     async getAllCounts() {
+//         const { data, error } = await tryCatch(pb.collection(notesCollection).getList(1, 1))
 
-        if (error) {
-            console.error('Error while getting all notebooks: ', error.message)
-        }
+//         if (error) {
+//             console.error('Error while getting all notebooks: ', error.message)
+//         }
 
-        this.totalNoteCount = data.totalItems
-    }
-}
+//         this.totalNoteCount = data.totalItems
+//     }
+// }
 
 export class NotelistState {
     notes = $state<NoteRecord>({
@@ -908,13 +933,13 @@ export function getNoteState(NOTE_KEY: string) {
     return getContext<ReturnType<typeof setNoteState>>(NOTE_KEY)
 }
 
-export function setDefaultNotebooksState() {
-    return setContext(INBOX_KEY, new defaultNotebooksState())
-}
+// export function setDefaultNotebooksState() {
+//     return setContext(INBOX_KEY, new defaultNotebooksState())
+// }
 
-export function getDefaultNotebooksState() {
-    return getContext<ReturnType<typeof setDefaultNotebooksState>>(INBOX_KEY)
-}
+// export function getDefaultNotebooksState() {
+//     return getContext<ReturnType<typeof setDefaultNotebooksState>>(INBOX_KEY)
+// }
 
 export function setSettingState() {
     return setContext(SETTING_KEY, new settingState())

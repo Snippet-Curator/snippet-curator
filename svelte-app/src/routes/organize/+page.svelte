@@ -4,7 +4,7 @@
 	import { Archive, Trash2 } from 'lucide-svelte';
 
 	import { New, NotebookList, TagList } from '$lib/components';
-	import { getDefaultNotebooksState, getNotebookState, getTagState } from '$lib/db.svelte';
+	import { getNotebookState, getTagState } from '$lib/db.svelte';
 	import type { Notebook } from '$lib/types';
 
 	const notebookState = getNotebookState();

@@ -14,14 +14,7 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
 	import * as Resizable from '$lib/components/ui/resizable/index.js';
 
-	import {
-		getNotebookState,
-		setNotebookState,
-		getTagState,
-		setTagState,
-		getDefaultNotebooksState,
-		setDefaultNotebooksState
-	} from '$lib/db.svelte';
+	import { getNotebookState, setNotebookState, getTagState, setTagState } from '$lib/db.svelte';
 
 	import { Dock, Icon, NotebookList, TagList } from '$lib/components';
 	import { getMobileState, setMobileState } from '$lib/utils.svelte';
@@ -29,18 +22,16 @@
 	let { children } = $props();
 	setTagState();
 	setNotebookState();
-	setDefaultNotebooksState();
 	setMobileState();
 	const tagState = getTagState();
 	const notebookState = getNotebookState();
-	const defaultNotebooksState = getDefaultNotebooksState();
 	const mobileState = getMobileState();
 
 	let screenWidth = window.innerWidth;
 
 	async function getDefaultNotebooks() {
-		await defaultNotebooksState.getAll();
-		await defaultNotebooksState.getAllCounts();
+		await notebookState.getInbox();
+		await notebookState.getAllCounts();
 	}
 
 	const updateScreenWidth = () => {
@@ -118,17 +109,16 @@
 					: ''} flex w-full justify-between"
 				href="#/"
 			>
-				<span>Search</span> {defaultNotebooksState.totalNoteCount}</a
+				<span>Search</span> {notebookState.totalNoteCount}</a
 			>
 		</li>
 		{#await defaultNotebooks then}
 			<li>
 				<a
-					class="{page.url.hash == `#/notebook/${defaultNotebooksState.inboxID}`
+					class="{page.url.hash == `#/notebook/${notebookState.inboxID}`
 						? 'menu-active'
 						: ''} flex w-full justify-between"
-					href="#/notebook/{defaultNotebooksState.inboxID}"
-					><span>Inbox</span> {defaultNotebooksState.inboxCount}</a
+					href="#/notebook/{notebookState.inboxID}"><span>Inbox</span> {notebookState.inboxCount}</a
 				>
 			</li>
 		{/await}
