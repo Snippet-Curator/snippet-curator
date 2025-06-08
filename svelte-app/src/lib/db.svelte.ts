@@ -580,48 +580,27 @@ export class NotelistState {
         // await this.getDefault(this.clickedPage)
     }
 
-    // async changeTags(selectedNotesID: string[], selectedTags: string[]) {
-    //   await Promise.all(selectedNotesID.map(async noteID => {
-    //     const { data, error } = await tryCatch(pb.collection(notesCollection).update(noteID, {
-    //       tags: selectedTags
-    //     }))
-    //     if (error) {
-    //       console.error('Error changing tags: ', noteID, error)
-    //     }
-    //   }))
-    //   await this.getDefault(this.clickedPage)
-    // }
-
-    // async getTags(selectedNotesID: string[]) {
-    //   let tagList: Tag[] = []
-    //   await Promise.all(selectedNotesID.map(async noteID => {
-    //     const { data, error } = await tryCatch<Note, PError>(pb.collection(viewNotesCollection).getOne(noteID, {
-    //       expand: 'tags'
-    //     }))
-    //     if (error) {
-    //       console.error('Error getting tag: ', noteID, error)
-    //       return
-    //     }
-    //     const tags = data.expand?.tags ?? []
-    //     if (tags.length === 0) return
-    //     tagList.push(...tags)
-    //   }))
-    //   const uniqueTags = Object.values(
-    //     Object.fromEntries(tagList.map(tag => [tag.id, tag]))
-    //   )
-    //   this.tags = uniqueTags
-    // }
-
-    async addAllTags(selectedNotesID: string[], selectedTagsID: string[]) {
+    async addTag(selectedNotesID: string[], selectedTagID: string) {
         await Promise.all(selectedNotesID.map(async noteID => {
             const { data, error } = await tryCatch(pb.collection(notesCollection).update(noteID, {
-                'tags+': selectedTagsID
+                'tags+': selectedTagID
             }))
             if (error) {
                 console.error('Error adding tag: ', noteID, error)
             }
         }))
         // await this.getDefault(this.clickedPage)
+    }
+
+    async removeTag(selectedNotesID: string[], selectedTagID: string) {
+        await Promise.all(selectedNotesID.map(async noteID => {
+            const { data, error } = await tryCatch(pb.collection(notesCollection).update(noteID, {
+                'tags-': selectedTagID
+            }))
+            if (error) {
+                console.error('Error removing tag: ', noteID, error)
+            }
+        }))
     }
 
     async clearTags(selectedNotesID: string[]) {

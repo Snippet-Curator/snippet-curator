@@ -8,12 +8,13 @@
 
 	type Props = {
 		isOpen: boolean;
-		addAll: (selectedTagIDs: string[]) => void;
+		add: (selectedTagID: string) => void;
+		remove: (selectedTagID: string) => void;
 		clearAll: () => void;
 		currentTagID?: string;
 	};
 
-	let { isOpen = $bindable(), addAll, clearAll, currentTagID = '' }: Props = $props();
+	let { isOpen = $bindable(), add, remove, clearAll, currentTagID = '' }: Props = $props();
 
 	const tagState = getTagState();
 
@@ -31,6 +32,11 @@
 			selectedTags.push(currentTag);
 		}
 	});
+
+	$effect(() => {
+		isOpen;
+		selectedTags = [];
+	});
 </script>
 
 <Command.Dialog bind:open={isOpen}>
@@ -40,9 +46,10 @@
 			{#each selectedTags as tag}
 				<button
 					onclick={() => {
-						selectedTags = selectedTags.filter((t) => t.id != tag.id);
+						remove(tag.id);
+						selectedTags = selectedTags.filter((existingTag) => existingTag.id != tag.id);
 					}}
-					class="badge hover:badge-ghost group flex items-center justify-center text-nowrap"
+					class="badge badge-primary hover:badge-ghost group flex items-center justify-center text-nowrap"
 					>{tag.name}</button
 				>
 			{/each}
@@ -57,6 +64,7 @@
 					if (!newTag) {
 						return;
 					}
+					add(newTag.id);
 					selectedTags.push(newTag);
 					searchText = '';
 				}}
@@ -69,10 +77,9 @@
 					{#each tags as tag}
 						<Command.Item
 							onSelect={() => {
-								if (!selectedTags.some((t) => t.id === tag.id)) {
-									selectedTags.push(tag);
-									searchText = '';
-								}
+								add(tag.id);
+								selectedTags.push(tag);
+								searchText = '';
 							}}
 							>{tag.name}
 						</Command.Item>
@@ -90,13 +97,6 @@
 				isOpen = false;
 			}}
 			class="btn">Clear all existing note tags</button
-		>
-		<button
-			onclick={() => {
-				addAll([...uniqueSelectedTags]);
-				isOpen = false;
-			}}
-			class="btn btn-primary">Add tags to all notes</button
 		>
 	</div>
 </Command.Dialog>

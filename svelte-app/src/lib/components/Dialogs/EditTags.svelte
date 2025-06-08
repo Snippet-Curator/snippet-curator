@@ -27,8 +27,9 @@
 	{#if currentTags}
 		<div class="gap-golden-sm p-golden-md border-b-base-content/10 flex flex-wrap border-b">
 			{#each currentTags as currentTag}
-				<button onclick={() => remove(currentTag.id)} class="badge hover:badge-ghost text-nowrap"
-					>{currentTag.name}</button
+				<button
+					onclick={() => remove(currentTag.id)}
+					class="badge badge-primary hover:badge-ghost text-nowrap">{currentTag.name}</button
 				>
 			{/each}
 		</div>

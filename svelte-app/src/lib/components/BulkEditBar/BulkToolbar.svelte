@@ -99,8 +99,12 @@
 <EditBulkTags
 	bind:isOpen={isEditTagsOpen}
 	{currentTagID}
-	addAll={async (selectedTagIDs) => {
-		await notelistState.addAllTags(selectedNotesID, selectedTagIDs);
+	add={async (selectedTagID: string) => {
+		await notelistState.addTag(selectedNotesID, selectedTagID);
+		updatePage();
+	}}
+	remove={async (selectedTagID: string) => {
+		await notelistState.removeTag(selectedNotesID, selectedTagID);
 		updatePage();
 	}}
 	clearAll={async () => {
