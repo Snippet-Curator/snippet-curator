@@ -19,311 +19,331 @@ const inboxNotebook = 'Inbox'
 const baseURL = 'http://127.0.0.1:8090/api/files'
 const remoteURL = pbURL + '/api/files'
 
+
+
 const parser = new XMLParser({
-  ignoreAttributes: false,
-  attributeNamePrefix: "",
+    ignoreAttributes: false,
+    attributeNamePrefix: "",
 })
 
 
 export async function makeDefaultNotebook() {
-  const { data, error } = await tryCatch<RecordModel, PError>(pb.collection(notebookCollection).create({ name: inboxNotebook })
-  )
+    const { data, error } = await tryCatch<RecordModel, PError>(pb.collection(notebookCollection).create({ name: inboxNotebook })
+    )
 
-  if (error) {
-    if (error.data.data.name.code == "validation_not_unique") {
-      console.log('Inbox already exists')
-    } else {
-      console.error('Error making Inbox: ', error.message)
+    if (error) {
+        if (error.data.data.name.code == "validation_not_unique") {
+            console.log('Inbox already exists')
+        } else {
+            console.error('Error making Inbox: ', error.message)
+        }
     }
-  }
 }
 
 
 async function getVideoThumb(videoUrl: string): Promise<File> {
 
-  return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
 
-    if (!videoUrl || videoUrl.trim() == '') {
-      return reject(new Error('Video URL is empty'))
-    }
-
-    const video = document.createElement("video");
-
-    // setting up properties
-    video.src = videoUrl;
-    video.crossOrigin = "anonymous"; // Prevent CORS issues
-    video.muted = true;
-    video.playsInline = true;
-    video.preload = 'metadata'
-
-    // add error handling
-    video.onerror = (e) => {
-      reject(new Error(`Video loading error: ${video.error?.message} || 'Unknown error'`))
-    }
-
-    // make sure metadata loaded before seeking
-    video.onloadedmetadata = () => {
-      // now seek
-      video.onloadeddata = () => {
-        video.currentTime = 1; // Capture at 1 second
-      };
-    }
-
-    video.onseeked = async () => {
-      // small delay
-      await new Promise((res) => setTimeout(res, 200));
-
-      const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-
-      // draw the current video frame to the canvas
-      const ctx = canvas.getContext("2d");
-
-      if (!ctx) {
-        reject(new Error('Could not get canvas context'))
-        return
-      }
-
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // Convert canvas to Blob and create a File
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const thumbnailFile = new File([blob], "thumbnail.png", { type: "image/png" });
-          resolve(thumbnailFile)
-        } else {
-          reject(new Error('Failed to create thumbnail blob'))
+        if (!videoUrl || videoUrl.trim() == '') {
+            return reject(new Error('Video URL is empty'))
         }
-      }, "image/png");
-    };
-  })
+
+        const video = document.createElement("video");
+
+        // setting up properties
+        video.src = videoUrl;
+        video.crossOrigin = "anonymous"; // Prevent CORS issues
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = 'metadata'
+
+        // add error handling
+        video.onerror = (e) => {
+            reject(new Error(`Video loading error: ${video.error?.message} || 'Unknown error'`))
+        }
+
+        // make sure metadata loaded before seeking
+        video.onloadedmetadata = () => {
+            // now seek
+            video.onloadeddata = () => {
+                video.currentTime = 1; // Capture at 1 second
+            };
+        }
+
+        video.onseeked = async () => {
+            // small delay
+            await new Promise((res) => setTimeout(res, 200));
+
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // draw the current video frame to the canvas
+            const ctx = canvas.getContext("2d");
+
+            if (!ctx) {
+                reject(new Error('Could not get canvas context'))
+                return
+            }
+
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert canvas to Blob and create a File
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    const thumbnailFile = new File([blob], "thumbnail.png", { type: "image/png" });
+                    resolve(thumbnailFile)
+                } else {
+                    reject(new Error('Failed to create thumbnail blob'))
+                }
+            }, "image/png");
+        };
+    })
 }
 
 function getResourceThumbURL(resources: Resource[]) {
-  if (!Array.isArray(resources)) return null;
+    if (!Array.isArray(resources)) return null;
 
-  const imageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/bmp', 'image/tiff', 'image/tif', 'image/svg', 'image/svg+xml', 'image/webp', 'image/gif'];
-  const videoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska', 'video/3gpp', 'video/ogg'];
+    const imageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/bmp', 'image/tiff', 'image/tif', 'image/svg', 'image/svg+xml', 'image/webp', 'image/gif'];
+    const videoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska', 'video/3gpp', 'video/ogg'];
 
-  // Find all images
-  const images = resources.filter(r => imageTypes.includes(r.type));
-  if (images.length > 0) {
-    // Return the largest image
-    return images.reduce((max, img) => (img.size > max.size ? img : max));
-  }
+    // Find all images
+    const images = resources.filter(r => imageTypes.includes(r.type));
+    if (images.length > 0) {
+        // Return the largest image
+        return images.reduce((max, img) => (img.size > max.size ? img : max));
+    }
 
-  // If no images, look for videos
-  const videos = resources.filter(r => videoTypes.includes(r.type));
-  if (videos.length > 0) {
-    // Return the first video
-    return videos[0];
-  }
+    // If no images, look for videos
+    const videos = resources.filter(r => videoTypes.includes(r.type));
+    if (videos.length > 0) {
+        // Return the first video
+        return videos[0];
+    }
 
-  // No suitable resource found
-  return null;
+    // No suitable resource found
+    return null;
 }
 
 async function createThumbnail(recordID: string, resources: Resource[]) {
-  const { data, error } = await tryCatch(pb.collection(notesCollection).getFirstListItem(`id="${recordID}"`))
+    const { data, error } = await tryCatch(pb.collection(notesCollection).getFirstListItem(`id="${recordID}"`))
 
-  if (error) {
-    console.error('Error getting record: ', error.message)
-  }
-
-  if (!data || !data.attachments) {
-    console.error('Error: no attachments found')
-  }
-
-  let thumbnailURL = ''
-  let record = data
-
-  if (!record) return
-  if (record.thumbnail) return
-
-  const thumbFile = getResourceThumbURL(resources)
-
-  if (!thumbFile) return
-  if (thumbFile.size < 10000) return
-
-  const mimeType = thumbFile.type
-  const defaultThumbURL = thumbFile.fileURL
-  const videoURL = thumbFile.fileURL.replace(/^http:\/\/127\.0\.0\.1:8090/, pbURL)
-
-  if (!mimeType.includes('image') && !mimeType.includes('video') && !mimeType.includes('application/octet-stream')) {
-    return
-  }
-
-  if (mimeType.includes('video') || mimeType == 'application/octet-stream') {
-    console.log('video found: ', videoURL)
-    console.log('pbURL: ', pbURL)
-    console.log('url: ', new URL(videoURL))
-    const { data: thumbFile, error: thumbFileError } = await tryCatch(getVideoThumb(videoURL))
-
-    if (thumbFileError) {
-      console.error('Error generating thumbfile: ', thumbFileError.message)
-      return
+    if (error) {
+        console.error('Error getting record: ', error.message)
     }
 
-    const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
-      'attachments+': [thumbFile]
+    if (!data || !data.attachments) {
+        console.error('Error: no attachments found')
+    }
+
+    let thumbnailURL = ''
+    let record = data
+
+    if (!record) return
+    if (record.thumbnail) return
+
+    const thumbFile = getResourceThumbURL(resources)
+
+    if (!thumbFile) return
+    if (thumbFile.size < 10000) return
+
+    const mimeType = thumbFile.type
+    const defaultThumbURL = thumbFile.fileURL
+    const videoURL = thumbFile.fileURL.replace(/^http:\/\/127\.0\.0\.1:8090/, pbURL)
+
+    if (!mimeType.includes('image') && !mimeType.includes('video') && !mimeType.includes('application/octet-stream')) {
+        return
+    }
+
+    if (mimeType.includes('video')) {
+        const { data: thumbFile, error: thumbFileError } = await tryCatch(getVideoThumb(videoURL))
+
+        if (thumbFileError) {
+            console.error('Error generating thumbfile: ', thumbFileError.message)
+            return
+        }
+
+        const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
+            'attachments+': [thumbFile]
+        }))
+
+        if (thumbError) {
+            console.error('Error getting updated thumbnail record: ', thumbError.message)
+            return
+        }
+
+        if (!thumbRecord) return
+        thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${thumbRecord.attachments.at(-1)}?thumb=500x0`
+        // uses video itself as thumbnail:
+        // thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
+    }
+
+    else if (mimeType == 'image/gif') {
+        thumbnailURL = defaultThumbURL
+    }
+
+    else {
+        thumbnailURL = `${defaultThumbURL}?thumb=500x0`
+    }
+
+    // update thumbnail
+    const { data: updatedRecord, error: thumbnailError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
+        'thumbnail': thumbnailURL
     }))
 
-    if (thumbError) {
-      console.error('Error getting updated thumbnail record: ', thumbError.message)
-      return
+    if (thumbnailError) {
+        console.error('Error updating record: ', thumbnailError.message)
     }
+    record = updatedRecord
 
-    if (!thumbRecord) return
-    thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${thumbRecord.attachments.at(-1)}?thumb=500x0`
-    // uses video itself as thumbnail:
-    // thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
-  }
+    // for (const [index, resource] of resources.entries()) {
+    //   if (!record) break
+    //   if (record.thumbnail) break
+    //   if (resource.size < 10000) continue
 
-  else if (mimeType == 'image/gif') {
-    thumbnailURL = defaultThumbURL
-  }
+    //   const mimeType = resource.type
 
-  else {
-    thumbnailURL = `${defaultThumbURL}?thumb=500x0`
-  }
+    //   if (!mimeType.includes('image') && !mimeType.includes('video') && !mimeType.includes('application/octet-stream')) {
+    //     continue
+    //   }
 
-  // update thumbnail
-  const { data: updatedRecord, error: thumbnailError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
-    'thumbnail': thumbnailURL
-  }))
+    //   if (mimeType.includes('video') || mimeType == 'application/octet-stream') {
+    //     const videoURL = `${remoteURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
 
-  if (thumbnailError) {
-    console.error('Error updating record: ', thumbnailError.message)
-  }
-  record = updatedRecord
+    //     const { data: thumbFile, error: thumbFileError } = await tryCatch(getVideoThumb(videoURL))
 
-  // for (const [index, resource] of resources.entries()) {
-  //   if (!record) break
-  //   if (record.thumbnail) break
-  //   if (resource.size < 10000) continue
+    //     if (thumbFileError) {
+    //       console.error('Error generating thumbfile: ', thumbFileError.message)
+    //       continue
+    //     }
 
-  //   const mimeType = resource.type
+    //     const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
+    //       'attachments+': [thumbFile]
+    //     }))
 
-  //   if (!mimeType.includes('image') && !mimeType.includes('video') && !mimeType.includes('application/octet-stream')) {
-  //     continue
-  //   }
+    //     if (thumbError) {
+    //       console.error('Error getting updated thumbnail record: ', thumbError.message)
+    //       continue
+    //     }
 
-  //   if (mimeType.includes('video') || mimeType == 'application/octet-stream') {
-  //     const videoURL = `${remoteURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
+    //     if (!thumbRecord) continue
+    //     thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${thumbRecord.attachments.at(-1)}?thumb=500x0`
+    //     // uses video itself as thumbnail:
+    //     // thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
+    //   }
 
-  //     const { data: thumbFile, error: thumbFileError } = await tryCatch(getVideoThumb(videoURL))
+    //   else if (mimeType == 'image/gif') {
+    //     thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
+    //   }
 
-  //     if (thumbFileError) {
-  //       console.error('Error generating thumbfile: ', thumbFileError.message)
-  //       continue
-  //     }
+    //   else {
+    //     thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}?thumb=500x0`
+    //   }
 
-  //     const { data: thumbRecord, error: thumbError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
-  //       'attachments+': [thumbFile]
-  //     }))
+    //   // update thumbnail
+    //   const { data: updatedRecord, error: thumbnailError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
+    //     'thumbnail': thumbnailURL
+    //   }))
 
-  //     if (thumbError) {
-  //       console.error('Error getting updated thumbnail record: ', thumbError.message)
-  //       continue
-  //     }
-
-  //     if (!thumbRecord) continue
-  //     thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${thumbRecord.attachments.at(-1)}?thumb=500x0`
-  //     // uses video itself as thumbnail:
-  //     // thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
-  //   }
-
-  //   else if (mimeType == 'image/gif') {
-  //     thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
-  //   }
-
-  //   else {
-  //     thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}?thumb=500x0`
-  //   }
-
-  //   // update thumbnail
-  //   const { data: updatedRecord, error: thumbnailError } = await tryCatch(pb.collection(notesCollection).update(record.id, {
-  //     'thumbnail': thumbnailURL
-  //   }))
-
-  //   if (thumbnailError) {
-  //     console.error('Error updating record: ', thumbnailError.message)
-  //   }
-  //   record = updatedRecord
-  // }
+    //   if (thumbnailError) {
+    //     console.error('Error updating record: ', thumbnailError.message)
+    //   }
+    //   record = updatedRecord
+    // }
 }
 
 async function getFileHash(file: File) {
-  const arrayBuffer = await file.arrayBuffer();
-  const hash = SparkMD5.ArrayBuffer.hash(arrayBuffer);
-  return hash;
+    const arrayBuffer = await file.arrayBuffer();
+    const hash = SparkMD5.ArrayBuffer.hash(arrayBuffer);
+    return hash;
 }
 
 function getPocketbaseResource(file: File, hash: string, url: string) {
-  const resource: Resource = {
-    name: file.name,
-    size: file.size,
-    hash: hash,
-    type: file.type,
-    fileURL: url,
-    lastUpdated: new Date().toISOString(),
-  }
-  return resource
+    const resource: Resource = {
+        name: file.name,
+        size: file.size,
+        hash: hash,
+        type: file.type,
+        fileURL: url,
+        lastUpdated: new Date().toISOString(),
+    }
+    return resource
 }
 
 function addMediaToContent(mimeType: string, fileURL: string, fileName: string) {
-  if (!fileURL) {
-    console.error('No file URL')
-    return ''
-  }
+    if (!fileURL) {
+        console.error('No file URL')
+        return ''
+    }
 
-  if (!fileName) {
-    console.error('No fileName provided')
-    return ''
-  }
+    if (!fileName) {
+        console.error('No fileName provided')
+        return ''
+    }
 
-  if (mimeType.includes('image') || ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff', 'tif'].some((ext) => fileName.includes(ext.toLowerCase()))) {
-    return `<img src=${fileURL} type=${mimeType}>`;
-  }
+    if (mimeType.includes('image') || ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff', 'tif'].some((ext) => fileName.includes(ext.toLowerCase()))) {
+        return `<img src=${fileURL} type=${mimeType}>`;
+    }
 
-  if (fileName.includes('svg')) {
-    return `<img src=${fileURL} type='svg' />`
-  }
+    if (fileName.includes('svg')) {
+        return `<img src=${fileURL} type='svg' />`
+    }
 
-  if (mimeType.includes('video') || ['mp4', 'webm', 'mov', 'avi', 'mkv', '3gp', 'ogg'].some((ext) => fileName.includes(ext))) {
-    return `<video style='width:100%' controls><source src=${fileURL} type=${mimeType} />Your browser does not support the video tag.</video>`
-  }
+    if (mimeType.includes('video') || ['mp4', 'webm', 'mov', 'avi', 'mkv', '3gp', 'ogg'].some((ext) => fileName.includes(ext))) {
+        return `<video style='width:100%' controls><source src=${fileURL} type=${mimeType} />Your browser does not support the video tag.</video>`
+    }
 
+    if (mimeType == 'audio/mpeg' || ['mp3', 'wav', 'aac'].some((ext) => fileName.includes(ext))) {
+        return `<div style="text-align: center;"><audio class="audio-player" controls style="width: 80vw; max-width: 400px;"><source src=${fileURL} type=${mimeType}><a href=${fileURL} target="_blank">${fileName}</a>.</audio></div>`
+    }
 
-  if (mimeType == 'audio/mpeg' || ['mp3', 'wav', 'aac'].some((ext) => fileName.includes(ext))) {
-    return `<div style="text-align: center;"><audio class="audio-player" controls style="width: 80vw; max-width: 400px;"><source src=${fileURL} type=${mimeType}><a href=${fileURL} target="_blank">${fileName}</a>.</audio></div>`
-  }
+    if (mimeType == 'application/pdf') {
+        return `<a href=${fileURL} target="_blank">${fileName}</a><iframe src=${fileURL} style="width: 80vw; min-height: 800px; height: 100vh; max-width: 900px; margin: auto; display: block;" frameborder="0" > </iframe> `
+    }
 
-  if (mimeType == 'application/pdf') {
-    return `<a href=${fileURL} target="_blank">${fileName}</a><iframe src=${fileURL} style="width: 80vw; min-height: 800px; height: 100vh; max-width: 900px; margin: auto; display: block;" frameborder="0" > </iframe> `
-  }
-
-  else {
-    return `<a href=${fileURL} type=${mimeType}/>${fileName}</a>`
-  }
+    else {
+        return `<a href=${fileURL} type=${mimeType}/>${fileName}</a>`
+    }
 }
 
 function createDescription(htmlContent: string, maxLength = 300) {
-  if (!htmlContent) return null
+    if (!htmlContent) return null
 
-  const strippedText = htmlContent
-    .replace(/<[^>]+>/g, '') // Remove HTML tags
-    .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
-    .replace(/\s+/g, ' '); // Normalize whitespace
+    const strippedText = htmlContent
+        .replace(/<[^>]+>/g, '') // Remove HTML tags
+        .replace(/&nbsp;/g, ' ') // Replace non-breaking spaces
+        .replace(/\s+/g, ' '); // Normalize whitespace
 
-  const trimmedText = strippedText.trim();
+    const trimmedText = strippedText.trim();
 
-  if (trimmedText.length <= maxLength) {
-    return trimmedText;
-  }
+    if (trimmedText.length <= maxLength) {
+        return trimmedText;
+    }
 
-  return trimmedText.substring(0, maxLength);
+    return trimmedText.substring(0, maxLength);
+}
+
+function getMimeFromName(fileName: string, originalMime: string) {
+    const MIME_LOOKUP: Record<string, string> = {
+        mp4: 'video/mp4',
+        webm: 'video/webm',
+        mov: 'video/quicktime',
+        avi: 'video/x-msvideo',
+        mkv: 'video/x-matroska',
+        '3gp': 'video/3gpp',
+        ogg: 'video/ogg',
+    };
+
+    let correctedMime = originalMime;
+    if (originalMime === 'application/octet-stream') {
+        const ext = fileName.split('.').pop()?.toLowerCase();
+        if (ext && MIME_LOOKUP[ext]) {
+            correctedMime = MIME_LOOKUP[ext];
+        }
+    }
+
+    return correctedMime
 }
 
 // export function sanitizeHTMLContent(content: string) {
@@ -454,694 +474,693 @@ function createDescription(htmlContent: string, maxLength = 300) {
 // }
 
 export class htmlImport {
-  title: string | 'Untitled'
-  content: string
-  parsedHTML: Document
-  source: string | null
-  sourceURL: string | null
-  recordID: string
-  added: string
-  description: string | null
-  selectedNotebookdID: string
-  HTMLparser: DOMParser
-  resources: Resource[]
+    title: string | 'Untitled'
+    content: string
+    parsedHTML: Document
+    source: string | null
+    sourceURL: string | null
+    recordID: string
+    added: string
+    description: string | null
+    selectedNotebookdID: string
+    HTMLparser: DOMParser
+    resources: Resource[]
 
-  constructor(fileContent: string, selectedNotebookID: string) {
-    this.HTMLparser = new DOMParser()
-    this.content = fileContent
-    this.parsedHTML = this.parseHTML(fileContent)
-    this.title = this.getTitle()
-    this.description = this.getDescription()
-    this.source = this.getSource()
-    this.sourceURL = this.getSourceURL()
-    this.added = this.getAdded()
-    this.recordID = ''
-    this.selectedNotebookdID = selectedNotebookID
-    this.resources = []
-    // const { parsedHTML, title, sourceURL, added } = this.parseHTML(fileContent)
-    // this.parsedHTML = parsedHTML
-  }
-
-  parseHTML(fileContent: string) {
-    return this.HTMLparser.parseFromString(fileContent, 'text/html')
-  }
-
-  getTitle() {
-    return this.parsedHTML.querySelector('title')?.textContent || 'Untitled'
-  }
-
-  getDescription() {
-    // parse instagram saves with source meta property
-    const description = this.parsedHTML.querySelector('meta[property="description"]')
-
-    if (description) {
-      return description.getAttribute('content')
+    constructor(fileContent: string, selectedNotebookID: string) {
+        this.HTMLparser = new DOMParser()
+        this.content = fileContent
+        this.parsedHTML = this.parseHTML(fileContent)
+        this.title = this.getTitle()
+        this.description = this.getDescription()
+        this.source = this.getSource()
+        this.sourceURL = this.getSourceURL()
+        this.added = this.getAdded()
+        this.recordID = ''
+        this.selectedNotebookdID = selectedNotebookID
+        this.resources = []
     }
 
-    const ogDescription = this.parsedHTML.querySelector('meta[property="og:description"]')?.getAttribute('content')
-
-    if (!ogDescription) return null
-
-    return createDescription(ogDescription)
-  }
-
-  getSource() {
-    // parse instagram saves with source meta property
-    const source = this.parsedHTML.querySelector('meta[property="source"]')
-
-    if (source) {
-      return source.getAttribute('content')
+    parseHTML(fileContent: string) {
+        return this.HTMLparser.parseFromString(fileContent, 'text/html')
     }
 
-    // if not, use regex to match singleFile source
-    const match = this.content.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
-
-    if (match) {
-      return 'SingleFile Save'
+    getTitle() {
+        return this.parsedHTML.querySelector('title')?.textContent || 'Untitled'
     }
 
-    return null
-  }
+    getDescription() {
+        // parse instagram saves with source meta property
+        const description = this.parsedHTML.querySelector('meta[property="description"]')
 
-  getSourceURL() {
-    const sourceURL = this.parsedHTML.querySelector('meta[property="source-url"]')
+        if (description) {
+            return description.getAttribute('content')
+        }
 
-    if (sourceURL) {
-      return sourceURL.getAttribute('content')
+        const ogDescription = this.parsedHTML.querySelector('meta[property="og:description"]')?.getAttribute('content')
+
+        if (!ogDescription) return null
+
+        return createDescription(ogDescription)
     }
 
-    const match = this.content.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
+    getSource() {
+        // parse instagram saves with source meta property
+        const source = this.parsedHTML.querySelector('meta[property="source"]')
 
-    if (!match || !match[1]) {
-      return null
+        if (source) {
+            return source.getAttribute('content')
+        }
+
+        // if not, use regex to match singleFile source
+        const match = this.content.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
+
+        if (match) {
+            return 'SingleFile Save'
+        }
+
+        return null
     }
 
-    return match[1];
-  }
+    getSourceURL() {
+        const sourceURL = this.parsedHTML.querySelector('meta[property="source-url"]')
 
-  getAdded() {
-    const added = this.parsedHTML.querySelector('meta[property="added"]')
+        if (sourceURL) {
+            return sourceURL.getAttribute('content')
+        }
 
-    if (added && added.textContent) {
-      return added.getAttribute('content') || new Date().toISOString()
+        const match = this.content.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
+
+        if (!match || !match[1]) {
+            return null
+        }
+
+        return match[1];
     }
 
-    const match = this.content.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
+    getAdded() {
+        const added = this.parsedHTML.querySelector('meta[property="added"]')
 
-    if (match) {
-      return new Date(match[2]).toISOString()
+        if (added && added.textContent) {
+            return added.getAttribute('content') || new Date().toISOString()
+        }
+
+        const match = this.content.match(/url:\s*(.+?)\s+saved date:\s*(.+?)\s*-->/s);
+
+        if (match) {
+            return new Date(match[2]).toISOString()
+        }
+
+        return new Date().toISOString()
     }
 
-    return new Date().toISOString()
-  }
+    base64ToFile(base64: string, mimeType: string) {
+        let extension: string = ''
+        let filename: string = ''
+        let byteCharacters: string = ''
+        let hash: string = ''
 
-  base64ToFile(base64: string, mimeType: string) {
-    let extension: string = ''
-    let filename: string = ''
-    let byteCharacters: string = ''
-    let hash: string = ''
+        try {
+            extension = mimeType.split("/")[1];
+            filename = `${uuidv4()}.${extension}`;
+            byteCharacters = atob(base64);
+            hash = SparkMD5.hashBinary(byteCharacters);
+        } catch (err) {
+            console.error('Error converting resource: ', err)
+        }
 
-    try {
-      extension = mimeType.split("/")[1];
-      filename = `${uuidv4()}.${extension}`;
-      byteCharacters = atob(base64);
-      hash = SparkMD5.hashBinary(byteCharacters);
-    } catch (err) {
-      console.error('Error converting resource: ', err)
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+
+        return {
+            file: new File([byteArray], filename, { type: mimeType }),
+            hash: hash
+        }
     }
 
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
+    async replaceResources(fileContent: string) {
+        // replaces src with image and font with pocketbase file links. Href is skipped
+        const mediaMatch = /\b(data:(?:image|font|video)\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+)\1?/g
 
-    return {
-      file: new File([byteArray], filename, { type: mimeType }),
-      hash: hash
-    }
-  }
+        if (!fileContent) {
+            console.error('Error: no file content')
+            return
+        }
 
-  async replaceResources(fileContent: string) {
-    // replaces src with image and font with pocketbase file links. Href is skipped
-    const mediaMatch = /\b(data:(?:image|font|video)\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+)\1?/g
+        const matches = [...fileContent.matchAll(mediaMatch)]
+        let updatedContent = fileContent
 
-    if (!fileContent) {
-      console.error('Error: no file content')
-      return
-    }
+        for (const match of matches) {
+            // console.log(match)
+            // const openingQuote = match[1] || undefined
+            // const dataURL = match[2] || undefined
+            // const closingQuote = match[3] || undefined
+            const dataURL = match[1]
 
-    const matches = [...fileContent.matchAll(mediaMatch)]
-    let updatedContent = fileContent
+            if (!dataURL) {
+                console.error('Error: no dataURL')
+                continue
+            }
 
-    for (const match of matches) {
-      // console.log(match)
-      // const openingQuote = match[1] || undefined
-      // const dataURL = match[2] || undefined
-      // const closingQuote = match[3] || undefined
-      const dataURL = match[1]
+            const mimeType = dataURL.split(';')[0].split(':')[1] || undefined
+            const base64Data = dataURL.split(',')[1]
 
-      if (!dataURL) {
-        console.error('Error: no dataURL')
-        continue
-      }
+            if (!base64Data || !mimeType) {
+                console.error('Error: invalid data URL format')
+                continue
+            }
 
-      const mimeType = dataURL.split(';')[0].split(':')[1] || undefined
-      const base64Data = dataURL.split(',')[1]
+            const { file: resourceFile, hash } = this.base64ToFile(base64Data, mimeType)
 
-      if (!base64Data || !mimeType) {
-        console.error('Error: invalid data URL format')
-        continue
-      }
+            if (!resourceFile) {
+                console.error('Error converting resource file')
+                continue
+            }
 
-      const { file: resourceFile, hash } = this.base64ToFile(base64Data, mimeType)
+            // upload to database
+            const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
+                'attachments+': [resourceFile],
+            }))
 
-      if (!resourceFile) {
-        console.error('Error converting resource file')
-        continue
-      }
+            if (error) {
+                console.error('Error uploading resource: ', error.message)
+                continue
+            }
 
-      // upload to database
-      const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
-        'attachments+': [resourceFile],
-      }))
+            if (!record) {
+                console.error('Error uploading file to database: ', error.message)
+                continue
+            }
 
-      if (error) {
-        console.error('Error uploading resource: ', error.message)
-        continue
-      }
+            const newURL = `${baseURL}\/${notesCollection}\/${this.recordID}\/${record.attachments.at(-1)}`
+            const resourceURL = `${baseURL}\/${notesCollection}\/${this.recordID}\/${record.attachments.at(-1)}`
+            // const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments.at(-1)}`
 
-      if (!record) {
-        console.error('Error uploading file to database: ', error.message)
-        continue
-      }
+            // add to list of resources
+            const resource = getPocketbaseResource(resourceFile, hash, resourceURL)
+            this.resources.push(resource)
 
-      const newURL = `${baseURL}\/${notesCollection}\/${this.recordID}\/${record.attachments.at(-1)}`
-      const resourceURL = `${baseURL}\/${notesCollection}\/${this.recordID}\/${record.attachments.at(-1)}`
-      // const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments.at(-1)}`
+            // replace media with new URL
+            if (newURL) {
+                updatedContent = updatedContent.replace(match[0], newURL)
+            }
 
-      // add to list of resources
-      const resource = getPocketbaseResource(resourceFile, hash, resourceURL)
-      this.resources.push(resource)
+        }
 
-      // replace media with new URL
-      if (newURL) {
-        updatedContent = updatedContent.replace(match[0], newURL)
-      }
-
+        this.content = updatedContent;
     }
 
-    this.content = updatedContent;
-  }
-
-  stripCSP() {
-    const matchPattern = /<meta http-equiv=["]?Content-Security-Policy["]?[^>]*>/ig
-    this.content = this.content.replace(matchPattern, '');
-  }
-
-  // centerImage() {
-  //   const matchPattern = /<div>\s*(<img[^>]*>)\s*<\/div>/g
-  //   this.content = this.content.replace(matchPattern, (_match, imgTag) => `<div class='img-wrapper'>${imgTag}</div>`);
-  // }
-
-  async uploadToDB() {
-    const sources = [{
-      'source': this.source,
-      'source_url': this.sourceURL
-    }]
-
-    const skeletonData = {
-      'title': this.title,
-      'added': this.added,
-      'description': this.description,
-      'weight': 5,
-      'notebook': this.selectedNotebookdID,
-      'last_score_updated': new Date().toISOString(),
-      'sources': JSON.stringify(sources),
-      'status': 'active'
+    stripCSP() {
+        const matchPattern = /<meta http-equiv=["]?Content-Security-Policy["]?[^>]*>/ig
+        this.content = this.content.replace(matchPattern, '');
     }
 
-    const { data: record, error } = await tryCatch(pb.collection(notesCollection).create(skeletonData))
+    // centerImage() {
+    //   const matchPattern = /<div>\s*(<img[^>]*>)\s*<\/div>/g
+    //   this.content = this.content.replace(matchPattern, (_match, imgTag) => `<div class='img-wrapper'>${imgTag}</div>`);
+    // }
 
-    if (error) {
-      if (error.data.data.title.code == "validation_not_unique") {
-        throw new Error('Skipped duplicate note')
-      }
-      throw (error)
+    async uploadToDB() {
+        const sources = [{
+            'source': this.source,
+            'source_url': this.sourceURL
+        }]
+
+        const skeletonData = {
+            'title': this.title,
+            'added': this.added,
+            'description': this.description,
+            'weight': 5,
+            'notebook': this.selectedNotebookdID,
+            'last_score_updated': new Date().toISOString(),
+            'sources': JSON.stringify(sources),
+            'status': 'active'
+        }
+
+        const { data: record, error } = await tryCatch(pb.collection(notesCollection).create(skeletonData))
+
+        if (error) {
+            if (error.data.data.title.code == "validation_not_unique") {
+                throw new Error('Skipped duplicate note')
+            }
+            throw (error)
+        }
+
+        if (!record) return
+
+        this.recordID = record.id
+
+        await this.replaceResources(this.content)
+        this.stripCSP()
+        await createThumbnail(this.recordID, this.resources)
+
+        const data = {
+            'content': this.content,
+            'original_content': this.content,
+            'resources': this.resources,
+        }
+
+        const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
+
+        if (updatedError) {
+            console.error('Error updating record: ', updatedError.message, updatedError.data)
+        }
     }
 
-    if (!record) return
 
-    this.recordID = record.id
+    // parseHTMLContent(parsedHTML: Document) {
+    //   const bodyContent = parsedHTML.body.innerHTML
+    //   const styleTags = [...parsedHTML.querySelectorAll('style')].map(style => style.outerHTML).join('\n')
+    //   const htmlContent = `${styleTags} ${bodyContent}`
 
-    await this.replaceResources(this.content)
-    this.stripCSP()
-    await createThumbnail(this.recordID, this.resources)
+    //   return htmlContent
+    // }
 
-    const data = {
-      'content': this.content,
-      'original_content': this.content,
-      'resources': this.resources,
-    }
+    // parseURL(parsedHTML: Document) {
+    //   return parsedHTML.querySelector('meta[property="og:url"]')?.getAttribute('content') || ""
+    // }
 
-    const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
+    // async uploadImg() {
+    //   for (const [index, img] of this.parsedHTML.querySelectorAll('img').entries()) {
 
-    if (updatedError) {
-      console.error('Error updating record: ', updatedError.message, updatedError.data)
-    }
-  }
+    //     if (!img.src.includes('data:image')) continue
+    //     if (img.src.includes('data:image/svg+xml')) continue
 
+    //     let base64Data = ''
+    //     let mimeType = ''
 
-  // parseHTMLContent(parsedHTML: Document) {
-  //   const bodyContent = parsedHTML.body.innerHTML
-  //   const styleTags = [...parsedHTML.querySelectorAll('style')].map(style => style.outerHTML).join('\n')
-  //   const htmlContent = `${styleTags} ${bodyContent}`
+    //     try {
+    //       base64Data = img.src.split(',')[1]
+    //       mimeType = img.src.split(';')[0].split(':')[1]
+    //     } catch (e) {
+    //       console.log(e)
+    //       continue
+    //     }
 
-  //   return htmlContent
-  // }
+    //     // convert to file
+    //     const imgFile = this.base64ToFile(base64Data, mimeType)
 
-  // parseURL(parsedHTML: Document) {
-  //   return parsedHTML.querySelector('meta[property="og:url"]')?.getAttribute('content') || ""
-  // }
+    //     // upload to database
+    //     const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
+    //       'attachments+': [imgFile]
+    //     }))
 
-  // async uploadImg() {
-  //   for (const [index, img] of this.parsedHTML.querySelectorAll('img').entries()) {
+    //     if (error) {
+    //       console.error('Error uploading image: ', error.message)
+    //     }
 
-  //     if (!img.src.includes('data:image')) continue
-  //     if (img.src.includes('data:image/svg+xml')) continue
+    //     if (!record) return
 
-  //     let base64Data = ''
-  //     let mimeType = ''
+    //     const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
 
-  //     try {
-  //       base64Data = img.src.split(',')[1]
-  //       mimeType = img.src.split(';')[0].split(':')[1]
-  //     } catch (e) {
-  //       console.log(e)
-  //       continue
-  //     }
+    //     // fill in thumbnail
+    //     if (record.thumbnail == '') {
+    //       let thumbnailURL = ''
 
-  //     // convert to file
-  //     const imgFile = this.base64ToFile(base64Data, mimeType)
+    //       // make thumbnail based on type of resource file
+    //       if (mimeType == 'image/gif') {
+    //         thumbnailURL = defaultThumbURL
+    //       } else {
+    //         thumbnailURL = `${defaultThumbURL}?thumb=500x0`
+    //       }
 
-  //     // upload to database
-  //     const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
-  //       'attachments+': [imgFile]
-  //     }))
+    //       // update thumbnail
+    //       await pb.collection(notesCollection).update(this.recordID, {
+    //         'thumbnail': thumbnailURL
+    //       })
+    //     }
 
-  //     if (error) {
-  //       console.error('Error uploading image: ', error.message)
-  //     }
+    //     // get new filename and url
+    //     const newName = record.attachments.at(-1)
+    //     const newURL = `${baseURL}/${notesCollection}/${this.recordID}/${newName}`
 
-  //     if (!record) return
-
-  //     const defaultThumbURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
-
-  //     // fill in thumbnail
-  //     if (record.thumbnail == '') {
-  //       let thumbnailURL = ''
-
-  //       // make thumbnail based on type of resource file
-  //       if (mimeType == 'image/gif') {
-  //         thumbnailURL = defaultThumbURL
-  //       } else {
-  //         thumbnailURL = `${defaultThumbURL}?thumb=500x0`
-  //       }
-
-  //       // update thumbnail
-  //       await pb.collection(notesCollection).update(this.recordID, {
-  //         'thumbnail': thumbnailURL
-  //       })
-  //     }
-
-  //     // get new filename and url
-  //     const newName = record.attachments.at(-1)
-  //     const newURL = `${baseURL}/${notesCollection}/${this.recordID}/${newName}`
-
-  //     // replace img src
-  //     if (newURL) {
-  //       img.setAttribute('src', newURL)
-  //     }
-  //   }
-  //   this.content = this.parseHTMLContent(this.parsedHTML)
-  // }
+    //     // replace img src
+    //     if (newURL) {
+    //       img.setAttribute('src', newURL)
+    //     }
+    //   }
+    //   this.content = this.parseHTMLContent(this.parsedHTML)
+    // }
 }
 
 export class EnImport {
-  enNote: EnNote
-  enMedias: EnMedia[] | null
-  enResources: EnResource[] | null
+    enNote: EnNote
+    enMedias: EnMedia[] | null
+    enResources: EnResource[] | null
 
-  title: string
-  content: string
-  added: string
-  updated: string
-  source: string
-  sourceURL: string
-  tags: string[] | null
-  recordID: string
-  description: string | null
-  selectedNotebookdID: string
+    title: string
+    content: string
+    added: string
+    updated: string
+    source: string
+    sourceURL: string
+    tags: string[] | null
+    recordID: string
+    description: string | null
+    selectedNotebookdID: string
 
-  constructor(fileContent: string, selectedNotebookID: string) {
+    constructor(fileContent: string, selectedNotebookID: string) {
 
-    this.recordID = ''
-    this.selectedNotebookdID = selectedNotebookID
+        this.recordID = ''
+        this.selectedNotebookdID = selectedNotebookID
 
-    const { xmlNote, xmlMedia, xmlContent } = this.parseEnex(fileContent)
+        const { xmlNote, xmlMedia, xmlContent } = this.parseEnex(fileContent)
 
-    this.enNote = xmlNote
-    this.content = xmlContent
-    this.enMedias = this.getEnMedias(xmlMedia)
-    this.tags = this.getTags()
+        this.enNote = xmlNote
+        this.content = xmlContent
+        this.enMedias = this.getEnMedias(xmlMedia)
+        this.tags = this.getTags()
 
-    this.enResources = this.getEnResources()
-    this.title = this.enNote['en-export'].note.title
-    this.added = this.getAdded()
-    this.updated = this.enNote['en-export'].note.updated
-    this.source = this.getSource()
-    this.sourceURL = this.getSourceURL()
-    this.description = createDescription(this.content)
-  }
-
-  parseEnex(fileContent: string) {
-    const xmlNote: EnNote = parser.parse(fileContent)
-    const xmlMedia: EnMedia = parser.parse(xmlNote['en-export']['note']['content'])['en-note']['en-media']
-    const xmlContent = xmlNote['en-export']['note']['content'].match(/<en-note[\s\S]*<\/en-note>/)?.[0] as string
-
-    return {
-      xmlNote,
-      xmlMedia,
-      xmlContent
-    }
-  }
-
-  getEnMedias(xmlMedia: EnMedia | EnMedia[]) {
-    if (!xmlMedia) return null
-    return Array.isArray(xmlMedia) ? xmlMedia : [xmlMedia]
-  }
-
-  getTags() {
-    const tags = this.enNote['en-export'].note.tag
-    if (!tags) return null
-    return Array.isArray(tags) ? tags : [tags]
-  }
-
-  getEnResources() {
-    const resources = this.enNote["en-export"]['note']['resource']
-    if (!resources) return null
-    return Array.isArray(resources) ? resources : [resources]
-  }
-
-  getSource() {
-    return this.enNote['en-export'].note['note-attributes'].source
-  }
-
-  getSourceURL() {
-    return this.enNote['en-export'].note['note-attributes']['source-url']
-  }
-
-  getAdded() {
-    const addedDate = this.enNote['en-export'].note.created
-    if (!addedDate) {
-      return new Date().toISOString()
-    }
-    return dayjs(addedDate, 'YYYYMMDDTHHmmss[Z]').toISOString()
-  }
-
-  convertResourceToFile(resource: EnResource) {
-    let binaryStr: string = ''
-    let byteArray: Uint8Array<ArrayBuffer>
-
-    try {
-      binaryStr = atob(resource.data['#text']);
-      byteArray = new Uint8Array(binaryStr.length)
-    } catch (err) {
-      console.error('Error converting resource file')
-      return
+        this.enResources = this.getEnResources()
+        this.title = this.enNote['en-export'].note.title
+        this.added = this.getAdded()
+        this.updated = this.enNote['en-export'].note.updated
+        this.source = this.getSource()
+        this.sourceURL = this.getSourceURL()
+        this.description = createDescription(this.content)
     }
 
-    for (let i = 0; i < binaryStr.length; i++) {
-      byteArray[i] = binaryStr.charCodeAt(i);
-    }
-    // Create a Blob
-    const blob = new Blob([byteArray], { type: resource.mime });
+    parseEnex(fileContent: string) {
+        const xmlNote: EnNote = parser.parse(fileContent)
+        const xmlMedia: EnMedia = parser.parse(xmlNote['en-export']['note']['content'])['en-note']['en-media']
+        const xmlContent = xmlNote['en-export']['note']['content'].match(/<en-note[\s\S]*<\/en-note>/)?.[0] as string
 
-    return new File([blob], resource['resource-attributes']['file-name'] || 'unknown', {
-      type: resource.mime,
-    });
-  }
-
-  async uploadResources() {
-    let files: File[] = []
-    if (!this.enResources || this.enResources.length === 0) return
-    for (const [index, resource] of this.enResources.entries()) {
-      if (!resource) continue
-
-      // converts to binary
-      const binaryStr = atob(resource.data['#text']);
-
-      // adds hash
-      resource.hash = SparkMD5.hashBinary(binaryStr);
-
-      // adds file and converts to file
-      resource.file = this.convertResourceToFile(resource)
-
-      // upload to database
-      const { data: record, error: uploadError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
-        'attachments+': [resource.file]
-      }))
-
-      if (uploadError) {
-        console.error('Error updating record: ', uploadError.message, uploadError.data)
-        continue
-      }
-
-      if (!record) continue
-
-      // console.log(resource)
-      resource.name = record.attachments[index]
-      resource.fileURL = `${baseURL}/${notesCollection}/${this.recordID}/${resource.name}`
-
-      if (!resource.file) continue
-
-      files.push(resource.file)
-    }
-  }
-
-  replaceEnMedia() {
-    // replaces en-media with regular html tags within content
-    const mediaMatch = /<en-media[^>]+?hash="([a-zA-Z0-9]+)"[^>]*\/?>/g
-
-    if (!this.enResources || this.enResources.length === 0) return
-
-    const enResources = this.enResources
-
-    const replaceMedia = (match: string, hash: string) => {
-      const resource = enResources.filter((resource) => {
-        return resource.hash == hash
-      })
-
-      if (!resource || resource.length === 0) return ''
-
-      if (!resource[0].fileURL) return
-
-      const fileName = resource[0]["resource-attributes"]['file-name'] || 'untitled'
-
-      return addMediaToContent(resource[0].mime, resource[0].fileURL, fileName)
+        return {
+            xmlNote,
+            xmlMedia,
+            xmlContent
+        }
     }
 
-    this.content = this.content.replace(mediaMatch, replaceMedia);
-  }
-
-  async addTags() {
-    if (!this.tags) return ['']
-    if (this.tags.length == 1 && this.tags[0] == '') return ['']
-
-    const tagList: string[] = []
-
-    const { data: existingTags, error } = await tryCatch<RecordModel[], PError>(pb.collection('tags').getFullList())
-
-    if (error) {
-      console.error('Unable to get all tags: ', error.message)
-      return ['']
+    getEnMedias(xmlMedia: EnMedia | EnMedia[]) {
+        if (!xmlMedia) return null
+        return Array.isArray(xmlMedia) ? xmlMedia : [xmlMedia]
     }
 
-    if (!existingTags) return ['']
+    getTags() {
+        const tags = this.enNote['en-export'].note.tag
+        if (!tags) return null
+        return Array.isArray(tags) ? tags : [tags]
+    }
 
-    const existingTagNames = new Set(existingTags.map((tag: { name: string }) => tag.name))
+    getEnResources() {
+        const resources = this.enNote["en-export"]['note']['resource']
+        if (!resources) return null
+        return Array.isArray(resources) ? resources : [resources]
+    }
 
-    for (const tag of this.tags) {
-      if (existingTagNames.has(tag.toLowerCase())) {
-        const record = existingTags.find((record: { name: string }) => record.name === tag.toLowerCase())
-        tagList.push(record.id)
-      } else {
-        const { data: newTag, error: newTagError } = await tryCatch<RecordModel[], PError>(pb.collection('tags').create({ 'name': tag.toLowerCase() }))
+    getSource() {
+        return this.enNote['en-export'].note['note-attributes'].source
+    }
 
-        if (newTagError) {
-          console.error('Unable to make new tags: ', newTagError.message, tag)
-          return ['']
+    getSourceURL() {
+        return this.enNote['en-export'].note['note-attributes']['source-url']
+    }
+
+    getAdded() {
+        const addedDate = this.enNote['en-export'].note.created
+        if (!addedDate) {
+            return new Date().toISOString()
+        }
+        return dayjs(addedDate, 'YYYYMMDDTHHmmss[Z]').toISOString()
+    }
+
+    convertResourceToFile(resource: EnResource) {
+
+        let binaryStr: string = ''
+        let byteArray: Uint8Array<ArrayBuffer>
+
+        try {
+            binaryStr = atob(resource.data['#text']);
+            byteArray = new Uint8Array(binaryStr.length)
+        } catch (err) {
+            console.error('Error converting resource file')
+            return
         }
 
-        if (!newTag) return ['']
+        for (let i = 0; i < binaryStr.length; i++) {
+            byteArray[i] = binaryStr.charCodeAt(i);
+        }
 
-        tagList.push(newTag.id)
-      }
-    }
-    return tagList
-  }
+        const originalMime = resource.mime;
+        const fileName = resource['resource-attributes']['file-name'] || 'unknown';
+        const correctedMime = getMimeFromName(fileName, originalMime)
 
-  getPocketbaseResources(enResources: EnResource[] | null) {
-    if (!enResources) return
-    if (enResources.length === 0) return
-    let resources: Resource[] = []
-    for (const enResource of enResources) {
-      const resource: Resource = {
-        name: enResource.name,
-        size: enResource.file?.size,
-        hash: enResource.hash,
-        type: enResource.mime,
-        fileURL: enResource.fileURL,
-        lastUpdated: new Date().toISOString(),
-        sourceURL: enResource['resource-attributes']['source-url'],
-        width: enResource.width,
-        height: enResource.height,
-        latitude: enResource['resource-attributes'].latitude,
-        longitude: enResource['resource-attributes'].longitude,
-        timestamp: enResource['resource-attributes'].timestamp,
-        cameraMake: enResource['resource-attributes']['camera-make']
-      }
-      resources.push(resource)
-    }
-    return resources
-  }
+        const blob = new Blob([byteArray], { type: correctedMime });
 
-  async uploadToDB() {
-    const tags = await this.addTags()
-    const sources = [{
-      'source': this.source,
-      'source_url': this.sourceURL
-    }]
-    const skeletonData = {
-      'title': this.title,
-      'added': this.added,
-      'tags': tags,
-      'weight': 5,
-      'notebook': this.selectedNotebookdID,
-      'last_score_updated': new Date().toISOString(),
-      'sources': JSON.stringify(sources),
-      'status': 'active'
+        return new File([blob], fileName, { type: correctedMime });
     }
 
-    const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).create(skeletonData))
+    async uploadResources() {
+        let files: File[] = []
+        if (!this.enResources || this.enResources.length === 0) return
+        for (const [index, resource] of this.enResources.entries()) {
+            if (!resource) continue
 
-    if (error) {
-      if (error.data.data.title.code == "validation_not_unique") {
-        throw new Error('Skipped duplicate note')
-      }
-      console.log('Error uploading file: ', error.message, error.data)
-      throw (error)
+            // converts to binary
+            const binaryStr = atob(resource.data['#text']);
+
+            // adds hash
+            resource.hash = SparkMD5.hashBinary(binaryStr);
+
+            // adds file and converts to file
+            resource.file = this.convertResourceToFile(resource)
+
+            // upload to database
+            const { data: record, error: uploadError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, {
+                'attachments+': [resource.file]
+            }))
+
+            if (uploadError) {
+                console.error('Error updating record: ', uploadError.message, uploadError.data)
+                continue
+            }
+
+            if (!record) continue
+
+            // console.log(resource)
+            resource.name = record.attachments[index]
+            resource.fileURL = `${baseURL}/${notesCollection}/${this.recordID}/${resource.name}`
+            resource.mime = getMimeFromName(resource.name, resource.mime)
+        }
     }
 
-    this.recordID = record.id
+    replaceEnMedia() {
+        // replaces en-media with regular html tags within content
+        const mediaMatch = /<en-media[^>]+?hash="([a-zA-Z0-9]+)"[^>]*\/?>/g
 
-    await this.uploadResources()
-    this.replaceEnMedia()
-    // this.content = sanitizeContent(this.content)
-    const resources = this.getPocketbaseResources(this.enResources)
-    await createThumbnail(this.recordID, resources)
+        if (!this.enResources || this.enResources.length === 0) return
 
-    const data = {
-      'content': this.content,
-      'original_content': this.content,
-      'description': this.description,
-      'resources': resources
+        const enResources = this.enResources
+
+        const replaceMedia = (match: string, hash: string) => {
+            const resource = enResources.filter((resource) => {
+                return resource.hash == hash
+            })
+
+            if (!resource || resource.length === 0) return ''
+
+            if (!resource[0].fileURL) return
+
+            const fileName = resource[0]["resource-attributes"]['file-name'] || 'untitled'
+            const originalMime = resource[0].mime;
+            const correctedMime = getMimeFromName(fileName, originalMime)
+
+            return addMediaToContent(correctedMime, resource[0].fileURL, fileName)
+        }
+
+        this.content = this.content.replace(mediaMatch, replaceMedia);
     }
 
-    const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
+    async addTags() {
+        if (!this.tags) return ['']
+        if (this.tags.length == 1 && this.tags[0] == '') return ['']
 
-    if (updatedError) {
-      console.error('Error updating record: ', updatedError.message, error.data)
+        const tagList: string[] = []
+
+        const { data: existingTags, error } = await tryCatch<RecordModel[], PError>(pb.collection('tags').getFullList())
+
+        if (error) {
+            console.error('Unable to get all tags: ', error.message)
+            return ['']
+        }
+
+        if (!existingTags) return ['']
+
+        const existingTagNames = new Set(existingTags.map((tag: { name: string }) => tag.name))
+
+        for (const tag of this.tags) {
+            if (existingTagNames.has(tag.toLowerCase())) {
+                const record = existingTags.find((record: { name: string }) => record.name === tag.toLowerCase())
+                tagList.push(record.id)
+            } else {
+                const { data: newTag, error: newTagError } = await tryCatch<RecordModel[], PError>(pb.collection('tags').create({ 'name': tag.toLowerCase() }))
+
+                if (newTagError) {
+                    console.error('Unable to make new tags: ', newTagError.message, tag)
+                    return ['']
+                }
+
+                if (!newTag) return ['']
+
+                tagList.push(newTag.id)
+            }
+        }
+        return tagList
     }
-  }
+
+    getPocketbaseResources(enResources: EnResource[] | null) {
+        if (!enResources) return
+        if (enResources.length === 0) return
+        let resources: Resource[] = []
+        for (const enResource of enResources) {
+            const resource: Resource = {
+                name: enResource.name,
+                size: enResource.file?.size,
+                hash: enResource.hash,
+                type: enResource.mime,
+                fileURL: enResource.fileURL,
+                lastUpdated: new Date().toISOString(),
+                sourceURL: enResource['resource-attributes']['source-url'],
+                width: enResource.width,
+                height: enResource.height,
+                latitude: enResource['resource-attributes'].latitude,
+                longitude: enResource['resource-attributes'].longitude,
+                timestamp: enResource['resource-attributes'].timestamp,
+                cameraMake: enResource['resource-attributes']['camera-make']
+            }
+            resources.push(resource)
+        }
+        return resources
+    }
+
+    async uploadToDB() {
+        const tags = await this.addTags()
+        const sources = [{
+            'source': this.source,
+            'source_url': this.sourceURL
+        }]
+        const skeletonData = {
+            'title': this.title,
+            'added': this.added,
+            'tags': tags,
+            'weight': 5,
+            'notebook': this.selectedNotebookdID,
+            'last_score_updated': new Date().toISOString(),
+            'sources': JSON.stringify(sources),
+            'status': 'active'
+        }
+
+        const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).create(skeletonData))
+
+        if (error) {
+            if (error.data.data.title.code == "validation_not_unique") {
+                throw new Error('Skipped duplicate note')
+            }
+            console.log('Error uploading file: ', error.message, error.data)
+            throw (error)
+        }
+
+        this.recordID = record.id
+
+        await this.uploadResources()
+        this.replaceEnMedia()
+        const resources = this.getPocketbaseResources(this.enResources)
+        await createThumbnail(this.recordID, resources)
+
+        const data = {
+            'content': this.content,
+            'original_content': this.content,
+            'description': this.description,
+            'resources': resources
+        }
+
+        const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
+
+        if (updatedError) {
+            console.error('Error updating record: ', updatedError.message, error.data)
+        }
+    }
 }
 
 export class fileImport {
-  title: string
-  file: File
-  mimeType: string
-  content: string
-  added: string
-  fileURL: string
-  recordID: string
-  selectedNotebookdID: string
+    title: string
+    file: File
+    mimeType: string
+    content: string
+    added: string
+    fileURL: string
+    recordID: string
+    selectedNotebookdID: string
 
-  constructor(file: File, selectedNotebookID: string) {
-    this.file = file
-    this.mimeType = file.type
-    this.recordID = ''
-    this.fileURL = ''
-    this.content = ''
-    this.title = `${file.name} ${dayjs(Date()).format('MM-DD-YYYY')}`
-    this.selectedNotebookdID = selectedNotebookID
-    this.added = new Date().toISOString()
-  }
-
-  async uploadResources() {
-    const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).update(this.recordID, {
-      'attachments+': [this.file]
-    }))
-
-    if (error) {
-      console.error('Error adding attachments: ', error.message)
+    constructor(file: File, selectedNotebookID: string) {
+        this.file = file
+        this.mimeType = file.type
+        this.recordID = ''
+        this.fileURL = ''
+        this.content = ''
+        this.title = `${file.name} ${dayjs(Date()).format('MM-DD-YYYY')}`
+        this.selectedNotebookdID = selectedNotebookID
+        this.added = new Date().toISOString()
     }
 
-    if (!record) return
+    async uploadResources() {
+        const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).update(this.recordID, {
+            'attachments+': [this.file]
+        }))
 
-    // await createThumbnail(this.recordID, [this.file])
-    // update attachment URL
-    this.fileURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
-  }
+        if (error) {
+            console.error('Error adding attachments: ', error.message)
+        }
 
-  async uploadToDB() {
+        if (!record) return
 
-    const skeletonData = {
-      'title': this.title,
-      'notebook': this.selectedNotebookdID,
-      'last_score_updated': new Date().toISOString(),
-      'weight': 5,
-      'added': this.added,
-      'status': 'active'
+        // await createThumbnail(this.recordID, [this.file])
+        // update attachment URL
+        this.fileURL = `${baseURL}/${notesCollection}/${this.recordID}/${record.attachments[0]}`
     }
 
-    const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).create(skeletonData))
+    async uploadToDB() {
 
-    if (error) {
-      if (error.data.data.title.code == "validation_not_unique") {
-        throw new Error('Skipped duplicate note')
-      }
-      throw (error)
+        const skeletonData = {
+            'title': this.title,
+            'notebook': this.selectedNotebookdID,
+            'last_score_updated': new Date().toISOString(),
+            'weight': 5,
+            'added': this.added,
+            'status': 'active'
+        }
+
+        const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).create(skeletonData))
+
+        if (error) {
+            if (error.data.data.title.code == "validation_not_unique") {
+                throw new Error('Skipped duplicate note')
+            }
+            throw (error)
+        }
+
+        if (!record) return
+        this.recordID = record.id
+
+        await this.uploadResources()
+        this.content = addMediaToContent(this.mimeType, this.fileURL, this.file.name)
+        const hash = await getFileHash(this.file)
+        const resources = [getPocketbaseResource(this.file, hash, this.fileURL)]
+        await createThumbnail(this.recordID, resources)
+
+        const data = {
+            'content': this.content,
+            'original_content': this.content,
+            'resources': resources
+        }
+
+        const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
+
+        if (updatedError) {
+            console.error('Error updating record: ', updatedError.message)
+        }
     }
-
-    if (!record) return
-    this.recordID = record.id
-
-    await this.uploadResources()
-    this.content = addMediaToContent(this.mimeType, this.fileURL, this.file.name)
-    const hash = await getFileHash(this.file)
-    const resources = [getPocketbaseResource(this.file, hash, this.fileURL)]
-    await createThumbnail(this.recordID, resources)
-
-    const data = {
-      'content': this.content,
-      'original_content': this.content,
-      'resources': resources
-    }
-
-    const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
-
-    if (updatedError) {
-      console.error('Error updating record: ', updatedError.message)
-    }
-  }
 }
