@@ -95,6 +95,7 @@
 			onclick={() => {
 				clearAll();
 				isOpen = false;
+				searchText = '';
 			}}
 			class="btn">Clear all existing note tags</button
 		>
