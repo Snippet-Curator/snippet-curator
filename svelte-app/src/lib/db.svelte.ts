@@ -614,7 +614,6 @@ export class NotelistState {
             const body = content.querySelector('body')?.innerHTML ?? ''
 
             mergedHead.push(head)
-
             mergedBody.push(body)
         }
 
@@ -631,7 +630,6 @@ export class NotelistState {
                 ${finalBody}
             </body>
             </html>`.trim();
-
         return finalHTML;
     }
 
