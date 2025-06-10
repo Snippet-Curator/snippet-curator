@@ -115,9 +115,10 @@
 		currentFile = '';
 		uploadStatus = 'completed';
 
-		await notebookState.getAll();
 		await tagState.getAll();
 		await notebookState.getAll();
+		await notebookState.getInbox();
+		await notebookState.getAllCounts();
 
 		// resubscribe
 		await pb.collection('notes').subscribe('*', async () => {
