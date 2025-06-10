@@ -7,6 +7,7 @@ export type Resource = {
   type: string
   lastUpdated: string
   fileURL: string // this is pocketbase url
+  oldFileURL?: string // this is original pocketbase URL if merge notes. Used to replace to new URL after merge
   sourceURL?: string
   width?: number
   height?: number
@@ -42,6 +43,7 @@ export type Note = {
   id: string,
   title: string
   content: string
+  "original_content": string
   notebook: string
   added: string
   last_opened: string
@@ -51,6 +53,7 @@ export type Note = {
   source: string
   source_url: string
   attachments: string[]
+  tags: string[]
   expand?: {
     notebook?: Notebook,
     tags?: Tag[]
@@ -118,7 +121,7 @@ export interface Props {
   }
 }
 
-// ------ Evernote ------ 
+// ------ Parser ------ 
 
 export type EnResource = {
   data: {
@@ -169,5 +172,13 @@ export type EnNote = {
       resource?: EnResource | EnResource[]
     }
   }
+}
+
+// ------ DB ------
+
+
+export type NoteType = {
+  type: 'tags' | 'notebooks' | 'default' | 'archive' | 'trash',
+  id?: string
 }
 

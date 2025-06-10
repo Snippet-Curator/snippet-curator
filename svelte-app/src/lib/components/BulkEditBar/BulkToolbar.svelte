@@ -8,6 +8,7 @@
 	import BulkTags from './bulk-tags.svelte';
 	import BulkArchive from './bulk-archive.svelte';
 	import BulkDelete from './bulk-delete.svelte';
+	import BulkMerge from './bulk-merge.svelte';
 
 	type Props = {
 		selectedNotesID: string[];
@@ -44,6 +45,14 @@
 		<div id="button-wrap" class="gap-golden-md grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
 			<BulkNotebook {selectedNotesID} bind:isOpen={isEditNotebookOpen} />
 			<BulkTags {selectedNotesID} bind:isOpen={isEditTagsOpen} />
+			<BulkMerge
+				{selectedNotesID}
+				merge={async () => {
+					await notelistState.mergeNotes(selectedNotesID);
+					updatePage();
+					isBulkEdit = false;
+				}}
+			></BulkMerge>
 			{#if !isTrash}
 				<BulkArchive
 					{selectedNotesID}

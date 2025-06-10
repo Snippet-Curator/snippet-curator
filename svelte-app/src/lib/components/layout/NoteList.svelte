@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import type { NoteList, Note } from '$lib/types';
 	import { Blank, NoteLoading } from '$lib/components/';
-	import { replacePbUrl } from '$lib/db.svelte';
+	import { replacePbUrl } from '$lib/utils';
 
 	type Props = {
 		isBulkEdit: boolean;

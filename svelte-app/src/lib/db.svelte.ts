@@ -1,34 +1,41 @@
 import PocketBase, { type RecordModel } from 'pocketbase'
-import { type Notebook, type Tag, type Note, type NoteRecord, type PError, type Setting } from './types';
+import { type Notebook, type Tag, type Note, type NoteRecord, type PError, type Setting, type NoteType, type Resource } from './types';
 import { getContext, setContext } from 'svelte'
 import { tryCatch } from './utils.svelte'
+import { superUser, superUserPass, notebooksCollection, notesCollection, tagsCollection, viewTagsCollectionName, viewNotesCollection, viewNotebooksCollection, settingCollection, inboxNotebook, pbURL, baseURL } from './const';
 
-export const pbURL = import.meta.env.VITE_PB_URL || 'http://127.0.0.1:8090'
 const pb = new PocketBase(pbURL)
-const notebooksCollection = 'notebooks'
-const notesCollection = 'notes'
-const tagsCollection = 'tags'
-const viewTagsCollectionName = 'tags_with_note_counts'
-const viewNotesCollection = 'notes_without_content'
-const viewNotebooksCollection = 'notebooks_with_note_counts'
-const settingCollection = 'settings'
-
-const superUser = 'admin@pocketbase.com'
-const superUserPass = 'amiodarone'
-
-export type NoteType = {
-    type: 'tags' | 'notebooks' | 'default' | 'archive' | 'trash',
-    id?: string
-}
-
-export function replacePbUrl(content: string) {
-    if (pbURL == 'http://127.0.0.1:8090') return content
-    return content.replace(/http:\/\/127\.0\.0\.1:8090/g, pbURL)
-}
 
 export async function getAuth() {
     await pb.collection('_superusers').authWithPassword(superUser, superUserPass)
     console.log("Logged in to Pocket client: ", pb.authStore.isValid)
+}
+
+export async function makeDefaultNotebook() {
+    const { data, error } = await tryCatch<RecordModel, PError>(pb.collection(notebooksCollection).create({ name: inboxNotebook })
+    )
+
+    if (error) {
+        if (error.data.data.name.code == "validation_not_unique") {
+            console.log('Inbox already exists')
+        } else {
+            console.error('Error making Inbox: ', error.message)
+        }
+    }
+}
+
+export async function uploadFileToPocketbase(recordID: string, file: File) {
+    // upload to database
+    const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).update(recordID, {
+        'attachments+': [file],
+    }))
+
+    if (error || !record) {
+        console.error('Error uploading file: ', error.message)
+        return ''
+    }
+
+    return `${baseURL}\/${notesCollection}\/${recordID}\/${record.attachments.at(-1)}`
 }
 
 export class TagState {
@@ -306,53 +313,6 @@ export class NotebookState {
     }
 }
 
-// export class defaultNotebooksState {
-//     inbox = $state<Note>()
-//     inboxID = $state<string>('')
-//     inboxCount = $state<number>(0)
-//     totalNoteCount = $state<number>(0)
-
-//     constructor() {
-//         $effect(() => {
-//             pb.collection(notebooksCollection).subscribe('*', async () => {
-//                 this.getAll()
-//                 this.getAllCounts()
-//             });
-//             pb.collection(notesCollection).subscribe('*', async () => {
-//                 this.getAll()
-//                 this.getAllCounts()
-//             });
-//         })
-//     }
-
-//     async getAll() {
-
-//         const { data: inbox, error } = await tryCatch(pb.collection(viewNotebooksCollection).getFirstListItem(`name="Inbox"`))
-
-//         if (error) {
-//             console.error('Error while getting inbox: ', error.message)
-//         }
-
-//         if (!inbox) {
-//             return
-//         }
-
-//         this.inbox = inbox
-//         this.inboxCount = inbox.note_count
-//         this.inboxID = inbox.id
-//     }
-
-//     async getAllCounts() {
-//         const { data, error } = await tryCatch(pb.collection(notesCollection).getList(1, 1))
-
-//         if (error) {
-//             console.error('Error while getting all notebooks: ', error.message)
-//         }
-
-//         this.totalNoteCount = data.totalItems
-//     }
-// }
-
 export class NotelistState {
     notes = $state<NoteRecord>({
         items: [],
@@ -399,7 +359,6 @@ export class NotelistState {
         }
         return data
     }
-
 
     async getByPage(newPage = 1) {
         const start = performance.now()
@@ -615,6 +574,150 @@ export class NotelistState {
         // await this.getDefault(this.clickedPage)
     }
 
+    private mergeSources(notes: Note[]) {
+        const allSources = notes.flatMap(n => n.sources || [])
+
+        const uniqueSources = Array.from(
+            new Map(
+                allSources.map(src => [`${src.source}|${src.source_url}`, src])).values()
+        )
+        return uniqueSources
+    }
+
+    private mergeResources(originalResources: Resource[] = [], newResources: Resource[] = []) {
+        if (!originalResources || !newResources) return
+
+        const all = [...originalResources, ...newResources];
+
+        // Deduplicate by resource.hash
+        const seen = new Set();
+        const deduped = [];
+
+        for (const res of all) {
+            if (!seen.has(res.hash)) {
+                seen.add(res.hash);
+                deduped.push(res);
+            }
+        }
+
+        return deduped;
+    }
+
+    private mergeContent(notes: Note[]) {
+        const parser = new DOMParser()
+        let mergedHead: string[] = []
+        let mergedBody: string[] = []
+
+        for (const note of notes) {
+            const content = parser.parseFromString(note.content, 'text/html')
+            const head = content.querySelector('head')?.innerHTML ?? ''
+            const body = content.querySelector('body')?.innerHTML ?? ''
+
+            mergedHead.push(head)
+
+            mergedBody.push(body)
+        }
+
+        const finalHead = mergedHead.join('\n');
+        const finalBody = mergedBody.join('\n\n<br/>\n\n');
+
+        const finalHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                ${finalHead}
+            </head>
+            <body>
+                ${finalBody}
+            </body>
+            </html>`.trim();
+
+        return finalHTML;
+    }
+
+    private createMergedNoteData(notes: Note[], newResources: Resource[]) {
+        const [base, ...rest] = notes
+        let content = this.mergeContent(notes)
+
+        for (const resource of newResources) {
+            if (!resource.oldFileURL) continue
+            content = content.replace(resource.oldFileURL, resource.fileURL)
+        }
+
+        return {
+            title: base.title,
+            notebook: base.notebook,
+            tags: [...new Set(notes.flatMap(n => n.tags || []))],
+            last_opened: new Date().toISOString(),
+            sources: this.mergeSources(notes),
+            resources: this.mergeResources(base.resources, newResources),
+            description: notes.map(n => n.description).join('\n\n'),
+            content: content,
+            'original_content': content,
+        }
+    }
+
+    async downloadAttachmentByURL(fileURL: string, fileName: string, fileType: string) {
+        const response = await fetch(fileURL);
+        const blob = await response.blob();
+        return new File([blob], fileName, { type: fileType });
+    }
+
+    async createOneNewResource(recordID: string, resource: Resource) {
+        const attachment = await this.downloadAttachmentByURL(resource.fileURL, resource.name, resource.type)
+        return {
+            name: resource.name,
+            fileURL: await uploadFileToPocketbase(recordID, attachment),
+            oldFileURL: resource.fileURL,
+            hash: resource.hash,
+            type: resource.type,
+            size: resource.size,
+            lastUpdated: new Date().toISOString()
+        } as Resource
+    }
+
+    async createNewResources(recordID: string, records: RecordModel[]) {
+        let newResources: Resource[] = []
+        for (const record of records) {
+            if (!record.resources) continue
+            for (const resource of record.resources) {
+                if (!resource) continue
+                const newResource = await this.createOneNewResource(recordID, resource)
+                newResources.push(newResource)
+            }
+        }
+        return newResources
+    }
+
+    async mergeNotes(selectedNotesID: string[]) {
+        let selectedNotes = []
+
+        for (const selectedNoteID of selectedNotesID) {
+            const { data: selectedNote, error: selectedNoteError } = await tryCatch(pb.collection(notesCollection).getOne(selectedNoteID))
+
+            if (selectedNoteError) {
+                console.error('Error getting notes to merge: ', selectedNoteError.message)
+                continue
+            }
+            selectedNotes.push(selectedNote)
+        }
+
+        if (!selectedNotes || selectedNotes.length < 2) return
+        const [baseNote, ...restNotes] = selectedNotes;
+
+        const newResources = await this.createNewResources(baseNote.id, restNotes)
+        const mergedNoteData = this.createMergedNoteData(selectedNotes, newResources)
+
+        const { data: finalNote, error: finalNoteError } = await tryCatch(pb.collection(notesCollection).update(baseNote.id, mergedNoteData))
+
+        if (finalNoteError) {
+            console.error('Error updating final merged note: ', finalNoteError.data)
+        }
+
+        await Promise.all(
+            selectedNotes.slice(1).map(n => pb.collection(notesCollection).delete(n.id))
+        );
+    }
 }
 
 export class NoteState {
@@ -911,14 +1014,6 @@ export function setNoteState(NOTE_KEY: string) {
 export function getNoteState(NOTE_KEY: string) {
     return getContext<ReturnType<typeof setNoteState>>(NOTE_KEY)
 }
-
-// export function setDefaultNotebooksState() {
-//     return setContext(INBOX_KEY, new defaultNotebooksState())
-// }
-
-// export function getDefaultNotebooksState() {
-//     return getContext<ReturnType<typeof setDefaultNotebooksState>>(INBOX_KEY)
-// }
 
 export function setSettingState() {
     return setContext(SETTING_KEY, new settingState())

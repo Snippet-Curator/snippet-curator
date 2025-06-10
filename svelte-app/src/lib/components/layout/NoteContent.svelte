@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ImageViewer } from 'svelte-image-viewer';
-	import sanitizeHTML from 'sanitize-html';
+	// import sanitizeHTML from 'sanitize-html';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
 
 	import { fade, scale } from 'svelte/transition';
@@ -10,7 +10,8 @@
 
 	import { onMount } from 'svelte';
 	import { tryCatch } from '$lib/utils.svelte';
-	import pb, { replacePbUrl } from '$lib/db.svelte';
+	import pb from '$lib/db.svelte';
+	import { replacePbUrl } from '$lib/utils';
 
 	type Props = {
 		note: Note;
