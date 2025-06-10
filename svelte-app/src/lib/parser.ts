@@ -177,7 +177,7 @@ export class htmlImport {
 
             // replace media with new URL
             if (fileURL) {
-                updatedContent = updatedContent.replace(match[0], fileURL)
+                updatedContent = updatedContent.replace(match, fileURL)
             }
 
             // add matches to bodyMatches

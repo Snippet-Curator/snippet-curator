@@ -701,8 +701,8 @@ export class NotelistState {
         }
 
         if (!selectedNotes || selectedNotes.length < 2) return
-        const [baseNote, ...restNotes] = selectedNotes;
 
+        const [baseNote, ...restNotes] = selectedNotes;
         const newResources = await this.createNewResources(baseNote.id, restNotes)
         const mergedNoteData = this.createMergedNoteData(selectedNotes, newResources)
 
@@ -713,7 +713,9 @@ export class NotelistState {
         }
 
         await Promise.all(
-            selectedNotes.slice(1).map(n => pb.collection(notesCollection).delete(n.id))
+            selectedNotes.slice(1).map(n => pb.collection(notesCollection).update(n.id, {
+                'status': 'deleted'
+            }))
         );
     }
 }
