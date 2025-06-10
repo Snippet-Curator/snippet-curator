@@ -55,6 +55,7 @@
 						<Command.Item
 							onSelect={() => {
 								add(tag.id);
+								searchText = '';
 							}}
 							>{tag.name}
 						</Command.Item>
