@@ -658,7 +658,7 @@ export class NotelistState {
     }
 
     async downloadAttachmentByURL(fileURL: string, fileName: string, fileType: string) {
-        const response = await fetch(fileURL);
+        const response = await fetch(fileURL.replace(/^http:\/\/127\.0\.0\.1:8090/, pbURL));
         const blob = await response.blob();
         return new File([blob], fileName, { type: fileType });
     }
