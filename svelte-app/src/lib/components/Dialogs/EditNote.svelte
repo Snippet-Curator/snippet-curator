@@ -3,6 +3,7 @@
 	import * as Dialog from '$lib/components/ui/dialog/index';
 	import type { Snippet } from 'svelte';
 	import type { Note } from '$lib/types';
+	import { replacePbUrl } from '$lib/utils';
 
 	type Props = {
 		isOpen: boolean;
@@ -55,7 +56,7 @@
 								<img
 									class="peer-checked:border-primary border-base-100 w-[200px]
 										rounded-md border-4 transition-transform duration-150 ease-in-out peer-checked:scale-105"
-									src="{resource.fileURL}?thumb=200x0"
+									src="{replacePbUrl(resource.fileURL)}?thumb=200x0"
 									alt=""
 								/>
 							</label>
