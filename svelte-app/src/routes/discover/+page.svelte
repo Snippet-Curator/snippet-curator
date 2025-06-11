@@ -113,7 +113,7 @@
 		</Topbar.Root>
 
 		<div class="h-[calc(100vh-60px)]">
-			<NoteContent {note} />
+			<NoteContent {noteState} />
 		</div>
 
 		<Navbar class="p-golden-md bg-base-100 flex flex-col items-end gap-y-2 rounded-md">

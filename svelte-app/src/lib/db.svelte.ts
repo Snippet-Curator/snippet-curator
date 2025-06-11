@@ -896,7 +896,7 @@ export class NoteState {
         }))
 
         if (error) {
-            console.error('Unable to archive note: ', error)
+            console.error('Error archiving note: ', error.message)
         }
     }
 
@@ -906,7 +906,27 @@ export class NoteState {
         }))
 
         if (error) {
-            console.error('Unable to archive note: ', error)
+            console.error('Error unarchiving note: ', error.message)
+        }
+    }
+
+    async changeTitle(newTitle: string) {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+            title: newTitle
+        }))
+
+        if (error) {
+            console.error('Error changing note title: ', error.message)
+        }
+    }
+
+    async changeThumbnail(newThumbURL: string) {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+            thumbnail: newThumbURL
+        }))
+
+        if (error) {
+            console.error('Error changing note thumbnail: ', error.message)
         }
     }
 }

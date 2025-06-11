@@ -10,15 +10,18 @@
 
 	import { onMount } from 'svelte';
 	import { tryCatch } from '$lib/utils.svelte';
-	import pb from '$lib/db.svelte';
+	import pb, { NoteState } from '$lib/db.svelte';
 	import { replacePbUrl } from '$lib/utils';
 
 	type Props = {
-		note: Note;
+		noteState: NoteState;
 	};
 
-	let { note }: Props = $props();
-	let content = $derived.by(() => replacePbUrl(note.content));
+	let { noteState }: Props = $props();
+	let note = $derived(noteState.note);
+	let content = $derived(replacePbUrl(noteState.note.content));
+	let noteTitle = $state(noteState.note.title);
+
 	let iframe = $state();
 	let doc = $state();
 	let fontScale = $state(1);
@@ -161,7 +164,11 @@
 
 <div class="bg-base-100/90 p-golden-sm md:p-golden-md z-20 flex w-full px-4 md:sticky md:top-0">
 	<div class="flex w-full">
-		<h2 class="card-title grow truncate">{note.title}</h2>
+		<input
+			class="card-title focus:ring-base-content/40 mr-2 grow truncate rounded-sm border-0"
+			bind:value={noteTitle}
+			onchange={() => noteState.changeTitle(noteTitle)}
+		/>
 		<div
 			class="text-base-content/20 hover:text-base-content hidden items-center gap-x-4 transition-colors duration-300 md:flex"
 		>

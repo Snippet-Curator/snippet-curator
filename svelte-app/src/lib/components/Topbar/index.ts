@@ -13,6 +13,7 @@ import Keyboard from './topbar-keys.svelte'
 import SidebarIcon from './topbar-sidebar.svelte'
 import NavBtns from './topbar-next-previous.svelte'
 import Weight from './topbar-weight.svelte'
+import Edit from './topbar-edit.svelte'
 
 export {
   Archive,
@@ -28,5 +29,6 @@ export {
   Keyboard,
   SidebarIcon,
   Weight,
+  Edit,
   Topbar as Root,
 }

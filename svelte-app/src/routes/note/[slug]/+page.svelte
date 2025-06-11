@@ -1,8 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { NoteContent, Delete, EditNotebook, EditTags, NoteLoading } from '$lib/components/';
+	import {
+		NoteContent,
+		Delete,
+		EditNotebook,
+		EditTags,
+		NoteLoading,
+		EditNote
+	} from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
 	import * as Topbar from '$lib/components/Topbar/index';
+
 	import { getMobileState } from '$lib/utils.svelte';
 
 	const noteState = new NoteState(page.params.slug);
@@ -12,6 +20,7 @@
 	let isDeleteOpen = $state(false);
 	let isEditTagsOpen = $state(false);
 	let isEditNotebookOpen = $state(false);
+	let isEditNoteOpen = $state(false);
 
 	const initialLoading = noteState.getNote();
 	noteState.updateLastOpened();
@@ -44,6 +53,8 @@
 			<div class="divider divider-horizontal"></div>
 		{/if}
 
+		<Topbar.Edit bind:isOpen={isEditNoteOpen} />
+
 		<Topbar.Archive
 			noteStatus={noteState.note.status}
 			archive={() => {
@@ -59,7 +70,7 @@
 		<Topbar.Info {note} />
 	</Topbar.Root>
 	<div class="h-[calc(100vh-60px)]">
-		<NoteContent {note} />
+		<NoteContent {noteState} />
 	</div>
 
 	<Delete
@@ -85,4 +96,13 @@
 			noteState.changeNotebook(selectedNotebookID);
 		}}
 	></EditNotebook>
+
+	<EditNote
+		{note}
+		thumbURL={note?.thumbnail}
+		bind:isOpen={isEditNoteOpen}
+		action={(selectedThumbnailURL) => {
+			noteState.changeThumbnail(selectedThumbnailURL);
+		}}
+	></EditNote>
 {/await}

@@ -24,4 +24,5 @@ export { default as ChangeParent } from './Dialogs/ChangeParent.svelte'
 export { default as EditNotebook } from './Dialogs/EditNotebook.svelte'
 export { default as EditTags } from './Dialogs/EditTags.svelte'
 export { default as EditBulkTags } from './Dialogs/EditBulkTags.svelte'
+export { default as EditNote } from './Dialogs/EditNote.svelte'
 
