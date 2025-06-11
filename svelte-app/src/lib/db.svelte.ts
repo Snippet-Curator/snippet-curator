@@ -612,10 +612,13 @@ export class NotelistState {
             const content = parser.parseFromString(note.content, 'text/html')
             const head = content.querySelector('head')?.innerHTML ?? ''
             const body = content.querySelector('body')?.innerHTML ?? ''
+            const wrapped = `<div style="all: unset; display: block">${body}</div>`;
 
             mergedHead.push(head)
-            mergedBody.push(body)
+            mergedBody.push(wrapped)
         }
+
+
 
         const finalHead = mergedHead.join('\n');
         const finalBody = mergedBody.join('\n\n<br/>\n\n');
