@@ -160,6 +160,10 @@
 			document.dispatchEvent(new KeyboardEvent(event.type, event));
 		});
 	});
+
+	$effect(() => {
+		noteTitle = noteState.note.title;
+	});
 </script>
 
 <div class="bg-base-100/90 p-golden-sm md:p-golden-md z-20 flex w-full px-4 md:sticky md:top-0">
