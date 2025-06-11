@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { NoteContent, Delete, EditNotebook, EditTags, Navbar } from '$lib/components/';
+	import { NoteContent, Delete, EditNotebook, EditTags, Navbar, EditNote } from '$lib/components/';
 	import { NoteState } from '$lib/db.svelte';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { onMount } from 'svelte';
@@ -18,6 +18,7 @@
 	let isDeleteOpen = $state(false);
 	let isEditTagsOpen = $state(false);
 	let isEditNotebookOpen = $state(false);
+	let isEditNoteOpen = $state(false);
 
 	async function getNextNote() {
 		if (currentIndex == lastItemIndex && currentPage == totalPages) return;
@@ -97,6 +98,8 @@
 			{/if}
 			<div class="divider divider-horizontal hidden md:flex"></div>
 
+			<Topbar.Edit bind:isOpen={isEditNoteOpen} />
+
 			<Topbar.Archive
 				noteStatus={note.status}
 				archive={() => {
@@ -168,5 +171,14 @@
 			add={(selectedTags) => noteState.addTag(selectedTags)}
 			remove={(selectedTags) => noteState.removeTag(selectedTags)}
 		/>
+
+		<EditNote
+			{note}
+			thumbURL={note?.thumbnail}
+			bind:isOpen={isEditNoteOpen}
+			action={(selectedThumbnailURL) => {
+				noteState.changeThumbnail(selectedThumbnailURL);
+			}}
+		></EditNote>
 	{/if}
 {/await}

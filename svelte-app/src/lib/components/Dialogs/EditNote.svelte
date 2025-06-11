@@ -16,6 +16,10 @@
 	let { isOpen = $bindable(), action, children, note, thumbURL }: Props = $props();
 
 	let selectedThumbnailURL = $state<string>(thumbURL.split('?')[0]);
+
+	$effect(() => {
+		selectedThumbnailURL = thumbURL.split('?')[0];
+	});
 </script>
 
 <Dialog.Root open={isOpen}>
