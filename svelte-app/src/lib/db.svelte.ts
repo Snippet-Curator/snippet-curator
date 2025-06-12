@@ -592,15 +592,42 @@ export class NotelistState {
 
         for (const note of notes) {
             const content = parser.parseFromString(note.content, 'text/html')
+
             const head = content.querySelector('head')?.innerHTML ?? ''
-            const body = content.querySelector('body')?.innerHTML ?? ''
-            const wrapped = `<div style="all: unset; display: block">${body}</div>`;
-
             mergedHead.push(head)
-            mergedBody.push(wrapped)
+
+            const body = content.querySelector('body')
+
+            if (body) {
+                // Remove problematic Tailwind-style classes from all elements
+                body.querySelectorAll('[class]').forEach(el => {
+                    const classAttr = typeof el.className === 'string' ? el.className : el.getAttribute('class') || '';
+                    const classes = classAttr.split(/\s+/);
+                    const filtered = classes.filter(c =>
+                        !c.startsWith('min-h-') &&
+                        !c.startsWith('min-w-') &&
+                        !c.startsWith('h-screen') &&
+                        !c.startsWith('w-screen')
+                    );
+                    el.setAttribute('class', filtered.join(' '));
+                });
+
+                // Remove min-height inline styles
+                body.querySelectorAll('[style]').forEach(el => {
+                    const style = el.getAttribute('style') || '';
+                    if (style.includes('min-height')) {
+                        const newStyle = style
+                            .split(';')
+                            .filter(s => !s.trim().startsWith('min-height'))
+                            .join(';');
+                        el.setAttribute('style', newStyle);
+                    }
+                });
+
+                const wrapped = `<div style="all: unset; display: block;">${body.innerHTML}</div>`;
+                mergedBody.push(wrapped);
+            }
         }
-
-
 
         const finalHead = mergedHead.join('\n');
         const finalBody = mergedBody.join('\n\n<br/>\n\n');
