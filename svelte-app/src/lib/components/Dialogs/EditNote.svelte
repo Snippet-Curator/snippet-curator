@@ -66,6 +66,21 @@
 							</label>
 						{/if}
 					{/each}
+					<label class="gap-golden-md flex cursor-pointer items-center">
+						<input
+							type="radio"
+							class="peer sr-only"
+							value=""
+							bind:group={selectedThumbnailURL}
+							name="thumbnail"
+						/>
+						<div
+							class="peer-checked:border-primary border-base-100 bg-base-200 flex h-[200px] w-[200px] items-center justify-center
+                                rounded-md border-4 transition-transform duration-150 ease-in-out peer-checked:scale-105"
+						>
+							No Thumbnail
+						</div>
+					</label>
 				{/if}
 			</div>
 		</ScrollArea>
@@ -73,9 +88,12 @@
 		<div class="flex justify-end gap-x-2">
 			<button onclick={() => (isOpen = false)} class="btn">Close</button>
 			<button
-				disabled={!selectedThumbnailURL}
 				onclick={() => {
-					if (!selectedThumbnailURL) return;
+					if (!selectedThumbnailURL) {
+						action('');
+						isOpen = false;
+						return;
+					}
 					action(selectedThumbnailURL + '?thumb=500x0');
 					isOpen = false;
 				}}
