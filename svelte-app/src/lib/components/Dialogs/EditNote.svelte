@@ -58,8 +58,8 @@
 								/>
 
 								<img
-									class="peer-checked:border-primary border-base-100 w-[200px]
-										rounded-md border-4 transition-transform duration-150 ease-in-out peer-checked:scale-105"
+									class="peer-checked:border-primary border-base-100 border-base-200
+										w-[200px] rounded-md border-4 transition-transform duration-150 ease-in-out peer-checked:scale-105"
 									src="{replacePbUrl(resource.fileURL)}?thumb=200x0"
 									alt=""
 								/>
