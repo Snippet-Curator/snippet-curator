@@ -4,10 +4,18 @@
 
 	type Props = {
 		isOpen: boolean;
+		isPermaDeleteNoteOpen: boolean;
 		noteStatus: 'active' | 'archived' | 'deleted';
+		trash: () => void;
+		restore: () => void;
 	};
 
-	let { isOpen = $bindable(), noteStatus }: Props = $props();
+	let {
+		isOpen = $bindable(),
+		noteStatus,
+		restore,
+		isPermaDeleteNoteOpen = $bindable()
+	}: Props = $props();
 
 	function handler(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
@@ -34,14 +42,15 @@
 	});
 </script>
 
-{#snippet renderArchived(status: string, Icon)}
+{#snippet renderArchived(status: string, Icon, action: () => void)}
 	<div class="tooltip tooltip-bottom z-30" data-tip={status}>
-		<button onclick={() => (isOpen = true)} class="btn btn-ghost"><Icon size={18} /></button>
+		<button onclick={() => action()} class="btn btn-ghost"><Icon size={18} /></button>
 	</div>
 {/snippet}
 
-{#if noteStatus === 'active'}
-	{@render renderArchived('Delete', Trash2)}
+{#if noteStatus === 'active' || noteStatus === 'archived'}
+	{@render renderArchived('Delete', Trash2, () => (isOpen = true))}
 {:else if noteStatus === 'deleted'}
-	{@render renderArchived('Restore', Inbox)}
-{:else if noteStatus === 'archived'}{/if}
+	{@render renderArchived('Delete Forever', Trash2, () => (isPermaDeleteNoteOpen = true))}
+	{@render renderArchived('Restore', Inbox, restore)}
+{/if}

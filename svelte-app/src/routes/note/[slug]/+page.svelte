@@ -21,6 +21,7 @@
 	let isEditTagsOpen = $state(false);
 	let isEditNotebookOpen = $state(false);
 	let isEditNoteOpen = $state(false);
+	let isPermaDeleteNoteOpen = $state(false);
 
 	const initialLoading = noteState.getNote();
 	noteState.updateLastOpened();
@@ -62,11 +63,16 @@
 				window.history.back();
 			}}
 			unarchive={() => {
-				noteState.unArchiveNote();
+				noteState.restoreNote();
 				window.history.back();
 			}}
 		/>
-		<Topbar.Delete noteStatus={noteState.note.status} bind:isOpen={isDeleteOpen} />
+		<Topbar.Delete
+			noteStatus={noteState.note.status}
+			bind:isOpen={isDeleteOpen}
+			restore={() => noteState.restoreNote()}
+			bind:isPermaDeleteNoteOpen
+		/>
 		<Topbar.Info {note} />
 	</Topbar.Root>
 	<div class="h-[calc(100vh-60px)]">
@@ -80,6 +86,15 @@
 			noteState.softDeleteNote();
 			window.history.back();
 		}}>this note</Delete
+	>
+
+	<Delete
+		bind:isOpen={isPermaDeleteNoteOpen}
+		name="Note"
+		action={() => {
+			noteState.permaDeleteNote();
+			window.history.back();
+		}}>this note permanently</Delete
 	>
 
 	<EditTags

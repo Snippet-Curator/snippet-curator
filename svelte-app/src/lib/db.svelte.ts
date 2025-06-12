@@ -900,13 +900,24 @@ export class NoteState {
         }
     }
 
-    async unArchiveNote() {
+    async restoreNote() {
         const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
             status: 'active'
         }))
 
         if (error) {
-            console.error('Error unarchiving note: ', error.message)
+            console.error('Error restoring note: ', error.message)
+        }
+
+        await this.getNote()
+        return data
+    }
+
+    async permaDeleteNote() {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).delete(this.note.id))
+
+        if (error) {
+            console.error('Error deleting note: ', error.message)
         }
     }
 
