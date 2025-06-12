@@ -593,9 +593,7 @@ export class NotelistState {
         for (const note of notes) {
             const content = parser.parseFromString(note.content, 'text/html')
 
-            const head = content.querySelector('head')?.innerHTML ?? ''
-            mergedHead.push(head)
-
+            const head = content.querySelector('head')
             const body = content.querySelector('body')
 
             if (body) {
@@ -624,7 +622,14 @@ export class NotelistState {
                     }
                 });
 
+                // removes style min-height
+                head.querySelectorAll('style').forEach(style => {
+                    const cleaned = style.innerHTML.replace(/min-height\s*:\s*[\w]+/gi, '');
+                    style.innerHTML = cleaned;
+                });
+
                 const wrapped = `<div style="all: unset; display: block;">${body.innerHTML}</div>`;
+                mergedHead.push(head.innerHTML)
                 mergedBody.push(wrapped);
             }
         }
