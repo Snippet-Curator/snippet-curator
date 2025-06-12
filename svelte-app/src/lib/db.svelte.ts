@@ -955,9 +955,11 @@ export class NoteState {
         }
     }
 
-    async changeThumbnail(newThumbURL: string) {
+    async changeThumbnail(url: string) {
+        const thumbURL = url ? `${url}?thumb=500x0` : ''
+
         const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
-            thumbnail: `${newThumbURL}?thumb=500x0`
+            thumbnail: thumbURL
         }))
 
         if (error) {
