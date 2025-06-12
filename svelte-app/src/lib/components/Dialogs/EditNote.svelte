@@ -94,7 +94,7 @@
 						isOpen = false;
 						return;
 					}
-					action(selectedThumbnailURL + '?thumb=500x0');
+					action(selectedThumbnailURL);
 					isOpen = false;
 				}}
 				class="btn btn-primary">Save</button

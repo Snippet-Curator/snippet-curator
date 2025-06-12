@@ -3,7 +3,7 @@ import { type Notebook, type Tag, type Note, type NoteRecord, type PError, type 
 import { getContext, setContext } from 'svelte'
 import { tryCatch } from './utils.svelte'
 import { superUser, superUserPass, notebooksCollection, notesCollection, tagsCollection, viewTagsCollectionName, viewNotesCollection, viewNotebooksCollection, settingCollection, inboxNotebook, pbURL, baseURL } from './const';
-import { mergeResources } from './utils';
+import { addThumbnailToRecord, getResourceThumbURL, mergeResources } from './utils';
 
 const pb = new PocketBase(pbURL)
 
@@ -729,6 +729,16 @@ export class NotelistState {
             console.error('Error updating final merged note: ', finalNoteError.data)
         }
 
+        // create new thumbnail if doesn't have one
+        if (!baseNote.thumbnail) {
+            try {
+                const thumbResource = getResourceThumbURL(finalNote.resources)
+                await addThumbnailToRecord(baseNote.id, thumbResource?.fileURL)
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
         await Promise.all(
             selectedNotes.slice(1).map(n => pb.collection(notesCollection).update(n.id, {
                 'status': 'deleted'
@@ -947,7 +957,7 @@ export class NoteState {
 
     async changeThumbnail(newThumbURL: string) {
         const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
-            thumbnail: newThumbURL
+            thumbnail: `${newThumbURL}?thumb=500x0`
         }))
 
         if (error) {

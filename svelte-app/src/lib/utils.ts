@@ -178,6 +178,20 @@ export function mergeResources(originalResources: Resource[] | undefined | null,
     }
 }
 
+/**
+ * Add thumbnail to record with a given thumbURL. This also adds thumb 500x0 suffix
+ */
+export async function addThumbnailToRecord(recordID: string, thumbURL: string) {
+    const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(recordID, {
+        'thumbnail': `${thumbURL}?thumb=500x0`
+    }))
+
+    if (error) {
+        console.error('Error updating thumbURL: ', error.message)
+    }
+
+    return record
+}
 
 /**
  * Create thumbnail using all resources. Returns thumbnail as resource
