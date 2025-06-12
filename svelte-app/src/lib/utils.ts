@@ -87,7 +87,7 @@ export async function getVideoThumb(videoUrl: string): Promise<File> {
 
 
 /**
- * User the list of notes.resources to generate thumbnail URL. Uses biggest image first. If no image is found. Then it uses video file url
+ * Use the list of notes.resources to generate thumbnail URL. Uses biggest image first. If no image is found. Then it uses video file url
  */
 export function getResourceThumbURL(resources: Resource[]) {
 
