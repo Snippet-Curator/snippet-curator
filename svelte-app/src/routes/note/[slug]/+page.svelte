@@ -47,8 +47,8 @@
 		{#if !mobileState.isMobile}
 			<Topbar.Rating
 				rating={note.rating}
-				action={(newRating) => {
-					noteState.changeRating(newRating);
+				action={async (newRating) => {
+					await noteState.changeRating(newRating);
 				}}
 			/>
 			<div class="divider divider-horizontal"></div>
@@ -58,19 +58,19 @@
 
 		<Topbar.Archive
 			noteStatus={noteState.note.status}
-			archive={() => {
-				noteState.archiveNote();
+			archive={async () => {
+				await noteState.archiveNote();
 				window.history.back();
 			}}
-			unarchive={() => {
-				noteState.restoreNote();
+			unarchive={async () => {
+				await noteState.restoreNote();
 				window.history.back();
 			}}
 		/>
 		<Topbar.Delete
 			noteStatus={noteState.note.status}
 			bind:isOpen={isDeleteOpen}
-			restore={() => noteState.restoreNote()}
+			restore={async () => await noteState.restoreNote()}
 			bind:isPermaDeleteNoteOpen
 		/>
 		<Topbar.Info {note} />
@@ -82,8 +82,8 @@
 	<Delete
 		bind:isOpen={isDeleteOpen}
 		name="Note"
-		action={() => {
-			noteState.softDeleteNote();
+		action={async () => {
+			await noteState.softDeleteNote();
 			window.history.back();
 		}}>this note</Delete
 	>
@@ -91,8 +91,8 @@
 	<Delete
 		bind:isOpen={isPermaDeleteNoteOpen}
 		name="Note"
-		action={() => {
-			noteState.permaDeleteNote();
+		action={async () => {
+			await noteState.permaDeleteNote();
 			window.history.back();
 		}}>this note permanently</Delete
 	>
@@ -100,15 +100,15 @@
 	<EditTags
 		bind:isOpen={isEditTagsOpen}
 		currentTags={note.expand?.tags}
-		add={(selectedTags) => noteState.addTag(selectedTags)}
-		remove={(selectedTags) => noteState.removeTag(selectedTags)}
+		add={async (selectedTags) => await noteState.addTag(selectedTags)}
+		remove={async (selectedTags) => await noteState.removeTag(selectedTags)}
 	/>
 
 	<EditNotebook
 		currentNotebookID={note.expand?.notebook.id}
 		bind:isOpen={isEditNotebookOpen}
-		action={(selectedNotebookID) => {
-			noteState.changeNotebook(selectedNotebookID);
+		action={async (selectedNotebookID) => {
+			await noteState.changeNotebook(selectedNotebookID);
 		}}
 	></EditNotebook>
 
@@ -116,8 +116,8 @@
 		{note}
 		thumbURL={note?.thumbnail}
 		bind:isOpen={isEditNoteOpen}
-		action={(selectedThumbnailURL) => {
-			noteState.changeThumbnail(selectedThumbnailURL);
+		action={async (selectedThumbnailURL) => {
+			await noteState.changeThumbnail(selectedThumbnailURL);
 		}}
 	></EditNote>
 {/await}
