@@ -103,8 +103,12 @@
 		const imgLinks = doc.querySelectorAll('a img');
 		imgLinks.forEach((img) => {
 			const link = img.parentElement;
-			link.parentNode.insertBefore(img, link);
-			link.parentNode.removeChild(link);
+			try {
+				link.parentNode.insertBefore(img, link);
+				link.parentNode.removeChild(link);
+			} catch (e) {
+				console.log(e);
+			}
 		});
 		// add image viewing clicks
 		const images = doc.querySelectorAll('img');
