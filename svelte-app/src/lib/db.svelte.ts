@@ -624,8 +624,8 @@ export class NotelistState {
                     }
                 });
 
-                // const wrapped = `<div style="all: unset; display: block;">${body.innerHTML}</div>`;
-                mergedBody.push(body.innerHTML);
+                const wrapped = `<div style="all: unset; display: block;">${body.innerHTML}</div>`;
+                mergedBody.push(wrapped);
             }
         }
 
