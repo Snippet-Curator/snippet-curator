@@ -3,6 +3,7 @@ import { type Notebook, type Tag, type Note, type NoteRecord, type PError, type 
 import { getContext, setContext } from 'svelte'
 import { tryCatch } from './utils.svelte'
 import { superUser, superUserPass, notebooksCollection, notesCollection, tagsCollection, viewTagsCollectionName, viewNotesCollection, viewNotebooksCollection, settingCollection, inboxNotebook, pbURL, baseURL } from './const';
+import { mergeResources } from './utils';
 
 const pb = new PocketBase(pbURL)
 
@@ -584,25 +585,6 @@ export class NotelistState {
         return uniqueSources
     }
 
-    private mergeResources(originalResources: Resource[] = [], newResources: Resource[] = []) {
-        if (!originalResources || !newResources) return
-
-        const all = [...originalResources, ...newResources];
-
-        // Deduplicate by resource.hash
-        const seen = new Set();
-        const deduped = [];
-
-        for (const res of all) {
-            if (!seen.has(res.hash)) {
-                seen.add(res.hash);
-                deduped.push(res);
-            }
-        }
-
-        return deduped;
-    }
-
     private mergeContent(notes: Note[]) {
         const parser = new DOMParser()
         let mergedHead: string[] = []
@@ -651,7 +633,7 @@ export class NotelistState {
             tags: [...new Set(notes.flatMap(n => n.tags || []))],
             last_opened: new Date().toISOString(),
             sources: this.mergeSources(notes),
-            resources: this.mergeResources(base.resources, newResources),
+            resources: mergeResources(base.resources, newResources),
             description: notes.map(n => n.description).join('\n\n'),
             content: content,
             'original_content': content,

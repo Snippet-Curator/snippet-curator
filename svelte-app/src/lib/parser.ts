@@ -7,7 +7,7 @@ import type { EnNote, EnMedia, EnResource, Resource, PError } from './types';
 import pb, { uploadFileToPocketbase } from '$lib/db.svelte'
 import { tryCatch } from './utils.svelte';
 import type { RecordModel } from 'pocketbase';
-import { addMediaToContent, createDescription, createThumbnail, getFileHash, getMimeFromName, getPocketbaseResource, parser } from './utils';
+import { addMediaToContent, addResourcesToRecord, createDescription, createThumbnail, getFileHash, getMimeFromName, getPocketbaseResource, mergeResources, parser } from './utils';
 import { notesCollection } from './const';
 
 dayjs.extend(customParseFormat)
@@ -226,12 +226,13 @@ export class htmlImport {
 
         await this.replaceResources(this.content)
         this.stripCSP()
-        await createThumbnail(this.recordID, this.bodyResources)
+        const thumbResource = await createThumbnail(this.recordID, this.bodyResources)
+        const mergedResource = mergeResources(this.resources, thumbResource) || this.resources
 
         const data = {
             'content': this.content,
             'original_content': this.content,
-            'resources': this.resources,
+            'resources': mergedResource,
         }
 
         const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
@@ -492,13 +493,14 @@ export class EnImport {
         await this.uploadResources()
         this.replaceEnMedia()
         const resources = this.getPocketbaseResources(this.enResources)
-        await createThumbnail(this.recordID, resources)
+        const thumbResource = await createThumbnail(this.recordID, resources)
+        const mergedResource = mergeResources(resources, thumbResource) || resources
 
         const data = {
             'content': this.content,
             'original_content': this.content,
             'description': this.description,
-            'resources': resources
+            'resources': mergedResource
         }
 
         const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
@@ -532,13 +534,19 @@ export class fileImport {
 
     async uploadToDB() {
 
+        const sources = [{
+            'source': 'Desktop',
+            'source_url': ''
+        }]
+
         const skeletonData = {
             'title': this.title,
             'notebook': this.selectedNotebookdID,
             'last_score_updated': new Date().toISOString(),
             'weight': 5,
             'added': this.added,
-            'status': 'active'
+            'status': 'active',
+            'sources': sources
         }
 
         const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).create(skeletonData))
@@ -557,12 +565,13 @@ export class fileImport {
         this.content = addMediaToContent(this.mimeType, this.fileURL, this.file.name)
         const hash = await getFileHash(this.file)
         const resources = [getPocketbaseResource(this.file, hash, this.fileURL)]
-        await createThumbnail(this.recordID, resources)
+        const thumbResource = await createThumbnail(this.recordID, resources)
+        const mergedResource = mergeResources(resources, thumbResource) || resources
 
         const data = {
             'content': this.content,
             'original_content': this.content,
-            'resources': resources
+            'resources': mergedResource
         }
 
         const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
