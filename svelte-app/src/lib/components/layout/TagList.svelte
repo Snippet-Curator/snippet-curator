@@ -45,7 +45,7 @@
 				href="#/tags/{tag.id}"
 				class="{page.url.hash == `#/tags/${tag.id}`
 					? 'badge-neutral'
-					: ''} badge hover:badge-neutral badge mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
+					: ''} badge hover:badge-neutral mx-2 my-2 flex items-center gap-x-2 text-nowrap transition-colors"
 			>
 				<TagIcon size={15} />{tag.name}
 			</a>
