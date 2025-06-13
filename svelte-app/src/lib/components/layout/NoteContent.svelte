@@ -150,6 +150,8 @@
 
 	$effect(() => {
 		noteTitle = noteState.note.title;
+		textContent = '';
+		isEditHTML = false;
 	});
 </script>
 
@@ -187,7 +189,7 @@
 		{#if isEditHTML}
 			<TrixEditor onFileAccept={handleFile} bind:value={textContent} bind:editor />
 
-			<div class="flex justify-end gap-x-2">
+			<div class="mt-10 flex justify-end gap-x-2">
 				<button
 					class="btn"
 					onclick={() => {
@@ -203,6 +205,15 @@
 						isEditHTML = false;
 					}}>Save</button
 				>
+				<!-- <button
+					class="btn btn-primary"
+					onclick={async () => {
+						const doc = iframe.contentDocument;
+						console.log(doc);
+						doc.designMode = 'off';
+						isEditHTML = false;
+					}}>Save iframe</button
+				> -->
 			</div>
 		{:else}
 			<div class="flex justify-end">
@@ -212,6 +223,15 @@
 					}}
 					class="btn">Add to Note</button
 				>
+				<!-- <button
+					onclick={() => {
+						const doc = iframe.contentDocument;
+						doc.designMode = 'on';
+						doc.addEventListener('paste', handlePaste);
+						isEditHTML = true;
+					}}
+					class="btn">edit iframe</button
+				> -->
 			</div>
 		{/if}
 	</div>
