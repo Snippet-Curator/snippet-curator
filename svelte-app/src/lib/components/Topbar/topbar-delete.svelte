@@ -25,6 +25,7 @@
 			case 'TEXTAREA':
 			case 'BUTTON':
 			case 'DIV':
+			case 'TRIX-EDITOR':
 				return;
 		}
 

@@ -18,24 +18,25 @@
 			case 'TEXTAREA':
 			case 'BUTTON':
 			case 'DIV':
+			case 'TRIX-EDITOR':
 				return;
 		}
 
 		switch (event.key) {
-			case 'n':
+			case 'e':
 				event.preventDefault();
 				isOpen = true;
 				break;
 		}
 	}
 
-	// onMount(() => {
-	// 	document.addEventListener('keydown', handler);
+	onMount(() => {
+		document.addEventListener('keydown', handler);
 
-	// 	onDestroy(() => {
-	// 		document.removeEventListener('keydown', handler);
-	// 	});
-	// });
+		onDestroy(() => {
+			document.removeEventListener('keydown', handler);
+		});
+	});
 </script>
 
 <div class="tooltip tooltip-bottom z-30" data-tip="Edit Thumbnail">

@@ -21,7 +21,7 @@
 		return { file, hash };
 	}
 
-	function getPocketbaseResource(file: File, hash: string, url: string) {
+	function makeResourceFromFile(file: File, hash: string, url: string) {
 		const resource = {
 			name: file.name,
 			size: file.size,
@@ -39,7 +39,7 @@
 			const fileURL = `${noteURL}/${attachment}`;
 			// console.log(fileURL);
 			const { file, hash } = await getDataFromURL(fileURL, attachment);
-			const resource = getPocketbaseResource(file, hash, fileURL);
+			const resource = makeResourceFromFile(file, hash, fileURL);
 			resources.push(resource);
 		}
 		const { data, error } = await tryCatch(
@@ -66,7 +66,7 @@
 		}
 		// for each record update attachments
 		for (const file of data.items) {
-			console.log('updating: ', file)
+			console.log('updating: ', file);
 			const noteURL = `${baseURL}${file.id}`;
 			await updateAttachments(file.attachments, noteURL, file.id);
 		}

@@ -7,7 +7,7 @@ import type { EnNote, EnMedia, EnResource, Resource, PError } from './types';
 import pb, { uploadFileToPocketbase } from '$lib/db.svelte'
 import { tryCatch } from './utils.svelte';
 import type { RecordModel } from 'pocketbase';
-import { addMediaToContent, addResourcesToRecord, createDescription, createThumbnail, getFileHash, getMimeFromName, getPocketbaseResource, mergeResources, parser } from './utils';
+import { addMediaToContent, addResourcesToRecord, createDescription, createThumbnail, getFileHash, getMimeFromName, makeResourceFromFile, mergeResources, parser } from './utils';
 import { notesCollection } from './const';
 
 dayjs.extend(customParseFormat)
@@ -172,7 +172,7 @@ export class htmlImport {
             const fileURL = await uploadFileToPocketbase(this.recordID, resourceFile)
 
             // add to list of resources
-            const resource = getPocketbaseResource(resourceFile, hash, fileURL)
+            const resource = makeResourceFromFile(resourceFile, hash, fileURL)
             this.resources.push(resource)
 
             // replace media with new URL
@@ -436,7 +436,7 @@ export class EnImport {
         return tagList
     }
 
-    getPocketbaseResources(enResources: EnResource[] | null) {
+    makeResourceFromFiles(enResources: EnResource[] | null) {
         if (!enResources) return
         if (enResources.length === 0) return
         let resources: Resource[] = []
@@ -492,7 +492,7 @@ export class EnImport {
 
         await this.uploadResources()
         this.replaceEnMedia()
-        const resources = this.getPocketbaseResources(this.enResources)
+        const resources = this.makeResourceFromFiles(this.enResources)
         const thumbResource = await createThumbnail(this.recordID, resources)
         const mergedResource = mergeResources(resources, thumbResource) || resources
 
@@ -564,7 +564,7 @@ export class fileImport {
         this.fileURL = await uploadFileToPocketbase(this.recordID, this.file)
         this.content = addMediaToContent(this.mimeType, this.fileURL, this.file.name)
         const hash = await getFileHash(this.file)
-        const resources = [getPocketbaseResource(this.file, hash, this.fileURL)]
+        const resources = [makeResourceFromFile(this.file, hash, this.fileURL)]
         const thumbResource = await createThumbnail(this.recordID, resources)
         const mergedResource = mergeResources(resources, thumbResource) || resources
 

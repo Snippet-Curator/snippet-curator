@@ -1,26 +1,34 @@
 <script lang="ts">
 	import { ImageViewer } from 'svelte-image-viewer';
-	// import sanitizeHTML from 'sanitize-html';
-	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
+	import { TrixEditor } from 'svelte-trix';
 
 	import { fade, scale } from 'svelte/transition';
+	import { onMount } from 'svelte';
 
 	import { CaseSensitive, CircleX } from 'lucide-svelte';
-	import type { Note } from '$lib/types';
 
-	import { onMount } from 'svelte';
-	import { tryCatch } from '$lib/utils.svelte';
-	import pb, { NoteState } from '$lib/db.svelte';
-	import { replacePbUrl } from '$lib/utils';
+	import { ScrollArea } from '$lib/components/ui/scroll-area/index';
+
+	import { NoteState, uploadFileToPocketbase } from '$lib/db.svelte';
+	import {
+		addMediaToContent,
+		addResourcesToRecord,
+		getFileHash,
+		makeResourceFromFile,
+		replacePbUrl
+	} from '$lib/utils';
 
 	type Props = {
 		noteState: NoteState;
 	};
 
 	let { noteState }: Props = $props();
+
 	let note = $derived(noteState.note);
 	let content = $derived(replacePbUrl(noteState.note.content));
 	let noteTitle = $state(noteState.note.title);
+	let textContent = $state('');
+	let editor: Element;
 
 	let iframe = $state();
 	let doc = $state();
@@ -39,55 +47,30 @@
 		isOpen = true;
 	}
 
-	const customStyles = $state(`
-	  :root {
-			--color-base-100: oklch(100% 0 0);
-			--color-base-content: oklch(27.807% 0.029 256.847);
-		}
-		@media (prefers-color-scheme: dark) {
-		  :root {
-				--color-base-100: oklch(25.33% 0.016 252.42);
-				--color-base-content: oklch(97.807% 0.029 256.847); 
-		 }
-	  }
-		html, body {
-			margin: 0 !important;
-			height: 100% !important;
-		}
-		* {
-			font-size: calc(1em * var(--fontScale, 1)) !important;
-			line-height: 1.4 !important;
-	   }
-		html, body, main, section, p, pre, div {
-			background-color: var(--color-base-100) !important;
-			background: var(--color-base-100) !important; 
-			color: var(--color-base-content) !important;
-			// transition: font-size 0.05s ease !important;
-		}
-		img {
-			max-width: 100% !important;
-			height: auto !important;
-		}
-		.img-wrapper {
-			display: flex;
-			justify-content: center;
-			margin-bottom: 1rem;
-		}
-		video {
-			max-height: 800px; !important;
-		}
-		`);
+	async function handleFile(e: Event) {
+		e.preventDefault();
 
-	async function saveHTML(newHTML: HTMLElement) {
-		const { data, error } = await tryCatch(
-			pb.collection('notes').update(note.id, {
-				content: newHTML
-			})
-		);
-		if (error) {
-			console.error('Error updating note: ', note.title, error.message);
-		}
-		return data;
+		const file = e.file;
+
+		// upload file and get url
+		const fileURL = await uploadFileToPocketbase(note?.id, file);
+
+		// get hash
+		const hash = await getFileHash(file);
+
+		// create resourc
+		const resource = makeResourceFromFile(file, hash, fileURL);
+
+		// add to resources
+		const mergedResources = addResourcesToRecord(note.id, resource);
+
+		// check thumbnails
+
+		// get new file content
+		const newContent = addMediaToContent(file.type, fileURL, file.name);
+
+		// insert file content to editor
+		editor.editor.insertHTML(newContent);
 	}
 
 	function manipulateIframe(doc) {
@@ -122,7 +105,7 @@
 	onMount(() => {
 		doc = iframe.contentDocument;
 		const styleTag = doc.createElement('style');
-		styleTag.textContent = customStyles;
+		styleTag.textContent = noteState.customStyles;
 		doc.head.appendChild(styleTag);
 
 		iframe.onload = () => {
@@ -143,7 +126,7 @@
 
 		manipulateIframe(doc);
 		const styleTag = doc.createElement('style');
-		styleTag.textContent = customStyles;
+		styleTag.textContent = noteState.customStyles;
 		doc.head.appendChild(styleTag);
 
 		iframe.onload = () => {
@@ -198,50 +181,39 @@
 </div>
 
 <ScrollArea scrollHideDelay={200} type="scroll" class="mb-20 h-full">
-	<div class="card mx-auto mt-10 max-w-3xl px-2 md:px-10 lg:max-w-5xl">
-		<!-- <div class="card-body z-0">
-			<div class="relative" bind:this={container}></div>
-		</div> -->
+	<div class="card mx-auto mt-10 max-w-3xl px-2 pb-40 md:px-10 lg:max-w-5xl">
+		<iframe title="content" class="bg-base-100 mb-10" scrolling="no" bind:this={iframe}></iframe>
 
-		<iframe
-			title="content"
-			class="{isEditHTML
-				? 'border-base-content rounded-md border'
-				: 'border-none'} bg-base-100 mb-10"
-			scrolling="no"
-			bind:this={iframe}
-		></iframe>
+		{#if isEditHTML}
+			<TrixEditor onFileAccept={handleFile} bind:value={textContent} bind:editor />
 
-		<div class="mb-20 flex justify-end gap-x-2">
-			{#if isEditHTML}
+			<div class="flex justify-end gap-x-2">
 				<button
 					class="btn"
 					onclick={() => {
-						const doc = iframe.contentDocument;
-						doc.body.contentEditable = 'false';
+						textContent = '';
 						isEditHTML = false;
 					}}>Cancel</button
 				>
 				<button
 					class="btn btn-primary"
 					onclick={async () => {
-						const doc = iframe.contentDocument;
-						doc.body.contentEditable = 'false';
-						content = await saveHTML(doc.documentElement.outerHTML);
+						await noteState.appendContent(textContent);
+						textContent = '';
 						isEditHTML = false;
 					}}>Save</button
 				>
-			{:else}
+			</div>
+		{:else}
+			<div class="flex justify-end">
 				<button
 					onclick={() => {
-						const doc = iframe.contentDocument;
-						doc.body.contentEditable = 'true';
 						isEditHTML = true;
 					}}
-					class="btn">Edit</button
+					class="btn">Add to Note</button
 				>
-			{/if}
-		</div>
+			</div>
+		{/if}
 	</div>
 </ScrollArea>
 

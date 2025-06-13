@@ -1,9 +1,12 @@
 import PocketBase, { type RecordModel } from 'pocketbase'
-import { type Notebook, type Tag, type Note, type NoteRecord, type PError, type Setting, type NoteType, type Resource } from './types';
+
 import { getContext, setContext } from 'svelte'
+
+import { type Notebook, type Tag, type Note, type NoteRecord, type PError, type Setting, type NoteType } from './types';
+
 import { tryCatch } from './utils.svelte'
 import { superUser, superUserPass, notebooksCollection, notesCollection, tagsCollection, viewTagsCollectionName, viewNotesCollection, viewNotebooksCollection, settingCollection, inboxNotebook, pbURL, baseURL } from './const';
-import { addThumbnailToRecord, getResourceThumbURL, mergeResources } from './utils';
+import { addThumbnailToRecord, createMergedNoteData, createNewResources, getContentBeforeMerge, mergeContents } from './utils';
 
 const pb = new PocketBase(pbURL)
 
@@ -575,135 +578,6 @@ export class NotelistState {
         // await this.getDefault(this.clickedPage)
     }
 
-    private mergeSources(notes: Note[]) {
-        const allSources = notes.flatMap(n => n.sources || [])
-
-        const uniqueSources = Array.from(
-            new Map(
-                allSources.map(src => [`${src.source}|${src.source_url}`, src])).values()
-        )
-        return uniqueSources
-    }
-
-    private mergeContent(notes: Note[]) {
-        const parser = new DOMParser()
-        let mergedHead: string[] = []
-        let mergedBody: string[] = []
-
-        for (const note of notes) {
-            const content = parser.parseFromString(note.content, 'text/html')
-
-            const head = content.querySelector('head')
-            const body = content.querySelector('body')
-
-            if (body) {
-                // Remove problematic Tailwind-style classes from all elements
-                body.querySelectorAll('[class]').forEach(el => {
-                    const classAttr = typeof el.className === 'string' ? el.className : el.getAttribute('class') || '';
-                    const classes = classAttr.split(/\s+/);
-                    const filtered = classes.filter(c =>
-                        !c.startsWith('min-h-') &&
-                        !c.startsWith('min-w-') &&
-                        !c.startsWith('h-screen') &&
-                        !c.startsWith('w-screen')
-                    );
-                    el.setAttribute('class', filtered.join(' '));
-                });
-
-                // Remove min-height inline styles
-                body.querySelectorAll('[style]').forEach(el => {
-                    const style = el.getAttribute('style') || '';
-                    if (style.includes('min-height')) {
-                        const newStyle = style
-                            .split(';')
-                            .filter(s => !s.trim().startsWith('min-height'))
-                            .join(';');
-                        el.setAttribute('style', newStyle);
-                    }
-                });
-
-                // removes style min-height
-                head.querySelectorAll('style').forEach(style => {
-                    const cleaned = style.innerHTML.replace(/min-height\s*:\s*[\w]+/gi, '');
-                    style.innerHTML = cleaned;
-                });
-
-                const wrapped = `<div style="all: unset; display: block;">${body.innerHTML}</div>`;
-                mergedHead.push(head.innerHTML)
-                mergedBody.push(wrapped);
-            }
-        }
-
-        const finalHead = mergedHead.join('\n');
-        const finalBody = mergedBody.join('\n\n<br/>\n\n');
-
-        const finalHTML = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                ${finalHead}
-            </head>
-            <body>
-                ${finalBody}
-            </body>
-            </html>`.trim();
-        return finalHTML;
-    }
-
-    private createMergedNoteData(notes: Note[], newResources: Resource[]) {
-        const [base, ...rest] = notes
-        let content = this.mergeContent(notes)
-
-        for (const resource of newResources) {
-            if (!resource.oldFileURL) continue
-            content = content.replace(resource.oldFileURL, resource.fileURL)
-        }
-
-        return {
-            title: base.title,
-            notebook: base.notebook,
-            tags: [...new Set(notes.flatMap(n => n.tags || []))],
-            last_opened: new Date().toISOString(),
-            sources: this.mergeSources(notes),
-            resources: mergeResources(base.resources, newResources),
-            description: notes.map(n => n.description).join('\n\n'),
-            content: content,
-            'original_content': content,
-        }
-    }
-
-    async downloadAttachmentByURL(fileURL: string, fileName: string, fileType: string) {
-        const response = await fetch(fileURL.replace(/^http:\/\/127\.0\.0\.1:8090/, pbURL));
-        const blob = await response.blob();
-        return new File([blob], fileName, { type: fileType });
-    }
-
-    async createOneNewResource(recordID: string, resource: Resource) {
-        const attachment = await this.downloadAttachmentByURL(resource.fileURL, resource.name, resource.type)
-        return {
-            name: resource.name,
-            fileURL: await uploadFileToPocketbase(recordID, attachment),
-            oldFileURL: resource.fileURL,
-            hash: resource.hash,
-            type: resource.type,
-            size: resource.size,
-            lastUpdated: new Date().toISOString()
-        } as Resource
-    }
-
-    async createNewResources(recordID: string, records: RecordModel[]) {
-        let newResources: Resource[] = []
-        for (const record of records) {
-            if (!record.resources) continue
-            for (const resource of record.resources) {
-                if (!resource) continue
-                const newResource = await this.createOneNewResource(recordID, resource)
-                newResources.push(newResource)
-            }
-        }
-        return newResources
-    }
-
     async mergeNotes(selectedNotesID: string[]) {
         let selectedNotes = []
 
@@ -720,8 +594,8 @@ export class NotelistState {
         if (!selectedNotes || selectedNotes.length < 2) return
 
         const [baseNote, ...restNotes] = selectedNotes;
-        const newResources = await this.createNewResources(baseNote.id, restNotes)
-        const mergedNoteData = this.createMergedNoteData(selectedNotes, newResources)
+        const newResources = await createNewResources(baseNote.id, restNotes)
+        const mergedNoteData = createMergedNoteData(selectedNotes, newResources)
 
         const { data: finalNote, error: finalNoteError } = await tryCatch(pb.collection(notesCollection).update(baseNote.id, mergedNoteData))
 
@@ -751,9 +625,49 @@ export class NoteState {
     note = $state<Note>()
     noteList = $state()
     noteID: string
+    customStyles = $state<string>()
 
     constructor(noteID: string) {
         this.noteID = noteID
+        this.customStyles = `
+            :root {
+                  --color-base-100: oklch(100% 0 0);
+                  --color-base-content: oklch(27.807% 0.029 256.847);
+              }
+              @media (prefers-color-scheme: dark) {
+                :root {
+                      --color-base-100: oklch(25.33% 0.016 252.42);
+                      --color-base-content: oklch(97.807% 0.029 256.847); 
+               }
+            }
+              html, body {
+                  margin: 0 !important;
+                  height: 100% !important;
+              }
+              * {
+                  font-size: calc(1em * var(--fontScale, 1)) !important;
+                  line-height: 1.4 !important;
+             }
+              html, body, main, section, p, pre, div {
+                  background-color: var(--color-base-100) !important;
+                  background: var(--color-base-100) !important; 
+                  color: var(--color-base-content) !important;
+                  // transition: font-size 0.05s ease !important;
+              }
+              img {
+                  max-width: 100% !important;
+                  height: auto !important;
+              }
+              .img-wrapper {
+                  display: flex;
+                  justify-content: center;
+                  margin-bottom: 1rem;
+              }
+              video {
+                  max-height: 800px; !important;
+              }
+              `
+
     }
 
     async getNote() {
@@ -971,6 +885,29 @@ export class NoteState {
 
         const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
             content: newContent
+        }))
+
+        if (error) {
+            console.error('Error updating note content: ', error.message)
+        }
+
+        this.note = data
+    }
+
+    async appendContent(newContent: string) {
+
+        const { data: record, error: recordError } = await tryCatch(pb.collection(notesCollection).getOne(this.note.id))
+
+        if (recordError) {
+            console.error('Error getting note content: ', recordError.message)
+            return
+        }
+
+        const contentList = [record.content, newContent]
+        const mergedContent = mergeContents(contentList)
+
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+            'content': mergedContent
         }))
 
         if (error) {

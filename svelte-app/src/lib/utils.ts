@@ -3,14 +3,38 @@ import { twMerge } from "tailwind-merge";
 import SparkMD5 from 'spark-md5';
 import { tryCatch } from './utils.svelte';
 import type { Resource } from './types';
-import pb from '$lib/db.svelte'
+import pb, { uploadFileToPocketbase } from '$lib/db.svelte'
 import { notesCollection, pbURL, baseURL } from './const';
 // import sanitizeHTML from 'sanitize-html';
 import { XMLParser } from 'fast-xml-parser'
+import { type Note } from './types';
+import type { RecordModel } from 'pocketbase';
+
+
+// ─────────────────────────────
+//          Tailwind
+// ─────────────────────────────
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
+
+// ─────────────────────────────
+//          Pocketbase
+// ─────────────────────────────
+
+/**
+ * Replaces local url with remote url if different
+ */
+export function replacePbUrl(content: string) {
+    if (!content) return ''
+    if (pbURL == 'http://127.0.0.1:8090') return content
+    return content.replace(/http:\/\/127\.0\.0\.1:8090/g, pbURL)
+}
+
+// ─────────────────────────────
+//          Parsers
+// ─────────────────────────────
 
 export const parser = new XMLParser({
     ignoreAttributes: false,
@@ -18,12 +42,58 @@ export const parser = new XMLParser({
 })
 
 
+// ─────────────────────────────
+//          File Operations
+// ─────────────────────────────
+
 export async function getFileHash(file: File) {
     const arrayBuffer = await file.arrayBuffer();
     const hash = SparkMD5.ArrayBuffer.hash(arrayBuffer);
     return hash;
 }
 
+/**
+ * downloads attachment from pocketbase and returns in file format
+ */
+export async function downloadAttachmentByURL(fileURL: string, fileName: string, fileType: string) {
+    const response = await fetch(fileURL.replace(/^http:\/\/127\.0\.0\.1:8090/, pbURL));
+    const blob = await response.blob();
+    return new File([blob], fileName, { type: fileType });
+}
+
+/**
+ * Returns mimetype based on guess from filename
+ */
+export function getMimeFromName(fileName: string, originalMime: string) {
+    const MIME_LOOKUP: Record<string, string> = {
+        mp4: 'video/mp4',
+        webm: 'video/webm',
+        mov: 'video/quicktime',
+        avi: 'video/x-msvideo',
+        mkv: 'video/x-matroska',
+        '3gp': 'video/3gpp',
+        ogg: 'video/ogg',
+    };
+
+    let correctedMime = originalMime;
+    if (originalMime === 'application/octet-stream') {
+        const ext = fileName.split('.').pop()?.toLowerCase();
+        if (ext && MIME_LOOKUP[ext]) {
+            correctedMime = MIME_LOOKUP[ext];
+        }
+    }
+
+    return correctedMime
+}
+
+
+// ─────────────────────────────
+//          Thumbnail
+// ─────────────────────────────
+
+/**
+ * Generates thumbnail for video file
+ */
 export async function getVideoThumb(videoUrl: string): Promise<File> {
 
     return new Promise((resolve, reject) => {
@@ -85,11 +155,10 @@ export async function getVideoThumb(videoUrl: string): Promise<File> {
     })
 }
 
-
 /**
- * Use the list of notes.resources to generate thumbnail URL. Uses biggest image first. If no image is found. Then it uses video file url
+ * Gets fileURL from list of notes.resources used to generate thumbnail. Uses biggest image first. If no image is found. Then it uses video file url
  */
-export function getResourceThumbURL(resources: Resource[]) {
+export function getResourceURLforThumbGeneratin(resources: Resource[]) {
 
     if (!Array.isArray(resources)) return null;
 
@@ -114,87 +183,8 @@ export function getResourceThumbURL(resources: Resource[]) {
     return null;
 }
 
-
 /**
- * add resource or resources to Record.resource
- */
-export async function addResourcesToRecord(recordID: string, resource: Resource | Resource[]) {
-    const { data: record, error } = await tryCatch(pb.collection(notesCollection).getOne(recordID))
-
-    if (error) {
-        console.error('Error getting record: ', error.message)
-        return
-    }
-
-    if (!record) return
-
-    const oldResources = record.resources
-    let mergedResource = mergeResources(oldResources, resource)
-
-    const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(recordID, {
-        'resources': mergedResource
-    }))
-
-    if (error) {
-        console.error('Error adding resources: ', error.message)
-    }
-
-    return mergedResource
-}
-
-
-/**
- * Merge old resource list and/or new resource list. If neither are true, return undefined
- */
-export function mergeResources(originalResources: Resource[] | undefined | null, newResources: Resource | Resource[] | undefined | null) {
-    const newResourceList = Array.isArray(newResources) ? newResources
-        : newResources
-            ? [newResources]
-            : [];
-    const oldResourceList = Array.isArray(originalResources) ? originalResources
-        : originalResources
-            ? [originalResources]
-            : [];
-
-    if (oldResourceList.length === 0 && newResourceList.length === 0) return [];
-
-    const all = [...oldResourceList, ...newResourceList];
-
-    try {
-        // Deduplicate by resource.hash
-        const seen = new Set();
-        const deduped = [];
-
-        for (const res of all) {
-            if (!seen.has(res.hash)) {
-                seen.add(res.hash);
-                deduped.push(res);
-            }
-        }
-        return deduped;
-    } catch (e) {
-        console.log(e)
-        return all
-    }
-}
-
-/**
- * Add thumbnail to record with a given thumbURL. This also adds thumb 500x0 suffix
- */
-export async function addThumbnailToRecord(recordID: string, thumbURL: string) {
-    const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(recordID, {
-        'thumbnail': `${thumbURL}?thumb=500x0`
-    }))
-
-    if (error) {
-        console.error('Error updating thumbURL: ', error.message)
-    }
-
-    return record
-}
-
-/**
- * Create thumbnail using all resources. Returns thumbnail as resource
+ * Create thumbnail based on resource types. Returns thumbnail as resource
  */
 export async function createThumbnail(recordID: string, resources: Resource[]) {
     const { data, error } = await tryCatch(pb.collection(notesCollection).getFirstListItem(`id="${recordID}"`))
@@ -213,7 +203,7 @@ export async function createThumbnail(recordID: string, resources: Resource[]) {
     if (!record) return
     if (record.thumbnail) return
 
-    const thumbFile = getResourceThumbURL(resources)
+    const thumbFile = getResourceURLforThumbGeneratin(resources)
     let thumbResource
 
     if (!thumbFile) return
@@ -250,7 +240,7 @@ export async function createThumbnail(recordID: string, resources: Resource[]) {
         // uses video itself as thumbnail:
         // thumbnailURL = `${baseURL}/${notesCollection}/${record.id}/${record.attachments[index]}`
         const thumbHash = await getFileHash(thumbFile)
-        thumbResource = getPocketbaseResource(thumbFile, thumbHash, thumbnailResourceURL)
+        thumbResource = makeResourceFromFile(thumbFile, thumbHash, thumbnailResourceURL)
     }
 
     else if (mimeType == 'image/gif') {
@@ -274,22 +264,25 @@ export async function createThumbnail(recordID: string, resources: Resource[]) {
     return thumbResource
 }
 
-
 /**
- * Gets one Resource for record
+ * Add thumbnail to record with a given thumbURL. This also adds thumb 500x0 suffix
  */
-export function getPocketbaseResource(file: File, hash: string, url: string) {
-    const resource: Resource = {
-        name: file.name,
-        size: file.size,
-        hash: hash,
-        type: file.type,
-        fileURL: url,
-        lastUpdated: new Date().toISOString(),
+export async function addThumbnailToRecord(recordID: string, thumbURL: string) {
+    const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(recordID, {
+        'thumbnail': `${thumbURL}?thumb=500x0`
+    }))
+
+    if (error) {
+        console.error('Error updating thumbURL: ', error.message)
     }
-    return resource
+
+    return record
 }
 
+
+// ─────────────────────────────
+//      Content Operation
+// ─────────────────────────────
 
 /**
  * Returns html embed for different medias
@@ -330,6 +323,9 @@ export function addMediaToContent(mimeType: string, fileURL: string, fileName: s
     }
 }
 
+/**
+ * Create description given html content
+ */
 export function createDescription(htmlContent: string, maxLength = 300) {
     if (!htmlContent) return null
 
@@ -348,38 +344,278 @@ export function createDescription(htmlContent: string, maxLength = 300) {
 }
 
 
-/**
- * Returns mimetype based on guess from filename
- */
-export function getMimeFromName(fileName: string, originalMime: string) {
-    const MIME_LOOKUP: Record<string, string> = {
-        mp4: 'video/mp4',
-        webm: 'video/webm',
-        mov: 'video/quicktime',
-        avi: 'video/x-msvideo',
-        mkv: 'video/x-matroska',
-        '3gp': 'video/3gpp',
-        ogg: 'video/ogg',
-    };
+// ─────────────────────────────
+//      Resource Operation
+// ─────────────────────────────
 
-    let correctedMime = originalMime;
-    if (originalMime === 'application/octet-stream') {
-        const ext = fileName.split('.').pop()?.toLowerCase();
-        if (ext && MIME_LOOKUP[ext]) {
-            correctedMime = MIME_LOOKUP[ext];
+/**
+ * Create one Resource for record based on file
+ */
+export function makeResourceFromFile(file: File, hash: string, url: string) {
+    const resource: Resource = {
+        name: file.name,
+        size: file.size,
+        hash: hash,
+        type: file.type,
+        fileURL: url,
+        lastUpdated: new Date().toISOString(),
+    }
+    return resource
+}
+
+/**
+ * Given one old resource, upload attachment to new record, and return new resource
+ */
+async function createOneNewResource(recordID: string, resource: Resource) {
+    const attachment = await downloadAttachmentByURL(resource.fileURL, resource.name, resource.type)
+    return {
+        name: resource.name,
+        fileURL: await uploadFileToPocketbase(recordID, attachment),
+        oldFileURL: resource.fileURL,
+        hash: resource.hash,
+        type: resource.type,
+        size: resource.size,
+        lastUpdated: new Date().toISOString()
+    } as Resource
+}
+
+/**
+ * For list of records, upload all of their resources to new record, return new resource
+ */
+export async function createNewResources(recordID: string, records: RecordModel[]) {
+    let newResources: Resource[] = []
+    for (const record of records) {
+        if (!record.resources) continue
+        for (const resource of record.resources) {
+            if (!resource) continue
+            const newResource = await createOneNewResource(recordID, resource)
+            newResources.push(newResource)
+        }
+    }
+    return newResources
+}
+
+/**
+ * Merge old resource list and/or new resource list. If both are empty, return undefined
+ */
+export function mergeResources(originalResources: Resource[] | undefined | null, newResources: Resource | Resource[] | undefined | null) {
+    const newResourceList = Array.isArray(newResources) ? newResources
+        : newResources
+            ? [newResources]
+            : [];
+    const oldResourceList = Array.isArray(originalResources) ? originalResources
+        : originalResources
+            ? [originalResources]
+            : [];
+
+    if (oldResourceList.length === 0 && newResourceList.length === 0) return [];
+
+    const all = [...oldResourceList, ...newResourceList];
+
+    try {
+        // Deduplicate by resource.hash
+        const seen = new Set();
+        const deduped = [];
+
+        for (const res of all) {
+            if (!seen.has(res.hash)) {
+                seen.add(res.hash);
+                deduped.push(res);
+            }
+        }
+        return deduped;
+    } catch (e) {
+        console.log(e)
+        return all
+    }
+}
+
+/**
+ * merge new resource or resources to Record.resource in database
+ */
+export async function addResourcesToRecord(recordID: string, resource: Resource | Resource[]) {
+    const { data: record, error } = await tryCatch(pb.collection(notesCollection).getOne(recordID))
+
+    if (error) {
+        console.error('Error getting record: ', error.message)
+        return
+    }
+
+    if (!record) return
+
+    const oldResources = record.resources
+    let mergedResource = mergeResources(oldResources, resource)
+
+    const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(recordID, {
+        'resources': mergedResource
+    }))
+
+    if (error) {
+        console.error('Error adding resources: ', error.message)
+    }
+
+    return mergedResource
+}
+
+
+// ─────────────────────────────
+//      Pocketbase Merge
+// ─────────────────────────────
+
+/**
+ * Merges sources into a list of unique sources
+ */
+export function mergeSources(notes: Note[]) {
+    const allSources = notes.flatMap(n => n.sources || [])
+
+    const uniqueSources = Array.from(
+        new Map(
+            allSources.map(src => [`${src.source}|${src.source_url}`, src])).values()
+    )
+    return uniqueSources
+}
+
+/**
+ * parses out head and body of content, clears out all min-h and h-screen styles. Return cleaned version
+ */
+export function getContentBeforeMerge(noteContent: string) {
+
+    const DomParser = new DOMParser()
+    const content = DomParser.parseFromString(noteContent, 'text/html')
+
+    const head = content.querySelector('head')
+    const body = content.querySelector('body')
+
+    if (!head || !body) {
+        return {
+            head: '',
+            body: ''
         }
     }
 
-    return correctedMime
+    // Remove problematic Tailwind-style classes from all elements
+    body.querySelectorAll('[class]').forEach(el => {
+        const classAttr = typeof el.className === 'string' ? el.className : el.getAttribute('class') || '';
+        const classes = classAttr.split(/\s+/);
+        const filtered = classes.filter(c =>
+            !c.startsWith('min-h-') &&
+            !c.startsWith('min-w-') &&
+            !c.startsWith('h-screen') &&
+            !c.startsWith('w-screen')
+        );
+        el.setAttribute('class', filtered.join(' '));
+    });
+
+    // Remove min-height inline styles
+    body.querySelectorAll('[style]').forEach(el => {
+        const style = el.getAttribute('style') || '';
+        if (style.includes('min-height')) {
+            const newStyle = style
+                .split(';')
+                .filter(s => !s.trim().startsWith('min-height'))
+                .join(';');
+            el.setAttribute('style', newStyle);
+        }
+    });
+
+    // removes style min-height
+    head.querySelectorAll('style').forEach(style => {
+        const cleaned = style.innerHTML.replace(/min-height\s*:\s*[\w]+/gi, '');
+        style.innerHTML = cleaned;
+    });
+
+    const wrapped = `<div style="all: unset; display: block;">${body.innerHTML}</div>`;
+
+    return {
+        head: head?.innerHTML,
+        body: wrapped
+    }
+
 }
 
-export function replacePbUrl(content: string) {
-    if (pbURL == 'http://127.0.0.1:8090') return content
-    return content.replace(/http:\/\/127\.0\.0\.1:8090/g, pbURL)
+/**
+ * gets a list of notes and then merge their content into one final HTML
+ */
+export function mergeNotesContent(notes: Note[]) {
+
+    let mergedHead: string[] = []
+    let mergedBody: string[] = []
+
+    for (const note of notes) {
+        const { head, body } = getContentBeforeMerge(note.content)
+        mergedHead.push(head)
+        mergedBody.push(body)
+    }
+
+    const finalHead = mergedHead.join('\n');
+    const finalBody = mergedBody.join('\n\n<br/>\n\n');
+
+    const finalHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                ${finalHead}
+            </head>
+            <body>
+                ${finalBody}
+            </body>
+            </html>`.trim();
+    return finalHTML;
 }
 
+/**
+ * creates pocketbase merged data from set of notes ready to be added to db
+ */
+export function createMergedNoteData(notes: Note[], newResources: Resource[]) {
+    const [base, ...rest] = notes
+    let content = mergeNotesContent(notes)
 
+    for (const resource of newResources) {
+        if (!resource.oldFileURL) continue
+        content = content.replace(resource.oldFileURL, resource.fileURL)
+    }
 
+    return {
+        title: base.title,
+        notebook: base.notebook,
+        tags: [...new Set(notes.flatMap(n => n.tags || []))],
+        last_opened: new Date().toISOString(),
+        sources: mergeSources(notes),
+        resources: mergeResources(base.resources, newResources),
+        description: notes.map(n => n.description).join('\n\n'),
+        content: content,
+        'original_content': content,
+    }
+}
+
+/**
+ * gets a list of contents and then merge their content into one final HTML
+ */
+export function mergeContents(contentList: string[]) {
+    let mergedHead: string[] = []
+    let mergedBody: string[] = []
+
+    for (const content of contentList) {
+        const { head, body } = getContentBeforeMerge(content)
+        mergedHead.push(head)
+        mergedBody.push(body)
+    }
+
+    const finalHead = mergedHead.join('\n');
+    const finalBody = mergedBody.join('\n\n<br/>\n\n');
+
+    const finalHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                ${finalHead}
+            </head>
+            <body>
+                ${finalBody}
+            </body>
+            </html>`.trim();
+    return finalHTML;
+}
 
 
 
