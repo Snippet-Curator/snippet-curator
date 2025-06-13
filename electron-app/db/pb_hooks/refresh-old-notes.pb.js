@@ -12,15 +12,17 @@ onBootstrap((e) => {
   const daysOld = findSettingbyName('daysOld')
 
   if (
-    !ratingWeight ||
-    !recencyWeight ||
-    !weightWeight ||
-    !randomWeight ||
-    !fullPenaltyWindow ||
-    !decayWindow ||
-    !daysOld
-  )
+    ratingWeight == null ||
+    recencyWeight == null ||
+    weightWeight == null ||
+    randomWeight == null ||
+    fullPenaltyWindow == null ||
+    decayWindow == null ||
+    daysOld == null
+  ) {
+    console.log('missing variables to run refresh hook')
     return
+  }
 
   function updateNotes() {
     const cutoff = new Date(Date.now() - daysOld * 86400000).toISOString()
