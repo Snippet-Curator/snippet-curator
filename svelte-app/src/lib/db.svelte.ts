@@ -966,6 +966,19 @@ export class NoteState {
             console.error('Error changing note thumbnail: ', error.message)
         }
     }
+
+    async updateContent(newContent: string) {
+
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+            content: newContent
+        }))
+
+        if (error) {
+            console.error('Error updating note content: ', error.message)
+        }
+
+        this.note = data
+    }
 }
 
 export class settingState {
