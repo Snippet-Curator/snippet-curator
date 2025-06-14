@@ -3,26 +3,14 @@ onBootstrap((e) => {
   const calculateNoteScore = require(`${__hooks}/utils.js`).calculateNoteScore
   const findSettingbyName = require(`${__hooks}/utils.js`).findSettingbyName
 
-  const ratingWeight = findSettingbyName('ratingWeight')
-  const recencyWeight = findSettingbyName('recencyWeight')
-  const weightWeight = findSettingbyName('weightWeight')
-  const randomWeight = findSettingbyName('randomWeight')
-  const fullPenaltyWindow = findSettingbyName('fullPenaltyWindow')
-  const decayWindow = findSettingbyName('decayWindow')
-  const daysOld = findSettingbyName('daysOld')
-
-  if (
-    ratingWeight == null ||
-    recencyWeight == null ||
-    weightWeight == null ||
-    randomWeight == null ||
-    fullPenaltyWindow == null ||
-    decayWindow == null ||
-    daysOld == null
-  ) {
-    console.log('missing variables to run refresh hook')
-    return
-  }
+  const ratingWeight = findSettingbyName('ratingWeight') ?? 0
+  const recencyWeight = findSettingbyName('recencyWeight') ?? 0
+  const weightWeight = findSettingbyName('weightWeight') ?? 0
+  const randomWeight = findSettingbyName('randomWeight') ?? 0
+  const fullPenaltyWindow = findSettingbyName('fullPenaltyWindow') ?? 0
+  const decayWindow = findSettingbyName('decayWindow') ?? 0
+  const daysOld = findSettingbyName('daysOld') ?? 0
+  const scoreRefreshHour = findSettingbyName('scoreRefreshHour') ?? 0
 
   function updateNotes() {
     const cutoff = new Date(Date.now() - daysOld * 86400000).toISOString()
@@ -87,5 +75,7 @@ onBootstrap((e) => {
 
   updateNotes()
 
-  cronAdd('scheduled-score-updates', '0 */6 * * *', updateNotes)
+  if (scoreRefreshHour != 0) {
+    cronAdd('scheduled-score-updates', `0 */${scoreRefreshHour} * * *`, updateNotes)
+  }
 })

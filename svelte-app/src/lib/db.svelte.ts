@@ -925,6 +925,7 @@ export class settingState {
     fullPenaltyWindow = $state<number>()
     decayWindow = $state<number>()
     daysOld = $state<number>()
+    scoreRefreshHour = $state<number>()
 
     async makeDefaultValue(name: string, defaultValue: number) {
         const { data, error } = await tryCatch<Setting, PError>(pb.collection(settingCollection).create({
@@ -982,6 +983,7 @@ export class settingState {
         this.fullPenaltyWindow = await this.getSetting('fullPenaltyWindow', 1)
         this.decayWindow = await this.getSetting('decayWindow', 12)
         this.daysOld = await this.getSetting('daysOld', 0)
+        this.scoreRefreshHour = await this.getSetting('scoreRefreshHour', 6)
     }
 }
 

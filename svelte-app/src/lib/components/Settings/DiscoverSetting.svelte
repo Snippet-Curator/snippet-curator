@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { getSettingState, setSettingState } from '$lib/db.svelte';
+	import { getSettingState } from '$lib/db.svelte';
 	import { onMount } from 'svelte';
 
-	setSettingState();
 	const settingState = getSettingState();
 
 	let initialLoading = $state();
@@ -82,6 +81,12 @@
 					'Refresh Score Cutoff (Day)',
 					settingState.daysOld,
 					'Notes older than this will get a score refresh on startup to recalculate based on recency. Use 0 to refresh all notes (can increase load time).'
+				)}
+				{@render renderSetting(
+					'scoreRefreshHour',
+					'Score Refresh Frequency When Open (hour)',
+					settingState.scoreRefreshHour,
+					'Curator will refresh scores when open. Default refresh is every 6 hours. Changing it to 0 will not refresh automatically.'
 				)}
 			</div>
 		{/await}
