@@ -62,6 +62,10 @@
 			description: 'Bulk edit'
 		},
 		{
+			displays: ['e'],
+			description: 'Edit note'
+		},
+		{
 			displays: ['n'],
 			description: 'Edit notebook'
 		},
