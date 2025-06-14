@@ -33,7 +33,7 @@
 			<!-- <NotebookIcon size={15} /> -->
 			{notebook.name}
 		</a>
-		<span class="text-base-content/80 text-right">{notebook.note_count}</span>
+		<span class="text-right">{notebook.note_count}</span>
 	</div>
 {/snippet}
 
