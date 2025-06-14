@@ -114,6 +114,7 @@
 		<Command.Group heading="Notebooks">
 			{#each notebooks as notebook}
 				<Command.Item
+					class="motion-opacity-in-0 motion-duration-75"
 					onSelect={() => {
 						goto(`#/notebook/${notebook.id}`);
 						isOpen = false;
