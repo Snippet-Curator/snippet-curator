@@ -3,7 +3,6 @@
 	import { TrixEditor } from 'svelte-trix';
 
 	import { fade, scale } from 'svelte/transition';
-	import { onMount } from 'svelte';
 
 	import { CaseSensitive, CircleX } from 'lucide-svelte';
 
@@ -31,7 +30,6 @@
 	let editor: Element;
 
 	let iframe = $state();
-	let doc = $state();
 	let fontScale = $state(1);
 
 	let isOpen = $state(false);
@@ -73,6 +71,45 @@
 		editor.editor.insertHTML(newContent);
 	}
 
+	// async function insertFile(file: File) {
+	// 	// upload file and get url
+	// 	const fileURL = await uploadFileToPocketbase(note?.id, file);
+
+	// 	// get hash
+	// 	const hash = await getFileHash(file);
+
+	// 	// create resourc
+	// 	const resource = makeResourceFromFile(file, hash, fileURL);
+
+	// 	// add to resources
+	// 	const mergedResources = addResourcesToRecord(note.id, resource);
+
+	// 	// check thumbnails
+
+	// 	// get new file content
+	// 	const newContent = addMediaToContent(file.type, fileURL, file.name);
+
+	// 	console.log(newContent);
+
+	// 	// insert file content to editor
+	// 	return newContent;
+	// }
+
+	// async function handlePaste(e: Event) {
+	// 	const items = event.clipboardData.items;
+	// 	const doc = iframe.contentDocument;
+	// 	for (const item of items) {
+	// 		if (item.type.startsWith('image')) {
+	// 			e.preventDefault();
+	// 			const file = item.getAsFile();
+	// 			const htmlToAdd = await insertFile(file);
+	// 			// const selection = doc.getSelection();
+
+	// 			doc.execCommand('insertHTML', false, htmlToAdd);
+	// 		}
+	// 	}
+	// }
+
 	function manipulateIframe(doc) {
 		// click link opens browser
 		const links = doc.querySelectorAll('a');
@@ -102,51 +139,39 @@
 		});
 	}
 
-	onMount(() => {
-		doc = iframe.contentDocument;
-		const styleTag = doc.createElement('style');
-		styleTag.textContent = noteState.customStyles;
-		doc.head.appendChild(styleTag);
+	function handler(event: KeyboardEvent) {
+		document.dispatchEvent(new KeyboardEvent(event.type, event));
+	}
 
-		iframe.onload = () => {
-			requestAnimationFrame(() => {
-				const height = doc.body.scrollHeight;
-				iframe.style.height = `${height + 100}px`;
-			});
-		};
-	});
-
-	$effect(() => {
-		const doc = iframe.contentDocument || iframe.contentWindow.document;
+	function initializeIframe(el) {
+		const doc = el.contentDocument;
 		doc.open();
 		doc.write(content);
 		doc.close();
 
 		doc.documentElement.style.setProperty('--fontScale', fontScale);
-
 		manipulateIframe(doc);
+
 		const styleTag = doc.createElement('style');
+		styleTag.setAttribute('id', 'custom-style');
 		styleTag.textContent = noteState.customStyles;
 		doc.head.appendChild(styleTag);
 
-		iframe.onload = () => {
-			const doc = iframe.contentDocument;
+		doc.addEventListener('keydown', handler);
 
-			doc.documentElement.style.setProperty('--fontScale', fontScale);
-
-			iframe.style.height = '0px';
-
-			requestAnimationFrame(() => {
-				const doc = iframe.contentDocument;
-				const height = doc.body.scrollHeight;
-				iframe.style.height = `${height + 100}px`;
-			});
+		return () => {
+			document.removeEventListener('keydown', handler);
 		};
+	}
 
-		doc.addEventListener('keydown', (event) => {
-			document.dispatchEvent(new KeyboardEvent(event.type, event));
-		});
-	});
+	function loadHeight(el) {
+		el.onload = () => {
+			el.style.height = '0px';
+			const doc = el.contentDocument;
+			const height = doc.body.scrollHeight;
+			el.style.height = `${height + 100}px`;
+		};
+	}
 
 	$effect(() => {
 		noteTitle = noteState.note.title;
@@ -184,7 +209,14 @@
 
 <ScrollArea scrollHideDelay={200} type="scroll" class="mb-20 h-full">
 	<div class="card mx-auto mt-10 max-w-3xl px-2 pb-40 md:px-10 lg:max-w-5xl">
-		<iframe title="content" class="bg-base-100 mb-10" scrolling="no" bind:this={iframe}></iframe>
+		<iframe
+			title="content"
+			class="bg-base-100 mb-10"
+			scrolling="no"
+			bind:this={iframe}
+			{@attach initializeIframe}
+			{@attach loadHeight}
+		></iframe>
 
 		{#if isEditHTML}
 			<TrixEditor onFileAccept={handleFile} bind:value={textContent} bind:editor />
@@ -209,7 +241,11 @@
 					class="btn btn-primary"
 					onclick={async () => {
 						const doc = iframe.contentDocument;
-						console.log(doc);
+						const customStyle = doc.head.querySelector('#custom-style');
+						if (customStyle) customStyle.remove();
+
+						await noteState.updateContent(doc.documentElement.outerHTML);
+
 						doc.designMode = 'off';
 						isEditHTML = false;
 					}}>Save iframe</button

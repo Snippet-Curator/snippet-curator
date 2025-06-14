@@ -34,7 +34,7 @@ export async function uploadFileToPocketbase(recordID: string, file: File) {
         'attachments+': [file],
     }))
 
-    if (error || !record) {
+    if (error) {
         console.error('Error uploading file: ', error.message)
         return ''
     }
@@ -652,7 +652,6 @@ export class NoteState {
                   background-color: var(--color-base-100) !important;
                   background: var(--color-base-100) !important; 
                   color: var(--color-base-content) !important;
-                  // transition: font-size 0.05s ease !important;
               }
               img {
                   max-width: 100% !important;
