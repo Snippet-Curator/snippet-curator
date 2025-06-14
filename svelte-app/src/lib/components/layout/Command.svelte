@@ -75,6 +75,10 @@
 		}
 	];
 
+	function customFilter(commandValue: string, search: string, commandKeywords?: string[]): number {
+		return commandValue.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
+	}
+
 	function handler(event: KeyboardEvent) {
 		const target = event.target as HTMLElement;
 
@@ -102,7 +106,7 @@
 	});
 </script>
 
-<Command.Dialog bind:open={isOpen}>
+<Command.Dialog filter={customFilter} bind:open={isOpen}>
 	<Command.Input placeholder="Search notebooks or tags..." />
 
 	<Command.List>
