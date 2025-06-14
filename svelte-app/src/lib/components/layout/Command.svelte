@@ -88,6 +88,7 @@
 		}
 
 		if (event.ctrlKey && event.key === 'k') {
+			event.preventDefault();
 			isOpen = true;
 		}
 	}
