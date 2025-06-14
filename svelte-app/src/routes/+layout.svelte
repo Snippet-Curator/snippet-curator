@@ -22,7 +22,7 @@
 		setSettingState
 	} from '$lib/db.svelte';
 
-	import { Dock, Icon, NotebookList, TagList } from '$lib/components';
+	import { Command, Dock, Icon, NotebookList, TagList } from '$lib/components';
 	import { getMobileState, setMobileState } from '$lib/utils.svelte';
 
 	let { children } = $props();
@@ -90,6 +90,8 @@
 		window.addEventListener('resize', updateScreenWidth);
 	});
 </script>
+
+<Command />
 
 <Resizable.PaneGroup direction="horizontal" class="font-display max-h-screen min-h-screen w-full">
 	<Resizable.Pane

@@ -32,6 +32,10 @@
 	];
 	const navigations: KBD[] = [
 		{
+			displays: ['ctrl + k'],
+			description: 'Command box'
+		},
+		{
 			displays: ['→', 'd', 'space'],
 			description: 'Next note'
 		},
@@ -104,7 +108,7 @@
 	<div class="card-body">
 		<div class="card-title text-xl">Keyboard Shortcuts</div>
 		<div class="gap-golden-md grid md:grid-cols-3">
-			{@render renderKBD(navigations, 'Discover Navigation')}
+			{@render renderKBD(navigations, 'Navigation')}
 			{@render renderKBD(ratings, 'Note Rating')}
 			{@render renderKBD(edits, 'Editing')}
 		</div>
