@@ -183,7 +183,7 @@
 <div class="bg-base-100/90 p-golden-sm md:p-golden-md z-20 flex w-full px-4 md:sticky md:top-0">
 	<div class="flex w-full">
 		<input
-			class="card-title focus:ring-base-content/40 bg-base-100/90 mr-2 grow truncate rounded-sm border-0"
+			class="card-title focus:ring-base-content/40 bg-base-100/90 mr-2 grow truncate rounded-md border-0"
 			bind:value={noteTitle}
 			onchange={() => noteState.changeTitle(noteTitle)}
 		/>
