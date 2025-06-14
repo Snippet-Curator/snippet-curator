@@ -866,6 +866,29 @@ export class NoteState {
         if (error) {
             console.error('Error changing note title: ', error.message)
         }
+        this.note = data
+    }
+
+    async changeDescription(newDescription: string) {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+            description: newDescription
+        }))
+
+        if (error) {
+            console.error('Error changing note description: ', error.message)
+        }
+        this.note = data
+    }
+
+    async changeSources(newSources: Note['sources'] | undefined) {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+            sources: newSources
+        }))
+
+        if (error) {
+            console.error('Error changing note sources: ', error.message)
+        }
+        this.note = data
     }
 
     async changeThumbnail(url: string) {
