@@ -666,7 +666,6 @@ export class NoteState {
                   max-height: 800px; !important;
               }
               `
-
     }
 
     async getNote() {
@@ -828,7 +827,7 @@ export class NoteState {
     }
 
     async archiveNote() {
-        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.noteID, {
             status: 'archived'
         }))
 

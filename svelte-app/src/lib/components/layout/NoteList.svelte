@@ -1,16 +1,28 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+
+	import * as ContextMenu from '$lib/components/ui/context-menu/index';
+
+	import { Delete, EditNotebook, EditTags, NoteLoading } from '$lib/components/';
+
 	import type { NoteList, Note } from '$lib/types';
-	import { Blank, NoteLoading } from '$lib/components/';
 	import { replacePbUrl } from '$lib/utils';
+	import { getNoteState, setNoteState } from '$lib/db.svelte';
 
 	type Props = {
 		isBulkEdit: boolean;
 		notes: NoteList[];
 		selectedNotesID: string[];
+		update: () => void;
 	};
 
-	let { notes, isBulkEdit = false, selectedNotesID = $bindable() }: Props = $props();
+	let { notes, isBulkEdit = false, selectedNotesID = $bindable(), update }: Props = $props();
+
+	setNoteState('');
+	const noteState = getNoteState('');
+	let isDeleteOpen = $state(false);
+	let isEditTagsOpen = $state(false);
+	let isEditNotebookOpen = $state(false);
 
 	function checkListNote(checkedNoteID: string) {
 		if (selectedNotesID.includes(checkedNoteID)) {
@@ -65,12 +77,47 @@
 			{#each notes.items as note}
 				<div class="group relative">
 					{#if !isBulkEdit}
-						<button
-							class="card motion-preset-fade motion-duration-200 hover:bg-base-200/70 bg-base-100 card-border w-full border transition-colors duration-200 hover:cursor-pointer"
-							onclick={() => goto(`#/note/${note.id}`)}
-						>
-							{@render renderNotes(note)}
-						</button>
+						<ContextMenu.Root>
+							<ContextMenu.Trigger>
+								<button
+									class="card motion-preset-fade motion-duration-200 hover:bg-base-200/70 bg-base-100 card-border w-full border transition-colors duration-200 hover:cursor-pointer"
+									onclick={() => goto(`#/note/${note.id}`)}
+								>
+									{@render renderNotes(note)}
+								</button>
+							</ContextMenu.Trigger>
+							<ContextMenu.Content>
+								<ContextMenu.Item
+									onSelect={async () => {
+										console.log(note.id, noteState.noteID);
+										noteState.noteID = note.id;
+										await noteState.getNote();
+										isEditNotebookOpen = true;
+									}}>Edit Notebook</ContextMenu.Item
+								>
+								<ContextMenu.Item
+									onSelect={async () => {
+										noteState.noteID = note.id;
+										await noteState.getNote();
+										isEditTagsOpen = true;
+									}}>Edit Tags</ContextMenu.Item
+								>
+								<ContextMenu.Item
+									onSelect={async () => {
+										noteState.noteID = note.id;
+										await noteState.archiveNote();
+										update();
+									}}>Archive</ContextMenu.Item
+								>
+								<ContextMenu.Separator />
+								<ContextMenu.Item
+									onSelect={() => {
+										noteState.noteID = note.id;
+										isDeleteOpen = true;
+									}}>Delete</ContextMenu.Item
+								>
+							</ContextMenu.Content>
+						</ContextMenu.Root>
 					{:else}
 						<button
 							onclick={() => {
@@ -92,5 +139,45 @@
 
 	{#snippet failed()}
 		Notelist Failed to Render
+	{/snippet}
+</svelte:boundary>
+
+<svelte:boundary>
+	<!-- {#await noteState} -->
+	{#if noteState && noteState.note}
+		<Delete
+			bind:isOpen={isDeleteOpen}
+			name="Note"
+			action={async () => {
+				await noteState.softDeleteNote();
+				update();
+			}}>this note</Delete
+		>
+
+		<EditTags
+			bind:isOpen={isEditTagsOpen}
+			currentTags={noteState.note.expand?.tags}
+			add={async (selectedTags) => {
+				await noteState.addTag(selectedTags);
+				update();
+			}}
+			remove={async (selectedTags) => {
+				await noteState.removeTag(selectedTags);
+				update();
+			}}
+		/>
+
+		<EditNotebook
+			currentNotebookID={noteState.note.expand?.notebook.id}
+			bind:isOpen={isEditNotebookOpen}
+			action={async (selectedNotebookID) => {
+				await noteState.changeNotebook(selectedNotebookID);
+				update();
+			}}
+		></EditNotebook>
+	{/if}
+	<!-- {/await} -->
+	{#snippet failed()}
+		Dialogs Failed to Render
 	{/snippet}
 </svelte:boundary>

@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
 
-	import { Notebook as NotebookIcon } from 'lucide-svelte';
-
 	import * as ContextMenu from '$lib/components/ui/context-menu/index';
 
 	import type { Notebook } from '$lib/types';
@@ -30,7 +28,6 @@
 {#snippet renderNotebook(notebook: Notebook)}
 	<div class=" flex w-full items-center justify-between">
 		<a href="#/notebook/{notebook.id}" class="w-full items-center gap-x-2 text-nowrap px-3 py-1">
-			<!-- <NotebookIcon size={15} /> -->
 			{notebook.name}
 		</a>
 		<span class="text-right">{notebook.note_count}</span>
