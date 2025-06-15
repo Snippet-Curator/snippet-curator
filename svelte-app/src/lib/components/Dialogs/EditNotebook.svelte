@@ -12,8 +12,6 @@
 
 	let { isOpen = $bindable(), action }: Props = $props();
 
-	console.log(isOpen);
-
 	let notebooks = $state<Notebook[]>();
 
 	async function getNotebooks() {

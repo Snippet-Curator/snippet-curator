@@ -3,7 +3,7 @@
 
 	import * as ContextMenu from '$lib/components/ui/context-menu/index';
 
-	import { Delete, EditNotebook, EditTags, NoteLoading } from '$lib/components/';
+	import { Delete, EditNotebook, EditTags, NoteLoading, EditNote } from '$lib/components/';
 
 	import type { NoteList, Note } from '$lib/types';
 	import { replacePbUrl } from '$lib/utils';
@@ -23,6 +23,7 @@
 	let isDeleteOpen = $state(false);
 	let isEditTagsOpen = $state(false);
 	let isEditNotebookOpen = $state(false);
+	let isEditNoteOpen = $state(false);
 
 	function checkListNote(checkedNoteID: string) {
 		if (selectedNotesID.includes(checkedNoteID)) {
@@ -89,7 +90,13 @@
 							<ContextMenu.Content>
 								<ContextMenu.Item
 									onSelect={async () => {
-										console.log(note.id, noteState.noteID);
+										noteState.noteID = note.id;
+										await noteState.getNote();
+										isEditNoteOpen = true;
+									}}>Edit</ContextMenu.Item
+								>
+								<ContextMenu.Item
+									onSelect={async () => {
 										noteState.noteID = note.id;
 										await noteState.getNote();
 										isEditNotebookOpen = true;
@@ -175,6 +182,20 @@
 				update();
 			}}
 		></EditNotebook>
+
+		<EditNote
+			note={noteState.note}
+			thumbURL={noteState.note?.thumbnail}
+			bind:isOpen={isEditNoteOpen}
+			action={async (title, description, sources, selectedThumbnailURL) => {
+				await noteState.changeTitle(title);
+				await noteState.changeDescription(description);
+				await noteState.changeSources(sources);
+				await noteState.changeThumbnail(selectedThumbnailURL);
+				await noteState.getNote();
+				update();
+			}}
+		></EditNote>
 	{/if}
 	<!-- {/await} -->
 	{#snippet failed()}
