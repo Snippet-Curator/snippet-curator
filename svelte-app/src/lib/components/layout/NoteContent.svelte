@@ -12,7 +12,9 @@
 	import {
 		addMediaToContent,
 		addResourcesToRecord,
+		addThumbnailToRecord,
 		getFileHash,
+		getResourceforThumbGen,
 		makeResourceFromFile,
 		replacePbUrl
 	} from '$lib/utils';
@@ -24,8 +26,8 @@
 	let { noteState }: Props = $props();
 
 	let note = $derived(noteState.note);
-	let content = $derived(replacePbUrl(noteState.note.content));
-	let noteTitle = $state(noteState.note.title);
+	let content = $derived(replacePbUrl(noteState.note?.content ?? ''));
+	let noteTitle = $state(noteState.note?.title ?? '');
 	let textContent = $state('');
 	let editor: Element;
 
@@ -47,8 +49,9 @@
 
 	async function handleFile(e: Event) {
 		e.preventDefault();
+		if (!note?.id) return;
 
-		const file = e.file;
+		const file = e.file as File;
 
 		// upload file and get url
 		const fileURL = await uploadFileToPocketbase(note?.id, file);
@@ -57,13 +60,18 @@
 		// get hash
 		const hash = await getFileHash(file);
 
-		// create resourc
-		const resource = makeResourceFromFile(file, hash, fileURL);
+		// create resource
+		const newResource = makeResourceFromFile(file, hash, fileURL);
 
 		// add to resources
-		const mergedResources = addResourcesToRecord(note.id, resource);
+		const mergedResources = await addResourcesToRecord(note.id, newResource);
+		if (!mergedResources) return;
 
 		// check thumbnails
+		if (!note.thumbnail) {
+			const thumbResource = getResourceforThumbGen(mergedResources);
+			await addThumbnailToRecord(note?.id, thumbResource.fileURL);
+		}
 
 		// get new file content
 		const newContent = addMediaToContent(file.type, fileURL, file.name);
@@ -223,7 +231,12 @@
 		></iframe>
 
 		{#if isEditHTML}
-			<TrixEditor onFileAccept={handleFile} bind:value={textContent} bind:editor />
+			<TrixEditor
+				onAttachmentAdd={() => {}}
+				onFileAccept={handleFile}
+				bind:value={textContent}
+				bind:editor
+			/>
 
 			<div class="mt-10 flex justify-end gap-x-2">
 				<button

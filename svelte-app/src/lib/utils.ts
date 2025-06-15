@@ -158,9 +158,9 @@ export async function getVideoThumb(videoUrl: string): Promise<File> {
 /**
  * Gets fileURL from list of notes.resources used to generate thumbnail. Uses biggest image first. If no image is found. Then it uses video file url
  */
-export function getResourceURLforThumbGeneratin(resources: Resource[]) {
+export function getResourceforThumbGen(resources: Resource[]) {
 
-    if (!Array.isArray(resources)) return null;
+    if (!Array.isArray(resources)) return resources;
 
     const imageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/bmp', 'image/tiff', 'image/tif', 'image/svg', 'image/svg+xml', 'image/webp', 'image/gif'];
     const videoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska', 'video/3gpp', 'video/ogg'];
@@ -203,7 +203,7 @@ export async function createThumbnail(recordID: string, resources: Resource[]) {
     if (!record) return
     if (record.thumbnail) return
 
-    const thumbFile = getResourceURLforThumbGeneratin(resources)
+    const thumbFile = getResourceforThumbGen(resources)
     let thumbResource
 
     if (!thumbFile) return
@@ -452,6 +452,7 @@ export async function addResourcesToRecord(recordID: string, resource: Resource 
 
     if (error) {
         console.error('Error adding resources: ', error.message)
+        return
     }
 
     return mergedResource
