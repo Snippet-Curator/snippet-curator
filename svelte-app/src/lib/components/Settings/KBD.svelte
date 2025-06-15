@@ -32,8 +32,8 @@
 	];
 	const navigations: KBD[] = [
 		{
-			displays: ['ctrl + k'],
-			description: 'Command box'
+			displays: ['ctrl + l'],
+			description: 'Navigation box'
 		},
 		{
 			displays: ['→', 'd', 'space'],
