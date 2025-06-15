@@ -66,7 +66,7 @@
 		{/if}
 		{#if notelistState.notes.totalItems > 0}
 			<NoteList
-				update={() => updatePage(savedPage)}
+				update={() => updatePage(notelistState.clickedPage)}
 				{isBulkEdit}
 				bind:selectedNotesID
 				notes={notelistState.notes}
