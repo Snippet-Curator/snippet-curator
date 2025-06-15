@@ -121,6 +121,7 @@
 			await noteState.changeDescription(description);
 			await noteState.changeSources(sources);
 			await noteState.changeThumbnail(selectedThumbnailURL);
+			await noteState.getNote();
 		}}
 	></EditNote>
 {/await}

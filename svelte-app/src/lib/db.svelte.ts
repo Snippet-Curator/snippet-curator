@@ -35,7 +35,7 @@ export async function uploadFileToPocketbase(recordID: string, file: File) {
     }))
 
     if (error) {
-        console.error('Error uploading file: ', error.message)
+        console.error('Error uploading file: ', error.message, error.data)
         return ''
     }
 
@@ -860,13 +860,12 @@ export class NoteState {
 
     async changeTitle(newTitle: string) {
         const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
-            title: newTitle
+            title: newTitle,
         }))
 
         if (error) {
             console.error('Error changing note title: ', error.message)
         }
-        this.note = data
     }
 
     async changeDescription(newDescription: string) {
@@ -877,18 +876,17 @@ export class NoteState {
         if (error) {
             console.error('Error changing note description: ', error.message)
         }
-        this.note = data
     }
 
     async changeSources(newSources: Note['sources'] | undefined) {
         const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
-            sources: newSources
+            sources: newSources,
+            expand: 'notebook,tags'
         }))
 
         if (error) {
             console.error('Error changing note sources: ', error.message)
         }
-        this.note = data
     }
 
     async changeThumbnail(url: string) {
@@ -907,6 +905,8 @@ export class NoteState {
 
         const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
             content: newContent
+        }, {
+            expand: 'notebook,tags'
         }))
 
         if (error) {
@@ -929,13 +929,14 @@ export class NoteState {
         const mergedContent = mergeContents(contentList)
 
         const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
-            'content': mergedContent
+            content: mergedContent
+        }, {
+            expand: 'notebook,tags'
         }))
 
         if (error) {
             console.error('Error updating note content: ', error.message)
         }
-
         this.note = data
     }
 }

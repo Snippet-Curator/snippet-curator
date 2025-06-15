@@ -52,6 +52,7 @@
 
 		// upload file and get url
 		const fileURL = await uploadFileToPocketbase(note?.id, file);
+		if (!fileURL) return;
 
 		// get hash
 		const hash = await getFileHash(file);
@@ -185,7 +186,10 @@
 		<input
 			class="card-title focus:ring-base-content/40 bg-base-100/90 mr-2 grow truncate rounded-md border-0"
 			bind:value={noteTitle}
-			onchange={() => noteState.changeTitle(noteTitle)}
+			onchange={async () => {
+				await noteState.changeTitle(noteTitle);
+				await noteState.getNote();
+			}}
 		/>
 		<div
 			class="text-base-content/20 hover:text-base-content hidden items-center gap-x-4 transition-colors duration-300 md:flex"
