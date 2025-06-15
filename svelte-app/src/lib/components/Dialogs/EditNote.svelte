@@ -60,7 +60,7 @@
 
 		<div class="">
 			<legend class="fieldset-legend">Description</legend>
-			<input type="text" class="input w-full" bind:value={description} />
+			<textarea class="textarea w-full" bind:value={description}></textarea>
 		</div>
 
 		<div>
