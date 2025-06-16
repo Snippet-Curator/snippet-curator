@@ -103,7 +103,7 @@ export type NoteList = {
 export type Setting = {
     id: string
     name: string
-    value: number
+    value: string | number
 }
 
 // ------ Frontend ------
