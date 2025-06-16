@@ -949,8 +949,9 @@ export class settingState {
     decayWindow = $state<number>()
     daysOld = $state<number>()
     scoreRefreshHour = $state<number>()
+    youtubeAPIKey = $state<string>()
 
-    async makeDefaultValue(name: string, defaultValue: number) {
+    async makeDefaultValue<T extends string | number>(name: string, defaultValue: T) {
         const { data, error } = await tryCatch<Setting, PError>(pb.collection(settingCollection).create({
             name: name,
             value: defaultValue
@@ -958,12 +959,12 @@ export class settingState {
 
         if (error) {
             console.error('Error making setting: ', name, error.message)
-            return 0
+            return
         }
 
-        if (!data) return 0
+        if (!data) return
 
-        return data.value
+        return data.value as T
     }
 
     async changeSetting(name: string, newValue: number) {
@@ -980,13 +981,13 @@ export class settingState {
 
         if (errorUpdate || !settingUpdate) {
             console.error('Error making setting: ', name, errorUpdate.message)
-            return 0
+            return
         }
 
         return settingUpdate.value
     }
 
-    async getSetting(name: string, defaultValue: number) {
+    async getSetting<T extends string | number>(name: string, defaultValue: T) {
         const { data, error } = await tryCatch<Setting, PError>(pb.collection(settingCollection).getFirstListItem(`name="${name}"`))
 
         if (error || !data) {
@@ -995,7 +996,7 @@ export class settingState {
             return newSettingValue
         }
 
-        return data.value
+        return data.value as T
     }
 
     async getDefaultSettings() {
@@ -1007,6 +1008,7 @@ export class settingState {
         this.decayWindow = await this.getSetting('decayWindow', 12)
         this.daysOld = await this.getSetting('daysOld', 0)
         this.scoreRefreshHour = await this.getSetting('scoreRefreshHour', 6)
+        this.youtubeAPIKey = await this.getSetting('youtubeAPIKey', "")
     }
 }
 

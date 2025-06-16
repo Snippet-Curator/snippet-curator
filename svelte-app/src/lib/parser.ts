@@ -599,14 +599,13 @@ export class youtubeImport {
     youtubeAPI: string
     selectedNotebookID: string
 
-    constructor(youtubeFullURL: string, selectedNotebookID: string) {
+    constructor(youtubeFullURL: string, selectedNotebookID: string, youtubeAPI: string) {
         this.youtubeID = this.getYoutubeID(youtubeFullURL)
         this.selectedNotebookID = selectedNotebookID
-        this.youtubeAPI = ''
+        this.youtubeAPI = youtubeAPI
         this.youtubeFullURL = youtubeFullURL
         this.youtubeThumbURL = ''
         this.thumbURL = ""
-        this.youtubeAPI = ''
         this.title = ''
         this.channelTitle = ''
         this.description = ''
@@ -702,7 +701,7 @@ export class youtubeImport {
 	<div style="margin-bottom: 1rem">
 		<iframe
 			style="width: 100%;aspect-ratio: 16/9;"
-			src="https://www.youtube.com/embed/${this.youtubeID}"
+			src="https://www.youtube-nocookie.com/embed/${this.youtubeID}"
 			${this.title}
 			frameborder="0"
 			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -723,6 +722,7 @@ export class youtubeImport {
     async uploadToDB() {
         const skeletonData = {
             'title': this.title,
+            'notebook': this.selectedNotebookID,
             'last_score_updated': new Date().toISOString(),
             'weight': 5,
             'added': new Date().toISOString(),
@@ -741,7 +741,8 @@ export class youtubeImport {
         if (!record) return
         this.recordID = record.id
 
-        this.youtubeAPI = 'AIzaSyBEes-owCgponHK68ZO7za_eLQx0s3-um4';
+        console.log('api', this.youtubeAPI)
+
         await this.fetchYoutubeMetadata(this.youtubeID, this.youtubeAPI)
 
         // add thumbnail and resource
