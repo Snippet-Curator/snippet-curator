@@ -155,7 +155,7 @@
 	function initializeIframe(el) {
 		const doc = el.contentDocument;
 		doc.open();
-		doc.write(content);
+		doc.write(`<!DOCTYPE html>${content}`);
 		doc.close();
 
 		doc.documentElement.style.setProperty('--fontScale', fontScale);
