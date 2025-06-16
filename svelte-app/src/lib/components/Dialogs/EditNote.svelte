@@ -38,6 +38,14 @@
 
 	$effect(() => {
 		selectedThumbnailURL = thumbURL.split('?')[0];
+		title = note?.title ?? '';
+		description = note?.description ?? '';
+		sources = note?.sources ?? [
+			{
+				source: '',
+				source_url: ''
+			}
+		];
 	});
 </script>
 
@@ -47,7 +55,7 @@
 			e.preventDefault();
 			isOpen = false;
 		}}
-		class="max-w-5xl"
+		class="max-h-full max-w-5xl overflow-y-scroll"
 	>
 		<Dialog.Header>
 			<Dialog.Title>Edit Note</Dialog.Title>
@@ -65,6 +73,7 @@
 
 		<div>
 			<legend class="fieldset-legend">Sources</legend>
+
 			{#if sources}
 				{#each sources as source, index}
 					<div class="gap-golden-md flex items-center justify-center">
@@ -85,6 +94,7 @@
 						</div>
 					</div>
 				{/each}
+
 				<div class="flex justify-end">
 					<button
 						class="btn"
@@ -101,7 +111,7 @@
 
 		<div>
 			<legend class="fieldset-legend">Change Thumbnail</legend>
-			<ScrollArea class="card border-base-content/20 max-h-[400px] overflow-y-hidden border">
+			<ScrollArea class="card border-base-content/20 max-h-[350px] overflow-y-hidden border">
 				<div class="gap-y-golden-xl m-golden-xl grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 					{#if note && note.resources}
 						{#each note.resources as resource}
