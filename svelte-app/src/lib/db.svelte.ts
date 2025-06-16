@@ -231,7 +231,9 @@ export class NotebookState {
     }
 
     async getAllCounts() {
-        const { data, error } = await tryCatch(pb.collection(notesCollection).getList(1, 1))
+        const { data, error } = await tryCatch(pb.collection(notesCollection).getList(1, 1, {
+            filter: `status="active"`,
+        }))
 
         if (error) {
             console.error('Error while getting all notebooks: ', error.message)
