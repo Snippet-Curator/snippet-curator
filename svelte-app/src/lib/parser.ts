@@ -651,7 +651,10 @@ export class youtubeImport {
         this.title = video.snippet.title
         this.content = video.snippet.description
         this.description = createDescription(this.content)
-        this.youtubeThumbURL = video.snippet.thumbnails.standard.url
+        this.youtubeThumbURL = video.snippet.thumbnails.standard?.url ??
+            video.snippet.thumbnails.high?.url ??
+            video.snippet.thumbnails.medium?.url ??
+            video.snippet.thumbnails.default?.url
         this.channelTitle = video.snippet.channelTitle;
         this.channelID = `https://www.youtube.com/${video.snippet.channelID}`
     }
