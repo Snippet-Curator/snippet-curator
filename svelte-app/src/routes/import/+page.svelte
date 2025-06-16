@@ -140,6 +140,21 @@
 
 <ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
 	<section class="gap-golden-xl p-golden-xl card mx-auto mt-10 grid max-w-5xl grid-cols-1">
+		<div class="prose">
+			<h3 class="">Supported Import Files</h3>
+			<p>
+				Evernote ENEX exports and SingleFile HTMLs will be imported as HTML files. Images, audios,
+				PDFs, and videos will be added as embedded HTML. Other file formats will be added as file
+				with a link. See <a
+					href="#/"
+					onclick={(e) => {
+						e.preventDefault();
+						window.open('https://recollect.krxiang.com');
+					}}
+					class="">here</a
+				> for details on import.
+			</p>
+		</div>
 		<div class="gap-golden-lg grid grid-cols-2">
 			<div class="gap-golden-md flex flex-col">
 				<input
@@ -173,9 +188,9 @@
 						</div>
 
 						<div>Status</div>
-						<div class="col-span-2 text-right">{uploadStatus}</div>
+						<div class="col-span-2 text-left">{uploadStatus}</div>
 						<div>Current File</div>
-						<div class="col-span-2 text-right">{currentFile}</div>
+						<div class="col-span-2 text-left">{currentFile}</div>
 					</div>
 				</div>
 			{/if}
@@ -231,23 +246,5 @@
 				</Tabs.Content>
 			</Tabs.Root>
 		{/if}
-	</section>
-
-	<div class="divider mx-auto max-w-5xl"></div>
-
-	<section class="card prose p-golden-xl mx-auto max-w-5xl">
-		<h2>Supported Import Files</h2>
-
-		<div class="join join-vertical bg-base-100 w-full">
-			{#each items as item}
-				<div class="collapse-arrow join-item border-base-200 collapse border">
-					<input type="checkbox" name="my-accordion-4" />
-					<div class="collapse-title font-semibold">{item.title}</div>
-					<div class="collapse-content">
-						{item.description}
-					</div>
-				</div>
-			{/each}
-		</div>
 	</section>
 </ScrollArea>
