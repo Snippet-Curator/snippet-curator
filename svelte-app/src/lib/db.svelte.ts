@@ -733,14 +733,14 @@ export class NoteState {
     }
 
     async deleteNote() {
-        const { data, error } = await tryCatch(pb.collection(notesCollection).delete(this.note.id))
+        const { data, error } = await tryCatch(pb.collection(notesCollection).delete(this.noteID))
         if (error) {
-            console.error('Error deleting note: ', this.note.id, error)
+            console.error('Error deleting note: ', this.noteID, error)
         }
     }
 
     async softDeleteNote() {
-        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.noteID, {
             status: 'deleted'
         }))
 
@@ -839,7 +839,7 @@ export class NoteState {
     }
 
     async restoreNote() {
-        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.noteID, {
             status: 'active'
         }))
 
@@ -852,7 +852,7 @@ export class NoteState {
     }
 
     async permaDeleteNote() {
-        const { data, error } = await tryCatch(pb.collection(notesCollection).delete(this.note.id))
+        const { data, error } = await tryCatch(pb.collection(notesCollection).delete(this.noteID))
 
         if (error) {
             console.error('Error deleting note: ', error.message)
@@ -860,7 +860,7 @@ export class NoteState {
     }
 
     async changeTitle(newTitle: string) {
-        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.noteID, {
             title: newTitle,
         }))
 
@@ -870,7 +870,7 @@ export class NoteState {
     }
 
     async changeDescription(newDescription: string) {
-        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.noteID, {
             description: newDescription
         }))
 
@@ -880,7 +880,7 @@ export class NoteState {
     }
 
     async changeSources(newSources: Note['sources'] | undefined) {
-        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.noteID, {
             sources: newSources,
             expand: 'notebook,tags'
         }))
@@ -893,7 +893,7 @@ export class NoteState {
     async changeThumbnail(url: string) {
         const thumbURL = url ? `${url}?thumb=500x0` : ''
 
-        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.noteID, {
             thumbnail: thumbURL
         }))
 
@@ -904,7 +904,7 @@ export class NoteState {
 
     async updateContent(newContent: string) {
 
-        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.note.id, {
+        const { data, error } = await tryCatch(pb.collection(notesCollection).update(this.noteID, {
             content: newContent
         }, {
             expand: 'notebook,tags'
@@ -919,7 +919,7 @@ export class NoteState {
 
     async appendContent(newContent: string) {
 
-        const { data: record, error: recordError } = await tryCatch(pb.collection(notesCollection).getOne(this.note.id))
+        const { data: record, error: recordError } = await tryCatch(pb.collection(notesCollection).getOne(this.noteID))
 
         if (recordError) {
             console.error('Error getting note content: ', recordError.message)
