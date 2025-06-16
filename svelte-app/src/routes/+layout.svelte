@@ -98,7 +98,7 @@
 		collapsedSize={0}
 	>
 		<div class="mb-5 ml-1 mt-2 flex h-6 items-center gap-x-1">
-			<Icon /> <span class="text-xl font-semibold tracking-widest">ecollect</span>
+			<Icon /> <span class="text-xl font-semibold">Snippet Curator</span>
 		</div>
 
 		<li>
