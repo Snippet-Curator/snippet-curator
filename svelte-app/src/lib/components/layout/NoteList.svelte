@@ -151,16 +151,15 @@
 
 <svelte:boundary>
 	<!-- {#await noteState} -->
+	<Delete
+		bind:isOpen={isDeleteOpen}
+		name="Note"
+		action={async () => {
+			await noteState.softDeleteNote();
+			update();
+		}}>this note</Delete
+	>
 	{#if noteState && noteState.note}
-		<Delete
-			bind:isOpen={isDeleteOpen}
-			name="Note"
-			action={async () => {
-				await noteState.softDeleteNote();
-				update();
-			}}>this note</Delete
-		>
-
 		<EditTags
 			bind:isOpen={isEditTagsOpen}
 			currentTags={noteState.note.expand?.tags}
