@@ -4,12 +4,13 @@
 	import * as Topbar from '$lib/components/Topbar/index';
 
 	import { EnImport, fileImport, htmlImport, youtubeImport } from '$lib/parser';
-	import pb, { getNotebookState, getTagState } from '$lib/db.svelte';
+	import pb, { getNotebookState, getSettingState, getTagState } from '$lib/db.svelte';
 
 	const decoder = new TextDecoder('utf-8');
 
 	const notebookState = getNotebookState();
 	const tagState = getTagState();
+	const settingState = getSettingState();
 
 	let files: File[] = [];
 	let listOfErrors = $state<
@@ -23,6 +24,7 @@
 	let progress = $state(0);
 	let currentFile = $state('');
 	let selectedNotebookID = $state<string>();
+	let selectedYoutubeNotebookID = $state<string>();
 	let uploadStatus: 'stopped' | 'in progress' | 'error' | 'completed' = $state('stopped');
 	const items = [
 		{
@@ -134,11 +136,16 @@
 	async function importYoutube(urls: string) {
 		if (!urls) return;
 		const urlList = urls.split('\n');
+
 		for (const url of urlList) {
-			if (selectedNotebookID?.startsWith('Import') || !selectedNotebookID) {
-				selectedNotebookID = notebookState.inboxID;
+			if (selectedYoutubeNotebookID?.startsWith('Import') || !selectedYoutubeNotebookID) {
+				selectedYoutubeNotebookID = notebookState.inboxID;
 			}
-			const youtubeFile = new youtubeImport(url, selectedNotebookID);
+			const youtubeFile = new youtubeImport(
+				url,
+				selectedYoutubeNotebookID,
+				settingState.youtubeAPIKey
+			);
 			await youtubeFile.uploadToDB();
 		}
 		youtubeURLs = '';
@@ -278,8 +285,19 @@
 
 		<textarea placeholder="Paste full youtube URL" bind:value={youtubeURLs} class="textarea w-full"
 		></textarea>
+		<select class="select w-full" bind:value={selectedYoutubeNotebookID}>
+			<option disabled selected>Import into Notebook</option>
+			{#each notebooks as notebook}
+				<option value={notebook.id}>{notebook.name}</option>
+			{/each}
+		</select>
 		<div class="flex justify-end">
-			<button onclick={() => importYoutube(youtubeURLs)} class="btn btn-neutral">Import</button>
+			<button
+				onclick={() => {
+					importYoutube(youtubeURLs);
+				}}
+				class="btn btn-neutral">Import</button
+			>
 		</div>
 	</section>
 </ScrollArea>

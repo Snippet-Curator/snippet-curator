@@ -12,7 +12,8 @@
 		setNotebookState,
 		getTagState,
 		setTagState,
-		setSettingState
+		setSettingState,
+		getSettingState
 	} from '$lib/db.svelte';
 
 	import { Command, Dock, Icon, NotebookList, TagList } from '$lib/components';
@@ -26,6 +27,7 @@
 	const tagState = getTagState();
 	const notebookState = getNotebookState();
 	const mobileState = getMobileState();
+	const settingState = getSettingState();
 
 	let screenWidth = window.innerWidth;
 
@@ -77,6 +79,7 @@
 	onMount(async () => {
 		updateScreenWidth();
 		defaultNotebooks = getDefaultNotebooks();
+		await settingState.getDefaultSettings();
 	});
 
 	$effect(() => {
