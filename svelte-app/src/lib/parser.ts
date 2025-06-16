@@ -705,7 +705,7 @@ export class youtubeImport {
 		<iframe
 			style="width: 100%;aspect-ratio: 16/9;"
 			src="https://www.youtube-nocookie.com/embed/${this.youtubeID}"
-			${this.title}
+			title=${this.title}
 			frameborder="0"
 			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 			referrerpolicy="strict-origin-when-cross-origin"
