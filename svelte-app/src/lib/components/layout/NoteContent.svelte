@@ -174,6 +174,11 @@
 	}
 
 	function loadHeight(el) {
+		el.style.height = '0px';
+		const doc = el.contentDocument;
+		const height = doc.body.scrollHeight;
+		el.style.height = `${height + 100}px`;
+
 		el.onload = () => {
 			el.style.height = '0px';
 			const doc = el.contentDocument;
