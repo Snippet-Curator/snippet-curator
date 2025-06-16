@@ -3,7 +3,7 @@
 	import * as Tabs from '$lib/components/ui/tabs/index';
 	import * as Topbar from '$lib/components/Topbar/index';
 
-	import { EnImport, fileImport, htmlImport } from '$lib/parser';
+	import { EnImport, fileImport, htmlImport, youtubeImport } from '$lib/parser';
 	import pb, { getNotebookState, getTagState } from '$lib/db.svelte';
 
 	const decoder = new TextDecoder('utf-8');
@@ -51,6 +51,8 @@
 				'Click the "Sign Up" button in the top right corner and follow the registration process.'
 		}
 	];
+
+	let youtubeURLs = $state('');
 
 	function handleFileUpload(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -129,6 +131,19 @@
 		});
 	}
 
+	async function importYoutube(urls: string) {
+		if (!urls) return;
+		const urlList = urls.split('\n');
+		for (const url of urlList) {
+			if (selectedNotebookID?.startsWith('Import') || !selectedNotebookID) {
+				selectedNotebookID = notebookState.inboxID;
+			}
+			const youtubeFile = new youtubeImport(url, selectedNotebookID);
+			await youtubeFile.uploadToDB();
+		}
+		youtubeURLs = '';
+	}
+
 	const notebooks = $derived(notebookState.flatNotebooks);
 </script>
 
@@ -141,7 +156,7 @@
 <ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
 	<section class="gap-golden-xl p-golden-xl card mx-auto mt-10 grid max-w-5xl grid-cols-1">
 		<div class="prose">
-			<h3 class="">Supported Import Files</h3>
+			<h3 class="">Import Files</h3>
 			<p>
 				Evernote ENEX exports and SingleFile HTMLs will be imported as HTML files. Images, audios,
 				PDFs, and videos will be added as embedded HTML. Other file formats will be added as file
@@ -246,5 +261,25 @@
 				</Tabs.Content>
 			</Tabs.Root>
 		{/if}
+	</section>
+	<!-- end file import -->
+	<div class="divider mx-auto max-w-5xl"></div>
+	<!-- start youtube import -->
+	<section class="gap-golden-xl p-golden-xl card mx-auto mt-10 grid max-w-5xl grid-cols-1">
+		<div class="prose max-w-none">
+			<h3>Youtube Import</h3>
+			<p>
+				This will add youtube videos as an embedded playable video. The video itself will not be
+				downloaded. However, this enables organization of saved youtube videos and will also save
+				the titles, thumbnail, and description. You need to have youtube API setup in Settings first
+				to use this.
+			</p>
+		</div>
+
+		<textarea placeholder="Paste full youtube URL" bind:value={youtubeURLs} class="textarea w-full"
+		></textarea>
+		<div class="flex justify-end">
+			<button onclick={() => importYoutube(youtubeURLs)} class="btn btn-neutral">Import</button>
+		</div>
 	</section>
 </ScrollArea>

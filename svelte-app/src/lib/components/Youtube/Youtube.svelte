@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	const API = 'AIzaSyBEes-owCgponHK68ZO7za_eLQx0s3-um4';
 
 	async function fetchYoutubeMetadata(videoID: string, apiKey: string) {
@@ -25,17 +27,17 @@
 		};
 	}
 
-	let youtubeURL = $state('');
-	let title = $state('');
+	let youtubeURL = $state('vIzopZRbMso');
+
+	let title = $derived('');
 	let description = $state('');
 	let channelTitle = $state('');
 	let thumbnails = $state('');
 	let duration = $state(0);
 	let player = $state('');
-</script>
+	let channelID = $state('');
 
-<input
-	onchange={async () => {
+	onMount(async () => {
 		const video = await fetchYoutubeMetadata(youtubeURL, API);
 		const { snippets, contentDetails: details, player: vPlayer } = video;
 		player = vPlayer;
@@ -44,24 +46,23 @@
 		thumbnails = snippets.thumbnails.standard.url;
 		duration = details.duration;
 		channelTitle = snippets.channelTitle;
-	}}
-	class="input"
-	type="text"
-	bind:value={youtubeURL}
-/>
+		channelID = snippets.channelID;
+	});
+</script>
 
-<div class="card">
-	<div></div>
-
-	<figure>
-		<img src={thumbnails} alt="" />
-	</figure>
-
-	thumb: {thumbnails}
-
-	<div class="aspect-video w-full">
+<div
+	style="font-family: Verdana, 'Segoe UI', sans-serif;
+        font-size: 16px"
+>
+	<h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.2rem">{title}</h2>
+	<div style="margin-bottom: 1rem">
+		<figure style="width: 100%">
+			<img style="width: 100%" src={thumbnails} alt="thumbnail" />
+		</figure>
+	</div>
+	<div style="margin-bottom: 1rem">
 		<iframe
-			class="w-full"
+			style="width: 100%;aspect-ratio: 16/9;"
 			src="https://www.youtube.com/embed/vIzopZRbMso?si=Gi26b7n5kpxPLtz5"
 			{title}
 			frameborder="0"
@@ -70,12 +71,16 @@
 			allowfullscreen
 		></iframe>
 	</div>
+	<div style="font-weight: 600">By <a href={channelID}>{channelTitle}</a></div>
 
-	<div class="card-body">
-		<h2 class="card-title">{title}</h2>
-
-		<div>channel: {channelTitle}</div>
-		<div>duration: {duration}</div>
-		<div>description: {description}</div>
+	<div style="padding: 1.6rem">
+		{@html description.replace(/\n/g, '<br/>')}
 	</div>
 </div>
+
+<!-- <style>
+	iframe {
+		width: 100%;
+		aspect-ratio: 16/9;
+	}
+</style> -->

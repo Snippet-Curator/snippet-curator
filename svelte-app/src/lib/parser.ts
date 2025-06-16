@@ -7,7 +7,7 @@ import type { EnNote, EnMedia, EnResource, Resource, PError } from './types';
 import pb, { uploadFileToPocketbase } from '$lib/db.svelte'
 import { tryCatch } from './utils.svelte';
 import type { RecordModel } from 'pocketbase';
-import { addMediaToContent, addResourcesToRecord, createDescription, createThumbnail, getFileHash, getMimeFromName, makeResourceFromFile, mergeResources, parser } from './utils';
+import { addMediaToContent, addResourcesToRecord, addThumbnailToRecord, createDescription, createThumbnail, getFileHash, getMimeFromName, getVideoThumb, makeResourceFromFile, mergeResources, parser } from './utils';
 import { notesCollection } from './const';
 
 dayjs.extend(customParseFormat)
@@ -580,4 +580,195 @@ export class fileImport {
             console.error('Error updating record: ', updatedError.message)
         }
     }
+}
+
+export class youtubeImport {
+    title: string | 'Untitled'
+    channelTitle: string
+    channelID: string
+    source: string | null
+    sourceURL: string | null
+    recordID: string
+    description: string | null
+    content: string
+    resources: Resource[]
+    youtubeFullURL: string
+    youtubeThumbURL: string
+    thumbURL: string
+    youtubeID: string | null
+    youtubeAPI: string
+    selectedNotebookID: string
+
+    constructor(youtubeFullURL: string, selectedNotebookID: string) {
+        this.youtubeID = this.getYoutubeID(youtubeFullURL)
+        this.selectedNotebookID = selectedNotebookID
+        this.youtubeAPI = ''
+        this.youtubeFullURL = youtubeFullURL
+        this.youtubeThumbURL = ''
+        this.thumbURL = ""
+        this.youtubeAPI = ''
+        this.title = ''
+        this.channelTitle = ''
+        this.description = ''
+        this.content = ''
+        this.source = 'Youtube'
+        this.sourceURL = youtubeFullURL
+        this.recordID = ''
+        this.resources = []
+        this.channelID = ""
+    }
+
+    getYoutubeID(url: string) {
+        const patterns = [
+            /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
+            /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?&]+)/,
+            /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([^?&]+)/,
+            /^(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?&]+)/,
+        ];
+
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match?.[1]) return match[1];
+        }
+
+        return null;
+    }
+
+    async fetchYoutubeMetadata(videoID: string, apiKey: string) {
+        const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoID}&key=${apiKey}`;
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Fetch Youtube error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const video = data.items?.[0];
+
+        if (!video) {
+            throw new Error('Video not found');
+        }
+
+        this.title = video.snippet.title
+        this.content = video.snippet.description
+        this.description = createDescription(this.content)
+        this.youtubeThumbURL = video.snippet.thumbnails.standard.url
+        this.channelTitle = video.snippet.channelTitle;
+        this.channelID = `https://www.youtube.com/${video.snippet.channelID}`
+    }
+
+    async addThumbnailandResource(youtubeThumbURL: string) {
+        if (!youtubeThumbURL) {
+            console.log('No youtube thumb')
+            return
+        }
+        // download from youtube
+        const response = await fetch(youtubeThumbURL)
+        if (!response.ok) {
+            console.error(`Error fetching Youtube thumbnail: ${response.status}`);
+            return
+        }
+        const blob = await response.blob();
+        const thumbFile = new File([blob], 'youtube-thumbnail.jpg', { type: blob.type });
+
+        // upload file to db
+        this.thumbURL = await uploadFileToPocketbase(this.recordID, thumbFile)
+
+        // add thumbnail to record
+        await addThumbnailToRecord(this.recordID, this.thumbURL)
+
+        // get hash
+        const hash = await getFileHash(thumbFile)
+
+        // get and add resource
+        const resource = makeResourceFromFile(thumbFile, hash, this.thumbURL)
+        this.resources = [resource]
+    }
+
+    makeHTML() {
+        return `
+        <style>
+            body {
+            font-family: "Concourse4", "Segoe UI", sans-serif;
+            font-size: 16px
+            }
+        </style>
+        <body>
+        <div style="font-family: var(--font-sans)">
+	<h2 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1.2rem">${this.title}</h2>
+	<div style="margin-bottom: 1rem">
+	<img style="width: 100%" src=${this.thumbURL} alt="thumbnail" />
+	</div>
+	<div style="margin-bottom: 1rem">
+		<iframe
+			style="width: 100%;aspect-ratio: 16/9;"
+			src="https://www.youtube.com/embed/${this.youtubeID}"
+			${this.title}
+			frameborder="0"
+			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+			referrerpolicy="strict-origin-when-cross-origin"
+			allowfullscreen
+		></iframe>
+	</div>
+	<div style="font-weight: 600">By <a href=${this.channelID}>${this.channelTitle}</a></div>
+
+	<div style="padding: 1.6rem">
+		${this.content?.replace(/\n/g, '<br/>') ?? ""}
+	</div>
+    </div>
+    </body> 
+`
+    }
+
+    async uploadToDB() {
+        const skeletonData = {
+            'title': this.title,
+            'last_score_updated': new Date().toISOString(),
+            'weight': 5,
+            'added': new Date().toISOString(),
+            'status': 'active',
+        }
+
+        const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).create(skeletonData))
+
+        if (error) {
+            if (error.data.data.title.code == "validation_not_unique") {
+                throw new Error('Skipped duplicate note')
+            }
+            throw (error)
+        }
+
+        if (!record) return
+        this.recordID = record.id
+
+        this.youtubeAPI = 'AIzaSyBEes-owCgponHK68ZO7za_eLQx0s3-um4';
+        await this.fetchYoutubeMetadata(this.youtubeID, this.youtubeAPI)
+
+        // add thumbnail and resource
+        await this.addThumbnailandResource(this.youtubeThumbURL)
+
+        // make html
+        this.content = this.makeHTML()
+
+        const sources = [{
+            'source': this.source,
+            'source_url': this.sourceURL
+        }]
+
+        const data = {
+            'title': this.title,
+            'sources': sources,
+            'description': this.description,
+            'content': this.content,
+            'original_content': this.content,
+            'resources': this.resources
+        }
+
+        const { data: updatedRecord, error: updatedError } = await tryCatch(pb.collection(notesCollection).update(this.recordID, data))
+
+        if (updatedError) {
+            console.error('Error updating record: ', updatedError.message)
+        }
+    }
+
 }
