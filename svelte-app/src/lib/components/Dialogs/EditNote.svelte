@@ -55,7 +55,7 @@
 			e.preventDefault();
 			isOpen = false;
 		}}
-		class="max-h-full max-w-5xl overflow-y-scroll"
+		class="scrollbar-thin max-h-full max-w-5xl overflow-y-auto"
 	>
 		<Dialog.Header>
 			<Dialog.Title>Edit Note</Dialog.Title>
@@ -160,3 +160,11 @@
 		</div>
 	</Dialog.Content>
 </Dialog.Root>
+
+<style>
+	:global(.scrollbar-thin::-webkit-scrollbar-button) {
+		display: none;
+		height: 0;
+		width: 0;
+	}
+</style>

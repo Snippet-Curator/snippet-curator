@@ -8,8 +8,9 @@
 		my-dark --prefersdark;
 }
 @plugin '@tailwindcss/typography';
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/aspect-ratio';
+/* @plugin '@tailwindcss/forms'; */
+/* @plugin '@tailwindcss/aspect-ratio'; */
+@plugin 'tailwind-scrollbar';
 
 @plugin "daisyui/theme" {
 	name: 'fantasy';
@@ -70,13 +71,24 @@
 	html {
 		@apply 3xl:text-lg 4xl:text-2xl 5xl:text-4xl 2xl:text-lg;
 	}
+
+	body {
+		@apply overflow-hidden;
+	}
+
+	input,
+	label,
+	textarea,
+	select {
+		@apply scrollbar-thin outline-none;
+	}
 }
 
 /* * {
 	border: 1px solid black;
 } */
 
-html {
+/* html {
 	box-sizing: border-box;
 }
 
@@ -84,15 +96,4 @@ html {
 *:before,
 *:after {
 	box-sizing: inherit;
-}
-
-body {
-	@apply overflow-hidden;
-}
-
-input,
-label,
-textarea,
-select {
-	@apply outline-none;
-}
+} */
