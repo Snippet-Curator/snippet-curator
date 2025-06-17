@@ -92,6 +92,7 @@ body {
 
 input,
 label,
-textarea {
+textarea,
+select {
 	@apply outline-none;
 }
