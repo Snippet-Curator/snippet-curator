@@ -66,11 +66,7 @@ function calculateNoteScore(
       weightWeight * weightNorm +
       randomWeight * randomFactor) /
     totalWt
-  console.log('rating weight', ratingWeight)
-  console.log('rating score', ratingNorm)
-  console.log('raw score', rawScore)
   const score = rawScore * recentlySeenPenalty(lastOpened, fullPenaltyWindow, decayWindow) * 100
-  console.log('score', score)
   return score
 }
 
