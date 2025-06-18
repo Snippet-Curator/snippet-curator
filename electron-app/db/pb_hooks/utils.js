@@ -34,11 +34,13 @@ function recentlySeenPenalty(lastOpened, fullPenaltyWindow, decayWindow) {
 
   const hoursAgo = (Date.now() - openedDate.getTime()) / (1000 * 60 * 60)
 
-  // Full penalty if seen within last hour, fades out over 12 hours
-  const decayFactor = Math.min(fullPenaltyWindow, hoursAgo / decayWindow)
-  // cap full penalty at 1%
-  const adjustedDecay = Math.max(0.1, decayFactor)
-  return adjustedDecay // 0 (just seen) → 1 (not seen in 12+ hours)
+  const fullPenalty = 0.1 // cap full penalty at 1%
+  if (hoursAgo <= fullPenaltyWindow) return fullPenalty
+  if (hoursAgo >= decayWindow) return 1
+
+  // Linearly interpolate from fullPenalty → 1 over decayWindow hours
+  const decayProgress = (hoursAgo - fullPenaltyWindow) / decayWindow
+  return fullPenalty + decayProgress * (1 - fullPenalty)
 }
 
 function calculateNoteScore(
