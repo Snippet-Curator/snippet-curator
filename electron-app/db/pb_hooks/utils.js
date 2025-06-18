@@ -1,5 +1,5 @@
 function normalizeRating(val, min, max) {
-  if ((val = 0)) return 0.5
+  if (val === 0) return 0.5
   return Math.max(0, Math.min(1, (val - min) / (max - min)))
 }
 
@@ -66,7 +66,11 @@ function calculateNoteScore(
       weightWeight * weightNorm +
       randomWeight * randomFactor) /
     totalWt
+  console.log('rating weight', ratingWeight)
+  console.log('rating score', ratingNorm)
+  console.log('raw score', rawScore)
   const score = rawScore * recentlySeenPenalty(lastOpened, fullPenaltyWindow, decayWindow) * 100
+  console.log('score', score)
   return score
 }
 
