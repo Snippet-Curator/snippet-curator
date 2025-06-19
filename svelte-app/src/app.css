@@ -75,13 +75,6 @@
 	body {
 		@apply overflow-hidden;
 	}
-
-	input,
-	label,
-	textarea,
-	select {
-		@apply scrollbar-thin outline-none;
-	}
 }
 
 /* * {
@@ -97,3 +90,10 @@
 *:after {
 	box-sizing: inherit;
 } */
+
+input,
+label,
+textarea,
+select {
+	@apply scrollbar-thin outline-none;
+}
