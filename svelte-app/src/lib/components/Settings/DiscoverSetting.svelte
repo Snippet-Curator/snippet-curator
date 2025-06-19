@@ -9,24 +9,26 @@
 	initialValue = 0,
 	description = '',
 	min = 0,
-	max = 1,
-	step = 0.1
+	max = 10,
+	step = 1
 )}
-	<div class="grid grid-cols-12 items-start">
+	<div class="gap-x-golden-md grid grid-cols-12 content-start">
+		<legend class="fieldset-legend col-span-12">{title}</legend>
 		<div class="col-span-9">
-			<legend class="fieldset-legend">{title}</legend>
 			<p>{description}</p>
 		</div>
 		<input
 			type="number"
-			class="input col-span-2 col-start-10 text-right"
+			class="input col-span-2 text-right"
+			required
 			{min}
 			{max}
 			value={initialValue}
 			{step}
 			onchange={(event: Event) => {
 				const input = event.target as HTMLInputElement;
-				const newValue = input.valueAsNumber;
+				let newValue = input.valueAsNumber;
+				if (!newValue) newValue = 0;
 				console.log('Changed setting: ', name, newValue);
 				settingState.changeSetting(name, newValue);
 			}}
@@ -39,7 +41,7 @@
 		<div class="card-title text-xl">Discover Settings</div>
 		<p>Settings are updated on restart.</p>
 
-		<div class="gap-golden-md grid grid-cols-1 md:grid-cols-2">
+		<div class="gap-x-golden-md space-y-golden-lg grid grid-cols-1 md:grid-cols-2">
 			{@render renderDiscoverSetting(
 				'recencyWeight',
 				'Recency Weight',
