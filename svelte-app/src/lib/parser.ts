@@ -7,7 +7,7 @@ import type { EnNote, EnMedia, EnResource, Resource, PError } from './types';
 import pb, { uploadFileToPocketbase } from '$lib/db.svelte'
 import { tryCatch } from './utils.svelte';
 import type { RecordModel } from 'pocketbase';
-import { addMediaToContent, addResourcesToRecord, addThumbnailToRecord, createDescription, createThumbnail, getFileHash, getMimeFromName, getVideoThumb, makeResourceFromFile, mergeResources, parser } from './utils';
+import { addMediaToContent, addResourcesToRecord, addThumbnailToRecord, createDescription, createThumbnail, getFileHash, getMimeFromName, getVideoThumb, makeResourceFromFile, mergeResources, parser, parseYouTubeDuration } from './utils';
 import { notesCollection } from './const';
 
 dayjs.extend(customParseFormat)
@@ -587,7 +587,6 @@ export class youtubeImport {
     channelTitle: string
     channelID: string
     source: string | null
-    sourceURL: string | null
     recordID: string
     description: string | null
     content: string
@@ -595,15 +594,18 @@ export class youtubeImport {
     youtubeFullURL: string
     youtubeThumbURL: string
     thumbURL: string
-    youtubeID: string | null
+    youtubeID: string | undefined
     youtubeAPI: string
     selectedNotebookID: string
+    viewCount: string
+    publishedDate: string
+    duration: string
 
     constructor(youtubeFullURL: string, selectedNotebookID: string, youtubeAPI: string) {
+        this.youtubeFullURL = youtubeFullURL
         this.youtubeID = this.getYoutubeID(youtubeFullURL)
         this.selectedNotebookID = selectedNotebookID
         this.youtubeAPI = youtubeAPI
-        this.youtubeFullURL = youtubeFullURL
         this.youtubeThumbURL = ''
         this.thumbURL = ""
         this.title = ''
@@ -611,13 +613,17 @@ export class youtubeImport {
         this.description = ''
         this.content = ''
         this.source = 'Youtube'
-        this.sourceURL = youtubeFullURL
         this.recordID = ''
         this.resources = []
         this.channelID = ""
+        this.viewCount = ""
+        this.publishedDate = ""
+        this.duration = ""
     }
 
     getYoutubeID(url: string) {
+        if (!url) return
+
         const patterns = [
             /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
             /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?&]+)/,
@@ -630,11 +636,12 @@ export class youtubeImport {
             if (match?.[1]) return match[1];
         }
 
-        return null;
+        this.youtubeFullURL = `https://www.youtube.com/watch?v=${url}`
+        return url;
     }
 
     async fetchYoutubeMetadata(videoID: string, apiKey: string) {
-        const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoID}&key=${apiKey}`;
+        const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoID}&key=${apiKey}`;
 
         const response = await fetch(url);
         if (!response.ok) {
@@ -657,6 +664,9 @@ export class youtubeImport {
             video.snippet.thumbnails.default?.url
         this.channelTitle = video.snippet.channelTitle;
         this.channelID = `https://www.youtube.com/${video.snippet.channelID}`
+        this.viewCount = video.statistics.viewCount;
+        this.publishedDate = video.snippet.publishedAt ?? "";
+        this.duration = video.contentDetails.duration ?? "";
     }
 
     async addThumbnailandResource(youtubeThumbURL: string) {
@@ -711,7 +721,13 @@ export class youtubeImport {
 			allowfullscreen
 		></iframe>
 	</div>
-	<div style="font-weight: 600">By <a href=${this.channelID}>${this.channelTitle}</a></div>
+	<div style="font-weight: 600">By <a href=${this.channelID}>${this.channelTitle}</a>
+        <div style="font-size: 0.8rem">
+			${this.publishedDate}<br />
+			${this.duration}<br />
+			${this.viewCount} views
+		</div>
+    </div>
 
 	<div style="padding: 1.6rem">
 		${this.content?.replace(/\n/g, '<br/>') ?? ""}
@@ -743,9 +759,10 @@ export class youtubeImport {
         if (!record) return
         this.recordID = record.id
 
-        console.log('api', this.youtubeAPI)
-
         await this.fetchYoutubeMetadata(this.youtubeID, this.youtubeAPI)
+        this.publishedDate = dayjs(this.publishedDate).format('MM/DD/YYYY') ?? ""
+        this.duration = parseYouTubeDuration(this.duration) ?? ""
+        this.viewCount = Number(this.viewCount).toLocaleString('en-US')
 
         // add thumbnail and resource
         await this.addThumbnailandResource(this.youtubeThumbURL)
@@ -755,7 +772,7 @@ export class youtubeImport {
 
         const sources = [{
             'source': this.source,
-            'source_url': this.sourceURL
+            'source_url': this.youtubeFullURL
         }]
 
         const data = {

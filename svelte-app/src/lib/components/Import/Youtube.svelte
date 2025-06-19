@@ -26,7 +26,7 @@
 
 			<div class="gap-golden-md col-span-12 flex flex-col md:col-span-6">
 				<textarea
-					placeholder="Paste full youtube URLs, one on each line."
+					placeholder="Paste full youtube URLs or video IDs, one on each line."
 					bind:value={youtubeURLs}
 					class="textarea w-full"
 				></textarea>

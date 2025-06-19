@@ -343,6 +343,28 @@ export function createDescription(htmlContent: string, maxLength = 300) {
     return trimmedText.substring(0, maxLength);
 }
 
+/**
+ * Parses youtube duration into readable format
+ */
+export function parseYouTubeDuration(duration: string) {
+    const regex = /P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+    const matches = duration.match(regex);
+
+    if (!matches) return null;
+
+    const days = parseInt(matches[1] || 0, 10);
+    const hours = parseInt(matches[2] || 0, 10);
+    const minutes = parseInt(matches[3] || 0, 10);
+    const seconds = parseInt(matches[4] || 0, 10);
+
+    const parts = [];
+    if (days) parts.push(`${days}d`);
+    if (hours) parts.push(`${hours}h`);
+    if (minutes) parts.push(`${minutes}m`);
+    if (seconds) parts.push(`${seconds}s`);
+    return parts.join(' ') || '0s';
+}
+
 
 // ─────────────────────────────
 //      Resource Operation
