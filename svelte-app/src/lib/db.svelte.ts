@@ -969,7 +969,7 @@ export class settingState {
         return data.value as T
     }
 
-    async changeSetting(name: string, newValue: number) {
+    async changeSetting<T extends number | string>(name: string, newValue: T) {
         const { data: settingRecord, error } = await tryCatch<Setting, PError>(pb.collection(settingCollection).getFirstListItem(`name="${name}"`))
 
         if (error || !settingRecord) {
