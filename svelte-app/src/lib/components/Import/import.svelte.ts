@@ -181,10 +181,10 @@ export class ImportStateClass implements ImportState {
         this.uploadStatus = 'in progress';
 
         for (const [index, url] of urlList.entries()) {
+            this.progress = Math.round(((index + 1) / this.totalFiles) * 100);
             if (!url) continue
             this.currentFile = url
             await this.uploadYoutube(url, this.selectedNotebookID, API)
-            this.progress = Math.round(((index + 1) / this.totalFiles) * 100);
         }
         this.currentFile = '';
         this.uploadStatus = 'completed';
