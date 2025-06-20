@@ -35,19 +35,22 @@
 
 	const currentTagID = $derived(notelistState.noteType == 'tags' ? page.params.slug : '');
 
-	function selectAll() {
+	function selectAll(e: Event) {
+		const target = e.target as HTMLInputElement;
 		if (!isSelectAll) {
 			selectedNotesID = [];
+			target.blur();
 			return;
 		}
 		notelistState.notes.items.forEach((item) => {
 			selectedNotesID.push(item.id);
 		});
+		target.blur();
 	}
 </script>
 
 <div
-	class="bg-base-100/95 border-t-base-200 motion-opacity-in-0 motion-duration-100 motion-scale-in-95 absolute bottom-0 left-0 z-20 flex w-full items-center justify-center border-t py-6 backdrop-blur-2xl"
+	class="bg-base-100/95 border-t-base-200 motion-opacity-in-0 motion-duration-100 motion-scale-in-95 absolute bottom-0 left-0 z-20 flex w-full items-center justify-center border-t py-6 backdrop-blur-2xl 2xl:py-10"
 >
 	<div class="gap-golden-md flex flex-col items-center md:flex-row">
 		<div class="gap-x-golden-md grid auto-cols-min grid-cols-4 md:mr-4">
