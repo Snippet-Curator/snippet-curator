@@ -709,18 +709,9 @@ export class youtubeImport {
         <div style="font-family: var(--font-sans)">
 	<h2 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1.2rem">${this.title}</h2>
 	<div style="margin-bottom: 1rem">
-	<img style="width: 100%" src=${this.thumbURL} alt="thumbnail" />
+	<img style="width: 100%; height: auto" src=${this.thumbURL} alt="thumbnail" />
 	</div>
-	<div style="margin-bottom: 1rem">
-		<iframe
-			style="width: 100%;aspect-ratio: 16/9;"
-			src="https://www.youtube-nocookie.com/embed/${this.youtubeID}"
-			frameborder="0"
-			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-			referrerpolicy="strict-origin-when-cross-origin"
-			allowfullscreen
-		></iframe>
-	</div>
+	
 	<div style="font-weight: 600">By <a href=${this.channelID}>${this.channelTitle}</a>
         <div style="font-size: 0.8rem">
 			${this.publishedDate}<br />
@@ -731,6 +722,16 @@ export class youtubeImport {
 
 	<div style="padding: 1.6rem">
 		${this.content?.replace(/\n/g, '<br/>') ?? ""}
+	</div>
+    <div style="margin-bottom: 1rem">
+		<iframe
+			style="width: 100%;aspect-ratio: 16/9"
+			src="https://www.youtube-nocookie.com/embed/${this.youtubeID}"
+			frameborder="0"
+			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+			referrerpolicy="strict-origin-when-cross-origin"
+			allowfullscreen
+		></iframe>
 	</div>
     </div>
     </body> 
