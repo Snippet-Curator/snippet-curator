@@ -15,7 +15,7 @@
 		</div>
 
 		<div class="col-span-3">Status</div>
-		<div class="col-span-9 text-right">{importState.uploadStatus}</div>
+		<div class="col-span-9">{importState.uploadStatus}</div>
 		<div class="col-span-3">Current File</div>
 		<div class="col-span-9 text-left">{importState.currentFile}</div>
 	</div>
