@@ -4,6 +4,7 @@
 	import type { Note } from '$lib/types';
 	import { replacePbUrl } from '$lib/utils';
 	import { X } from 'lucide-svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	type Props = {
 		isOpen: boolean;
@@ -46,6 +47,23 @@
 				source_url: ''
 			}
 		];
+	});
+
+	function handler(event: KeyboardEvent) {
+		if (isOpen == false) return;
+
+		switch (event.key) {
+			case 'Enter':
+				save();
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener('keydown', handler);
+
+		onDestroy(() => {
+			document.removeEventListener('keydown', handler);
+		});
 	});
 </script>
 
