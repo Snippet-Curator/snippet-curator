@@ -24,6 +24,17 @@
 	});
 
 	function handler(event: KeyboardEvent) {
+		const target = event.target as HTMLElement;
+
+		switch (target.tagName) {
+			case 'INPUT':
+			case 'TEXTAREA':
+			case 'BUTTON':
+			case 'DIV':
+			case 'TRIX-EDITOR':
+				return;
+		}
+
 		switch (event.key) {
 			case 'ArrowRight':
 				changePage(currentPage + 1);
