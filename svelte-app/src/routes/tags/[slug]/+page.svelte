@@ -59,7 +59,7 @@
 					updatePage(notelistState.clickedPage);
 				}}
 				bind:isBulkEdit
-				{selectedNotesID}
+				bind:selectedNotesID
 				{notelistState}
 			/>
 		{/if}

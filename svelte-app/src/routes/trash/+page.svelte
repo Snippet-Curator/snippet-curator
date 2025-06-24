@@ -57,9 +57,9 @@
 				updatePage={() => {
 					updatePage(notelistState.clickedPage);
 				}}
-				bind:isBulkEdit
 				isTrash
-				{selectedNotesID}
+				bind:isBulkEdit
+				bind:selectedNotesID
 				{notelistState}
 			/>
 		{/if}

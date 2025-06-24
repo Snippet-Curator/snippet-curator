@@ -58,9 +58,9 @@
 				updatePage={() => {
 					updatePage(notelistState.clickedPage);
 				}}
-				bind:isBulkEdit
 				isArchive
-				{selectedNotesID}
+				bind:isBulkEdit
+				bind:selectedNotesID
 				{notelistState}
 			/>
 		{/if}
