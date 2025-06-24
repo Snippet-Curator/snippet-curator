@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getMobileState } from '$lib/utils.svelte';
 	import { ChevronLeft, ChevronsLeft, ChevronsRight, ChevronRight } from 'lucide-svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	type Props = {
 		changePage: (newPage: number) => void;
@@ -20,6 +21,24 @@
 			start = Math.max(1, end - maxVisiblePages + 1);
 		}
 		return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+	});
+
+	function handler(event: KeyboardEvent) {
+		switch (event.key) {
+			case 'ArrowRight':
+				changePage(currentPage + 1);
+				break;
+			case 'ArrowLeft':
+				changePage(currentPage - 1);
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener('keydown', handler);
+
+		onDestroy(() => {
+			document.removeEventListener('keydown', handler);
+		});
 	});
 </script>
 
