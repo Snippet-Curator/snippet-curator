@@ -1,5 +1,33 @@
 <script lang="ts">
 	import { ArrowLeft } from 'lucide-svelte';
+	import { onDestroy, onMount } from 'svelte';
+
+	function handler(event: KeyboardEvent) {
+		const target = event.target as HTMLElement;
+
+		switch (target.tagName) {
+			case 'INPUT':
+			case 'TEXTAREA':
+			case 'BUTTON':
+			case 'DIV':
+			case 'TRIX-EDITOR':
+				return;
+		}
+
+		switch (event.key) {
+			case 'Backspace':
+				window.history.back();
+				break;
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener('keydown', handler);
+
+		onDestroy(() => {
+			document.removeEventListener('keydown', handler);
+		});
+	});
 </script>
 
 <button
