@@ -4,7 +4,7 @@
 		description: string;
 	};
 
-	const ratings: KBD[] = [
+	const notes: KBD[] = [
 		{
 			displays: ['0', 'h'],
 			description: 'no star'
@@ -28,13 +28,33 @@
 		{
 			displays: ['5', "'"],
 			description: '5 stars'
+		},
+		{
+			displays: ['shift + a'],
+			description: 'Archive note'
+		},
+		{
+			displays: ['del'],
+			description: 'Delete note'
+		},
+		{
+			displays: ['e'],
+			description: 'Edit note'
+		},
+		{
+			displays: ['n'],
+			description: 'Edit notebook'
+		},
+		{
+			displays: ['t'],
+			description: 'Edit tags'
+		},
+		{
+			displays: ['b'],
+			description: 'Bulk edit'
 		}
 	];
-	const navigations: KBD[] = [
-		{
-			displays: ['ctrl + l'],
-			description: 'Navigation box'
-		},
+	const discover: KBD[] = [
 		{
 			displays: ['→', 'd', 'space'],
 			description: 'Next note'
@@ -50,40 +70,24 @@
 		{
 			displays: ['↓', 's'],
 			description: 'See less'
-		},
-		{
-			displays: ['shift + a'],
-			description: 'Archive note'
-		},
-		{
-			displays: ['del'],
-			description: 'Delete note'
 		}
 	];
-	const edits: KBD[] = [
+	const navigations: KBD[] = [
 		{
-			displays: ['b'],
-			description: 'Bulk edit'
+			displays: ['ctrl + l'],
+			description: 'Navigation box'
 		},
 		{
-			displays: ['e'],
-			description: 'Edit note'
+			displays: ['→'],
+			description: 'Next page'
 		},
 		{
-			displays: ['n'],
-			description: 'Edit notebook'
+			displays: ['←'],
+			description: 'Previous page'
 		},
 		{
-			displays: ['t'],
-			description: 'Edit tags'
-		},
-		{
-			displays: ['shift + a'],
-			description: 'Archive note'
-		},
-		{
-			displays: ['del'],
-			description: 'Delete note'
+			displays: ['Backspace'],
+			description: 'Go back'
 		}
 	];
 </script>
@@ -107,10 +111,12 @@
 <div class="card">
 	<div class="card-body">
 		<div class="card-title text-xl">Keyboard Shortcuts</div>
-		<div class="gap-golden-md grid md:grid-cols-3">
+		<div class="gap-golden-md grid md:grid-cols-2">
 			{@render renderKBD(navigations, 'Navigation')}
-			{@render renderKBD(ratings, 'Note Rating')}
-			{@render renderKBD(edits, 'Editing')}
+			<div class="row-span-2">
+				{@render renderKBD(notes, 'Editing Notes')}
+			</div>
+			{@render renderKBD(discover, 'Discover Navigation')}
 		</div>
 	</div>
 </div>
