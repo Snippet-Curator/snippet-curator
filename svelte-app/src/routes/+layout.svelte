@@ -16,7 +16,7 @@
 		getSettingState
 	} from '$lib/db.svelte';
 
-	import { Command, Dock, Icon, NotebookList, TagList } from '$lib/components';
+	import { Command, Dock, Icon, NotebookList, Pinned, TagList } from '$lib/components';
 	import { getMobileState, setMobileState } from '$lib/utils.svelte';
 
 	let { children } = $props();
@@ -120,9 +120,8 @@
 		{#await defaultNotebooks then}
 			<li>
 				<a
-					class="{page.url.hash == `#/notebook/${notebookState.inboxID}`
-						? 'menu-active'
-						: ''} flex w-full justify-between"
+					class="{page.url.hash == `#/notebook/${notebookState.inboxID}` &&
+						'menu-active'} flex w-full justify-between"
 					href="#/notebook/{notebookState.inboxID}"><span>Inbox</span> {notebookState.inboxCount}</a
 				>
 			</li>
@@ -131,6 +130,8 @@
 		<div class="divider my-0 py-0"></div>
 
 		<ScrollArea scrollHideDelay={200} class="h-10 grow">
+			<!-- <Pinned /> -->
+
 			<span class="menu-title flex max-h-60 items-center gap-2 overflow-y-auto"
 				><NotebookIcon size={18} />Notebooks</span
 			>

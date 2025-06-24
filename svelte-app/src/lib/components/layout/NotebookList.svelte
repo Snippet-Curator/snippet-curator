@@ -10,7 +10,7 @@
 
 	type Props = {
 		notebooks: Notebook[];
-		allowEdit: boolean;
+		allowEdit?: boolean;
 	};
 
 	let { notebooks, allowEdit = false }: Props = $props();

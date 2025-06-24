@@ -11,7 +11,7 @@
 
 	type Props = {
 		tags: Tag[];
-		allowEdit: boolean;
+		allowEdit?: boolean;
 	};
 
 	let { tags, allowEdit = false }: Props = $props();

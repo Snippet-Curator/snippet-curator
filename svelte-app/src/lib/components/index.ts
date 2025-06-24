@@ -8,6 +8,7 @@ export { default as Icon } from './Layout/Icon.svelte'
 export { default as Blank } from './Layout/Blank.svelte'
 export { default as Navbar } from './Navbar/NavToolbar.svelte'
 export { default as Command } from './Layout/Command.svelte'
+export { default as Pinned } from './Layout/Pinned.svelte'
 
 // notes
 export { default as Pagination } from './Layout/Pagination.svelte'
