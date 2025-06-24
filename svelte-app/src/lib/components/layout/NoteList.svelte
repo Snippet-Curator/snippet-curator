@@ -77,66 +77,63 @@
 		{#if notes.items.length > 0}
 			{#each notes.items as note}
 				<div class="group relative">
-					{#if !isBulkEdit}
-						<ContextMenu.Root>
-							<ContextMenu.Trigger>
-								<button
-									class="card motion-preset-fade motion-duration-200 hover:bg-base-200/70 bg-base-100 card-border w-full border transition-colors duration-200 hover:cursor-pointer"
-									onclick={() => goto(`#/note/${note.id}`)}
-								>
-									{@render renderNotes(note)}
-								</button>
-							</ContextMenu.Trigger>
-							<ContextMenu.Content>
-								<ContextMenu.Item
-									onSelect={async () => {
-										noteState.noteID = note.id;
-										await noteState.getNote();
-										isEditNoteOpen = true;
-									}}>Edit</ContextMenu.Item
-								>
-								<ContextMenu.Item
-									onSelect={async () => {
-										noteState.noteID = note.id;
-										await noteState.getNote();
-										isEditNotebookOpen = true;
-									}}>Edit Notebook</ContextMenu.Item
-								>
-								<ContextMenu.Item
-									onSelect={async () => {
-										noteState.noteID = note.id;
-										await noteState.getNote();
-										isEditTagsOpen = true;
-									}}>Edit Tags</ContextMenu.Item
-								>
-								<ContextMenu.Item
-									onSelect={async () => {
-										noteState.noteID = note.id;
-										await noteState.archiveNote();
-										update();
-									}}>Archive</ContextMenu.Item
-								>
-								<ContextMenu.Separator />
-								<ContextMenu.Item
-									onSelect={() => {
-										noteState.noteID = note.id;
-										isDeleteOpen = true;
-									}}>Delete</ContextMenu.Item
-								>
-							</ContextMenu.Content>
-						</ContextMenu.Root>
-					{:else}
-						<button
-							onclick={() => {
-								checkListNote(note.id);
-							}}
-							class="{selectedNotesID.includes(note.id)
-								? ' bg-primary/50 opacity-100'
-								: ''} card bg-base-100 card-border w-full border opacity-70 duration-100 hover:cursor-pointer"
-						>
-							{@render renderNotes(note)}
-						</button>
-					{/if}
+					<ContextMenu.Root>
+						<ContextMenu.Trigger>
+							<button
+								class="{[
+									selectedNotesID.includes(note.id) &&
+										'bg-primary/50 hover:bg-primary/60 opacity-100',
+									isBulkEdit ? 'opacity-70' : ''
+								]} card motion-preset-fade motion-duration-200 hover:bg-base-200/70 bg-base-100 card-border w-full border hover:cursor-pointer"
+								onclick={() => {
+									if (isBulkEdit) {
+										checkListNote(note.id);
+										return;
+									}
+									goto(`#/note/${note.id}`);
+								}}
+							>
+								{@render renderNotes(note)}
+							</button>
+						</ContextMenu.Trigger>
+						<ContextMenu.Content>
+							<ContextMenu.Item
+								onSelect={async () => {
+									noteState.noteID = note.id;
+									await noteState.getNote();
+									isEditNoteOpen = true;
+								}}>Edit</ContextMenu.Item
+							>
+							<ContextMenu.Item
+								onSelect={async () => {
+									noteState.noteID = note.id;
+									await noteState.getNote();
+									isEditNotebookOpen = true;
+								}}>Edit Notebook</ContextMenu.Item
+							>
+							<ContextMenu.Item
+								onSelect={async () => {
+									noteState.noteID = note.id;
+									await noteState.getNote();
+									isEditTagsOpen = true;
+								}}>Edit Tags</ContextMenu.Item
+							>
+							<ContextMenu.Item
+								onSelect={async () => {
+									noteState.noteID = note.id;
+									await noteState.archiveNote();
+									update();
+								}}>Archive</ContextMenu.Item
+							>
+							<ContextMenu.Separator />
+							<ContextMenu.Item
+								onSelect={() => {
+									noteState.noteID = note.id;
+									isDeleteOpen = true;
+								}}>Delete</ContextMenu.Item
+							>
+						</ContextMenu.Content>
+					</ContextMenu.Root>
 				</div>
 			{/each}
 		{:else}
