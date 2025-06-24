@@ -70,6 +70,14 @@
 <Dialog.Root open={isOpen}>
 	<Dialog.Content
 		onCloseAutoFocus={(e) => {
+			title = note?.title ?? '';
+			description = note?.description ?? '';
+			sources = note?.sources ?? [
+				{
+					source: '',
+					source_url: ''
+				}
+			];
 			e.preventDefault();
 			isOpen = false;
 		}}
