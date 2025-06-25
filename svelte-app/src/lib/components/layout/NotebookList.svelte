@@ -1,25 +1,87 @@
 <script lang="ts">
-	import type { Notebook as NotebookType } from '$lib/types';
-	import { Notebook } from '$lib/components/';
+	import { page } from '$app/state';
+
+	import * as ContextMenu from '$lib/components/ui/context-menu/index';
+
+	import type { Notebook } from '$lib/types';
+	import { ChangeParent, Delete, Rename, New } from '$lib/components/';
 	import NotebookList from './NotebookList.svelte';
+	import { getNotebookState } from '$lib/db.svelte';
 
 	type Props = {
-		notebooks: NotebookType[];
+		notebooks: Notebook[];
 		allowEdit?: boolean;
 	};
 
 	let { notebooks, allowEdit = false }: Props = $props();
+
+	const notebookState = getNotebookState();
+
+	let isEditOpen = $state(false);
+	let isDeleteOpen = $state(false);
+	let isChangeParentOpen = $state(false);
+	let isNewNotebookOpen = $state(false);
+	let selectedNotebook = $state<Notebook>();
+	let flatNotebooks = $derived(notebookState.flatNotebooks);
 </script>
+
+{#snippet renderNotebook(notebook: Notebook)}
+	<div class=" flex w-full items-center justify-between">
+		<a href="#/notebook/{notebook.id}" class="w-full items-center gap-x-2 text-nowrap px-3 py-1">
+			{notebook.name}
+		</a>
+		<span class="text-right">{notebook.note_count}</span>
+	</div>
+{/snippet}
+
+{#snippet renderNotebookSection(notebook: Notebook)}
+	<ContextMenu.Root>
+		<ContextMenu.Trigger
+			class="{page.url.hash == `#/notebook/${notebook.id}`
+				? ' bg-neutral text-neutral-content'
+				: ''} my-1 flex cursor-auto items-center justify-between rounded-md p-0 pr-2"
+		>
+			{@render renderNotebook(notebook)}
+		</ContextMenu.Trigger>
+		<ContextMenu.Content>
+			<ContextMenu.Item
+				onSelect={() => {
+					selectedNotebook = notebook;
+					isEditOpen = true;
+				}}>Rename</ContextMenu.Item
+			>
+			<ContextMenu.Item
+				onSelect={() => {
+					selectedNotebook = notebook;
+					isChangeParentOpen = true;
+				}}>Change Parent</ContextMenu.Item
+			>
+			<ContextMenu.Item
+				onSelect={() => {
+					selectedNotebook = notebook;
+					isDeleteOpen = true;
+				}}>Delete</ContextMenu.Item
+			>
+			<ContextMenu.Separator />
+			<ContextMenu.Item
+				onSelect={() => {
+					selectedNotebook = notebook;
+					isNewNotebookOpen = true;
+				}}>New</ContextMenu.Item
+			>
+		</ContextMenu.Content>
+	</ContextMenu.Root>
+{/snippet}
 
 <svelte:boundary>
 	{#each notebooks as notebook}
 		{#if notebook.name != 'Inbox'}
 			<li class="group mr-4">
-				{#if notebook.children && notebook.children?.length > 0}
+				{#if notebook.children?.length > 0}
 					<details class="w-full">
 						<summary class="flex w-full py-0 pl-0">
 							<div class="grow">
-								<Notebook {notebook} />
+								{@render renderNotebookSection(notebook)}
 							</div>
 						</summary>
 
@@ -30,7 +92,7 @@
 						{/if}
 					</details>
 				{:else}
-					<Notebook {notebook} />
+					{@render renderNotebookSection(notebook)}
 				{/if}
 			</li>
 		{/if}
@@ -40,3 +102,32 @@
 		NotebookList Failed to Render
 	{/snippet}
 </svelte:boundary>
+
+<Rename
+	bind:isOpen={isEditOpen}
+	renameType="Notebook"
+	currentName={selectedNotebook.name}
+	action={(newName) => notebookState.updateOnebyName(selectedNotebook.id, newName)}
+/>
+
+<Delete
+	bind:isOpen={isDeleteOpen}
+	name="Notebook"
+	action={() => notebookState.delete(selectedNotebook.id)}>this notebook?</Delete
+>
+
+<ChangeParent
+	bind:isOpen={isChangeParentOpen}
+	type="notebook"
+	fullList={flatNotebooks}
+	currentItemID={selectedNotebook?.id}
+	clear={() => notebookState.updateOnebyParent(selectedNotebook?.id, '')}
+	action={(selectedParentNotebookID) =>
+		notebookState.updateOnebyParent(selectedNotebook?.id, selectedParentNotebookID)}
+/>
+
+<New
+	bind:isOpen={isNewNotebookOpen}
+	newType="Notebook"
+	action={(newNotebookName) => notebookState.createOnebyName(newNotebookName, selectedNotebook.id)}
+/>

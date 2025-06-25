@@ -101,6 +101,8 @@ export class TagState {
         if (error) {
             console.error('Error while deleting tag: ', error)
         }
+
+        await this.getAll()
     }
 
     async getOne(tagID: string) {
