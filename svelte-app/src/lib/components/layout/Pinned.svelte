@@ -32,7 +32,7 @@
 			<ContextMenu.Item
 				onSelect={() => {
 					notebookState.unpin(notebook.id);
-				}}>unpin</ContextMenu.Item
+				}}>Unpin</ContextMenu.Item
 			>
 		</ContextMenu.Content>
 	</ContextMenu.Root>
@@ -55,7 +55,7 @@
 			<ContextMenu.Item
 				onSelect={() => {
 					tagState.unpin(tag.id);
-				}}>unpin</ContextMenu.Item
+				}}>Unpin</ContextMenu.Item
 			>
 		</ContextMenu.Content>
 	</ContextMenu.Root>
