@@ -5,20 +5,22 @@
 
 	import type { Notebook } from '$lib/types';
 	import { ChangeParent, Delete, Rename, New } from '$lib/components/';
-	import type { NotebookState } from '$lib/db.svelte';
+
+	import { getNotebookState } from '$lib/db.svelte';
 
 	type Props = {
 		notebook: Notebook;
-		notebookState: NotebookState;
-		flatNotebooks: Notebook[];
 	};
 
-	let { notebook, flatNotebooks, notebookState }: Props = $props();
+	let { notebook }: Props = $props();
+
+	const notebookState = getNotebookState();
 
 	let isEditOpen = $state(false);
 	let isDeleteOpen = $state(false);
 	let isChangeParentOpen = $state(false);
 	let isNewNotebookOpen = $state(false);
+	let flatNotebooks = $derived(notebookState.flatNotebooks);
 </script>
 
 {#snippet renderNotebook(notebook: Notebook)}

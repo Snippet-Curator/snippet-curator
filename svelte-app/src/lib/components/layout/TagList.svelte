@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Tag as TagType } from '$lib/types';
 	import { TagList, Tag } from '$lib/components/';
-	import { getTagState } from '$lib/db.svelte';
 
 	type Props = {
 		tags: TagType[];
@@ -9,9 +8,6 @@
 	};
 
 	let { tags, allowEdit = false }: Props = $props();
-
-	const tagState = getTagState();
-	const flatTags = $derived(tagState.flatTags);
 </script>
 
 <svelte:boundary>
@@ -21,7 +17,7 @@
 				<details class="w-full cursor-pointer">
 					<summary class="mr-4 flex w-full py-0 pl-0">
 						<div class="grow">
-							<Tag {tag} {tagState} {flatTags} />
+							<Tag {tag} />
 						</div>
 					</summary>
 
@@ -32,7 +28,7 @@
 					{/if}
 				</details>
 			{:else}
-				<Tag {tag} {tagState} {flatTags} />
+				<Tag {tag} />
 			{/if}
 		</li>
 	{/each}

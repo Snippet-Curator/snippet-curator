@@ -2,7 +2,6 @@
 	import type { Notebook as NotebookType } from '$lib/types';
 	import { Notebook } from '$lib/components/';
 	import NotebookList from './NotebookList.svelte';
-	import { getNotebookState } from '$lib/db.svelte';
 
 	type Props = {
 		notebooks: NotebookType[];
@@ -10,9 +9,6 @@
 	};
 
 	let { notebooks, allowEdit = false }: Props = $props();
-
-	const notebookState = getNotebookState();
-	const flatNotebooks = $derived(notebookState.flatNotebooks);
 </script>
 
 <svelte:boundary>
@@ -23,7 +19,7 @@
 					<details class="w-full">
 						<summary class="flex w-full py-0 pl-0">
 							<div class="grow">
-								<Notebook {notebook} {flatNotebooks} {notebookState} />
+								<Notebook {notebook} />
 							</div>
 						</summary>
 
@@ -34,7 +30,7 @@
 						{/if}
 					</details>
 				{:else}
-					<Notebook {notebook} {flatNotebooks} {notebookState} />
+					<Notebook {notebook} />
 				{/if}
 			</li>
 		{/if}
