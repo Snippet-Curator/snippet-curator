@@ -679,11 +679,14 @@ export class NoteState {
     note = $state<Note>()
     noteList = $state()
     noteID: string
-    customStyles = $state<string>()
+    fontScale = $state(1)
 
     constructor(noteID: string) {
         this.noteID = noteID
-        this.customStyles = `
+    }
+
+    get customStyles() {
+        return `
             :root {
                   --color-base-100: oklch(100% 0 0);
                   --color-base-content: oklch(27.807% 0.029 256.847);
@@ -699,7 +702,7 @@ export class NoteState {
                   height: 100% !important;
               }
               * {
-                  font-size: calc(1em * var(--fontScale, 1)) !important;
+                  font-size: ${this.fontScale * 100}% !important;
                   line-height: 1.4 !important;
              }
               html, body, main, section, p, pre, div {

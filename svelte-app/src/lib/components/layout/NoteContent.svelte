@@ -32,7 +32,6 @@
 	let editor: Element;
 
 	let iframe = $state();
-	let fontScale = $state(1);
 
 	let isOpen = $state(false);
 	let isEditHTML = $state(false);
@@ -158,7 +157,6 @@
 		doc.write(`<!DOCTYPE html>${content}`);
 		doc.close();
 
-		doc.documentElement.style.setProperty('--fontScale', fontScale);
 		manipulateIframe(doc);
 
 		const styleTag = doc.createElement('style');
@@ -187,6 +185,14 @@
 		};
 	}
 
+	function changeFontSize(el) {
+		const doc = el.contentDocument;
+		const styleTag = doc.createElement('style');
+		styleTag.setAttribute('id', 'custom-style');
+		styleTag.textContent = noteState.customStyles;
+		doc.head.appendChild(styleTag);
+	}
+
 	$effect(() => {
 		noteTitle = noteState.note.title;
 		textContent = '';
@@ -210,14 +216,10 @@
 			<input
 				type="range"
 				class="range range-xs"
-				min="0.98"
-				max="1.2"
+				min="0.96"
+				max="1.1"
 				step="0.01"
-				bind:value={fontScale}
-				oninput={() => {
-					const doc = iframe.contentDocument;
-					doc?.documentElement.style.setProperty('--fontScale', fontScale);
-				}}
+				bind:value={noteState.fontScale}
 			/>
 			<CaseSensitive size={32} />
 		</div>
@@ -233,6 +235,7 @@
 			bind:this={iframe}
 			{@attach initializeIframe}
 			{@attach loadHeight}
+			{@attach changeFontSize}
 		></iframe>
 
 		{#if isEditHTML}
