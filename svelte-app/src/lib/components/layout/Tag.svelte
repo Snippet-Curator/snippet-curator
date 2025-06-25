@@ -6,21 +6,20 @@
 
 	import { ChangeParent, Delete, Rename, New } from '$lib/components/';
 	import type { Tag } from '$lib/types';
-	import { getTagState } from '$lib/db.svelte';
+	import type { TagState } from '$lib/db.svelte';
 
 	type Props = {
 		tag: Tag;
+		flatTags: Tag[];
+		tagState: TagState;
 	};
 
-	let { tag }: Props = $props();
-
-	const tagState = getTagState();
+	let { tag, flatTags, tagState }: Props = $props();
 
 	let isEditOpen = $state(false);
 	let isDeleteOpen = $state(false);
 	let isChangeParentOpen = $state(false);
 	let isNewTagOpen = $state(false);
-	const flatTags = $derived(tagState.flatTags);
 </script>
 
 <ContextMenu.Root>
