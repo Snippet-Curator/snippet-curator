@@ -1,11 +1,11 @@
 {
-  "name": "recollect",
-  "productName": "Recollect",
+  "name": "snippet-curator",
+  "productName": "snippet-curator",
   "version": "0.1.3",
-  "description": "collect and discover snippets",
+  "description": "collect and discover",
   "main": "./out/main/index.js",
   "author": "kang rui xiang",
-  "homepage": "https://recollect.krxiang.com",
+  "homepage": "https://curator.krxiang.com",
   "publish": [
     {
       "provider": "github"

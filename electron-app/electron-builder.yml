@@ -1,5 +1,5 @@
-appId: com.krxiang.recollect
-productName: Recollect
+appId: com.krxiang.snippet.curator
+productName: Snippet Curator
 directories:
   buildResources: build
 # afterSign: build/notarize.js
@@ -27,7 +27,7 @@ extraResources:
 asarUnpack:
   - resources/**
 win:
-  executableName: Recollect
+  executableName: Snippet Curator
   icon: resources/icon.ico
   target:
     - nsis

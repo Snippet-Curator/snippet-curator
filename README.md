@@ -1,2 +1,2 @@
-# Recollect
+# Snippet Curator
  

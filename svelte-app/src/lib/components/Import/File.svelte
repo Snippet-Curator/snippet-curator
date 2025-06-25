@@ -43,7 +43,7 @@
 						href="#/"
 						onclick={(e) => {
 							e.preventDefault();
-							window.open('https://recollect.krxiang.com');
+							window.open('https://curator.krxiang.com');
 						}}
 						class="">here</a
 					> for details on import.
