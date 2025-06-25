@@ -46,6 +46,11 @@
 		<ContextMenu.Content>
 			<ContextMenu.Item
 				onSelect={() => {
+					notebookState.pin(notebook.id);
+				}}>Pin</ContextMenu.Item
+			>
+			<ContextMenu.Item
+				onSelect={() => {
 					selectedNotebook = notebook;
 					isEditOpen = true;
 				}}>Rename</ContextMenu.Item

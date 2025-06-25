@@ -45,6 +45,7 @@ export async function uploadFileToPocketbase(recordID: string, file: File) {
 export class TagState {
     tags = $state<Tag[]>([])
     flatTags = $state<Tag[]>([])
+    pinnedTags = $state<Tag[]>([])
 
     constructor() {
         $effect(() => {
@@ -74,10 +75,14 @@ export class TagState {
         // console.log(`after db: ${mid - start} ms`)
 
         this.flatTags = records
+        this.pinnedTags = []
 
         const tagMap = new Map()
         records.forEach(tag => {
             tagMap.set(tag.id, { ...tag, children: [] })
+            if (tag.status === 'pinned') {
+                this.pinnedTags.push(tag)
+            }
         })
 
         let rootTags: Tag[] = []
@@ -150,6 +155,30 @@ export class TagState {
         }
         await this.getAll()
     }
+
+    async pin(recordID: string) {
+        const { data, error } = await tryCatch(
+            pb.collection(tagsCollection).update(recordID, {
+                'status': 'pinned'
+            })
+        )
+        if (error) {
+            console.error('Error pinning tag: ', error.message, error.data)
+        }
+        await this.getAll()
+    }
+
+    async unpin(recordID: string) {
+        const { data, error } = await tryCatch(
+            pb.collection(tagsCollection).update(recordID, {
+                'status': ''
+            })
+        )
+        if (error) {
+            console.error('Error unpin tag: ', error.message, error.data)
+        }
+        await this.getAll()
+    }
 }
 
 export class NotebookState {
@@ -159,6 +188,7 @@ export class NotebookState {
     totalNoteCount = $state(0)
     notebooks = $state<Notebook[]>([])
     flatNotebooks = $state<Notebook[]>([])
+    pinnedNotebooks = $state<Notebook[]>([])
 
     constructor() {
         $effect(() => {
@@ -193,10 +223,14 @@ export class NotebookState {
         }
 
         this.flatNotebooks = records
+        this.pinnedNotebooks = []
 
         const notebookMap = new Map()
         records.forEach(notebook => {
             notebookMap.set(notebook.id, { ...notebook, children: [] })
+            if (notebook.status === 'pinned') {
+                this.pinnedNotebooks.push(notebook)
+            }
         })
 
         let rootNotebooks: Notebook[] = []
@@ -316,6 +350,24 @@ export class NotebookState {
             console.error('Error while updating parent notebook: ', error)
         }
         // await this.getAll()
+    }
+
+    async pin(recordID: string) {
+        const { data, error } = await tryCatch(pb.collection(notebooksCollection).update(recordID, {
+            'status': 'pinned'
+        }))
+        if (error) {
+            console.error('Error pinning notebook: ', error.data)
+        }
+    }
+
+    async unpin(recordID: string) {
+        const { data, error } = await tryCatch(pb.collection(notebooksCollection).update(recordID, {
+            'status': ''
+        }))
+        if (error) {
+            console.error('Error unpinning notebook: ', error.data)
+        }
     }
 }
 

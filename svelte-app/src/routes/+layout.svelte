@@ -101,7 +101,7 @@
 		collapsedSize={0}
 	>
 		<div class="mb-5 ml-1 mt-2 flex h-6 items-center gap-x-1">
-			<Icon /> <span class="text-xl font-semibold">Snippet Curator</span>
+			<Icon /> <span class="select-none text-xl font-semibold">Snippet Curator</span>
 		</div>
 
 		<li>
@@ -130,7 +130,7 @@
 		<div class="divider my-0 py-0"></div>
 
 		<ScrollArea scrollHideDelay={200} class="h-10 grow">
-			<!-- <Pinned /> -->
+			<Pinned />
 
 			<span class="menu-title flex max-h-60 items-center gap-2 overflow-y-auto"
 				><NotebookIcon size={18} />Notebooks</span

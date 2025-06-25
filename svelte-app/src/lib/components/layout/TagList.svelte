@@ -23,19 +23,7 @@
 	let isChangeParentOpen = $state(false);
 	let isNewTagOpen = $state(false);
 	let selectedTag = $state<Tag>();
-	// let tagSearchTerm = $state<string>('');
-	// let filteredTags = $state(tagState.tags);
 	let flatTags = $derived(tagState.flatTags);
-
-	// function filterTag(ownTag: Tag) {
-	// 	if (!tagSearchTerm) {
-	// 		filteredTags = tagState.tags.filter((tag) => !tag.id.includes(ownTag.id));
-	// 		return;
-	// 	}
-	// 	filteredTags = tagState.tags.filter((tag) => {
-	// 		return tag.name.includes(tagSearchTerm.toLowerCase()) && !tag.id.includes(ownTag.id);
-	// 	});
-	// }
 </script>
 
 {#snippet renderTag(tag: Tag)}
@@ -53,6 +41,11 @@
 			<span class="text-base-content/80 text-right">{tag.note_count}</span>
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
+			<ContextMenu.Item
+				onSelect={() => {
+					tagState.pin(tag.id);
+				}}>Pin</ContextMenu.Item
+			>
 			<ContextMenu.Item
 				onSelect={() => {
 					selectedTag = tag;
@@ -85,7 +78,7 @@
 <svelte:boundary>
 	{#each tags as tag}
 		<li class="group mr-4">
-			{#if tag.children?.length > 0}
+			{#if tag.children && tag.children?.length > 0}
 				<details class="w-full cursor-pointer">
 					<summary class="mr-4 flex w-full py-0 pl-0">
 						<div class="grow">

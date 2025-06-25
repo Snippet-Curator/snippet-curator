@@ -80,7 +80,7 @@ export type NoteRecord = {
 export type Notebook = {
     id: string
     name: string
-    children?: Notebook
+    children?: Notebook[]
     parent?: string
     note_count: number
 }
@@ -88,12 +88,13 @@ export type Notebook = {
 export type Tag = {
     id: string
     name: string
-    children?: Tag,
+    children?: Tag[],
     expand: {
         notes_via_tags: Note[]
     },
     parent?: string
     note_count: number
+    status: 'pinned' | undefined
 }
 
 export type NoteList = {
