@@ -5,7 +5,7 @@ import { existsSync, cpSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { spawn } from 'child_process'
-import { log } from 'electron-log'
+// import { log } from 'electron-log' 
 import { autoUpdater } from 'electron-updater';
 
 import icon from '../../resources/icon.png?asset'

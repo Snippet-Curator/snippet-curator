@@ -2,7 +2,7 @@ appId: com.krxiang.snippet.curator
 productName: Snippet Curator
 directories:
   buildResources: build
-# afterSign: build/notarize.js
+afterSign: build/notarize.js
 icon: resources/icon
 files:
   - '!**/.vscode/*'
