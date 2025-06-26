@@ -10,7 +10,7 @@
 	let { searchNotes, searchInput = $bindable(), clearNote }: Props = $props();
 </script>
 
-<div class="relative w-full px-2">
+<div class="relative grow px-2">
 	<input
 		type="text"
 		bind:value={searchInput}
