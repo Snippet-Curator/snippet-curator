@@ -31,6 +31,8 @@ win:
   icon: resources/icon.ico
   target:
     - nsis
+  publish:
+    -provider: github
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

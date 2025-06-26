@@ -1,18 +1,21 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
-import path from 'path'
-import { existsSync, cpSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import os from 'os'
+import { join } from 'path'
+import { existsSync, cpSync, readFileSync, rmSync, writeFileSync } from 'fs';
+
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
 import { spawn } from 'child_process'
+import { log } from 'electron-log'
+import { autoUpdater } from 'electron-updater';
+
+import icon from '../../resources/icon.png?asset'
 
 let pocketBaseProcess
 const userDataPath = app.getPath('userData')
-const resourcePath = path.join(process.resourcesPath, 'db')
-const pbDataPath = path.join(userDataPath, 'pb_data')
+const resourcePath = join(process.resourcesPath, 'db')
+const pbDataPath = join(userDataPath, 'pb_data')
 const currentVersion = app.getVersion()
-const versionFile = path.join(userDataPath, '.pb_version')
+const versionFile = join(userDataPath, '.pb_version')
 const pocketbaseDevPath = join(__dirname, '..', '..', 'db', 'pocketbase')
 const pocketbaseProdPath = join(process.resourcesPath, 'db', 'pocketbase')
 
@@ -20,12 +23,12 @@ function getIconPath() {
     const platform = os.platform();
 
     if (platform === 'win32') {
-        return path.join(__dirname, 'resources', 'icon.ico');
+        return join(__dirname, 'resources', 'icon.ico');
     } else if (platform === 'darwin') {
-        return path.join(__dirname, 'resources', 'icon.icns');
+        return join(__dirname, 'resources', 'icon.icns');
     } else {
         // Linux
-        return path.join(__dirname, 'resources', 'icon.png');
+        return join(__dirname, 'resources', 'icon.png');
     }
 }
 
@@ -85,8 +88,8 @@ function createWindow(): void {
 
 function copyPbFolder(requiredFolders: string[]) {
     for (const folder of requiredFolders) {
-        const from = path.join(resourcePath, folder);
-        const to = path.join(userDataPath, folder);
+        const from = join(resourcePath, folder);
+        const to = join(userDataPath, folder);
         console.log('copying: ', from, to)
 
         if (existsSync(from)) {
@@ -101,8 +104,8 @@ function checkPbVersion() {
     const requiredFolders = ['pb_migrations', 'pb_hooks']
 
     const needsCopy = requiredFolders.some(folder => {
-        console.log('path exists: ', path.join(userDataPath, folder), existsSync(path.join(userDataPath, folder)))
-        return !existsSync(path.join(userDataPath, folder))
+        console.log('path exists: ', join(userDataPath, folder), existsSync(join(userDataPath, folder)))
+        return !existsSync(join(userDataPath, folder))
     })
 
     if (needsCopy) {
@@ -161,6 +164,17 @@ function runPocketbase() {
 
 }
 
+// ----------------------------------------------
+// For logging
+//
+//
+// ----------------------------------------------
+// autoUpdater.logger = log
+// autoUpdater.logger.transports.file.level = 'info'
+// log.info('App starting...')
+
+
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -194,6 +208,11 @@ app.whenReady().then(async () => {
         // dock icon is clicked and there are no other windows open.
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
+
+    app.on('ready', () => {
+        autoUpdater.checkForUpdatesAndNotify()
+    }
+    )
 })
 
 // Gracefully handle quitting
