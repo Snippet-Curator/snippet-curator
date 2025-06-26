@@ -72,6 +72,7 @@
 				merge={async () => {
 					await notelistState.mergeNotes(selectedNotesID);
 					updatePage();
+					selectedNotesID = [];
 					isBulkEdit = false;
 				}}
 			></BulkMerge>
