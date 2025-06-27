@@ -103,7 +103,7 @@ jobs:
         with:
           token: ${{ secrets.RELEASE_MIRROR_TOKEN }}
           repository: https://github.com/Snippet-Curator/snippet-curator-releases
-          tag_name: ${{ github.ref_name }}
+        #   tag_name: ${{ github.ref_name }}
           files: |
             electron-app/dist/*.exe
             electron-app/dist/latest.yml
