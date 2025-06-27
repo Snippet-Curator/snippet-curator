@@ -70,7 +70,7 @@ jobs:
           npm run publish
         env:
           # Common envs
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_MIRROR_TOKEN }}
 
           # macOS signing (optional)
           # CSC_LINK and CSC_KEY_PASSWORD will work here too
