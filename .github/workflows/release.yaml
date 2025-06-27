@@ -60,7 +60,7 @@ jobs:
           cp -R svelte-app/build/* electron-app/out/renderer
 
       - name: Build Electron App
-        run: cd electron-app && npm run build
+        run: cd electron-app && electron-builder --publish never
         env:
           # Common envs
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -86,7 +86,19 @@ jobs:
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and publish Electron app
-        run: npm electron-builder --publish onTag
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Build and publish Electron app
+      #   env:
+      #       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: npm electron-builder --publish never
+      
+      - name: Upload to release mirror
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.RELEASE_MIRROR_TOKEN }}
+          repository:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            dist/*.exe
+            dist/latest.yml
+
+    
