@@ -54,6 +54,9 @@ move-svelte-mac:
 	mkdir -p electron-app/out/renderer
 	cp -R svelte-app/build/* electron-app/out/renderer
 
+publish:
+    concurrently "cd electron-app && pnpm run publish"
+
 gen-icon: 
     concurrently "cd electron-app\resources && magick convert icon.png -define icon:auto-resize=256,128,64,48,32,16 icon.ico"
     

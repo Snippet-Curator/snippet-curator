@@ -1,9 +1,9 @@
 name: Build Electron App (Windows + macOS + Linux)
 
 on: 
-  push:
-    tags:
-      - 'v*' # e.g. v1.0.0
+  push
+    # tags:
+    #   - 'v*' # e.g. v1.0.0
 
 jobs:
   build:
@@ -60,7 +60,9 @@ jobs:
           cp -R svelte-app/build/* electron-app/out/renderer
 
       - name: Build Electron App
-        run: cd electron-app && electron-builder --publish never
+        run: |
+          cd svelte-app
+          npm run publish
         env:
           # Common envs
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
