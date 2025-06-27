@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*' # e.g. v1.0.0
+  workflow_dispatch:
 
 jobs:
   build:
@@ -102,7 +103,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.RELEASE_MIRROR_TOKEN }}
-          repository: https://github.com/Snippet-Curator/snippet-curator-releases
+          repository: Snippet-Curator/snippet-curator-releases
           tag_name: ${{ github.ref_name }}
           files: |
             electron-app/dist/*.exe
