@@ -65,5 +65,6 @@ appImage:
 npmRebuild: false
 publish:
   provider: github
+  repo: snippet-curator-releases
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
