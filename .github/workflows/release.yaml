@@ -80,25 +80,7 @@ jobs:
           APPLE_ID_PASS: ${{ secrets.APPLEIDPASS }}
           CSC_NAME: ${{ secrets.CSC_NAME }}
           APPLE_TEAM_ID: ${{ secrets.APPLETEAMID }}
-
-      # - name: Upload release artifacts
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     files: |
-      #       dist/*.dmg
-      #       dist/*.exe
-      #       dist/*.AppImage
-      #       dist/*.zip
-      #       dist/*.msi
-      #       dist/*.deb
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Build and publish Electron app
-      #   env:
-      #       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: npm electron-builder --publish never
-      
+     
       - name: Upload to release mirror
         uses: softprops/action-gh-release@v2
         with:
@@ -107,6 +89,8 @@ jobs:
           tag_name: ${{ github.ref_name }}
           files: |
             electron-app/dist/*.exe
+            electron-app/dist/*.dmg
+            electron-app/dist/*.deb
             electron-app/dist/latest.yml
 
     
