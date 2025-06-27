@@ -61,7 +61,7 @@ jobs:
 
       - name: Build Electron App
         run: |
-          cd svelte-app
+          cd electron-app
           npm run publish
         env:
           # Common envs
