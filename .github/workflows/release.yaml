@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
       - name: Install dependencies for frontend
         run: |
@@ -68,9 +68,10 @@ jobs:
           # macOS signing (optional)
           # CSC_LINK and CSC_KEY_PASSWORD will work here too
           # For notarization:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLEID }}
+          APPLE_ID_PASS: ${{ secrets.APPLEIDPASS }}
+          CSC_NAME: ${{ secrets.CSC_NAME }}
+          APPLE_TEAM_ID: ${{ secrets.APPLETEAMID }}
 
       # - name: Upload release artifacts
       #   uses: softprops/action-gh-release@v2
