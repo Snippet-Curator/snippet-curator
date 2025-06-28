@@ -1,7 +1,8 @@
 {
   "name": "snippet-curator",
-  "productName": "snippet-curator",
-  "version": "0.1.8",
+  "appID": "com.krxiang.curator",
+  "productName": "Snippet Curator",
+  "version": "0.1.9",
   "description": "collect and discover",
   "main": "./out/main/index.js",
   "author": "kang rui xiang",
@@ -29,6 +30,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
+    "builder-util-runtime": "^9.3.1",
     "dotenv": "^16.5.0",
     "electron-log": "^5.4.1",
     "electron-updater": "^6.6.2"

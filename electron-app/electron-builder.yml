@@ -1,4 +1,4 @@
-appId: com.krxiang.snippet.curator
+appId: com.krxiang.curator
 productName: Snippet Curator
 directories:
   buildResources: build
