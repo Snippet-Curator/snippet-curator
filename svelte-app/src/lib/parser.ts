@@ -7,7 +7,7 @@ import type { EnNote, EnMedia, EnResource, Resource, PError } from './types';
 import pb, { uploadFileToPocketbase } from '$lib/db.svelte'
 import { tryCatch } from './utils.svelte';
 import type { RecordModel } from 'pocketbase';
-import { addMediaToContent, addResourcesToRecord, addThumbnailToRecord, createDescription, createThumbnail, deleteAllAttachments, getFileHash, getMimeFromName, getVideoThumb, makeResourceFromFile, mergeResources, parser, parseYouTubeDuration } from './utils';
+import { addAsOnlyFileToRecord, addMediaToContent, addResourcesToRecord, addThumbnailToRecord, createDescription, createThumbnail, deleteAllAttachments, getFileHash, getMimeFromName, getVideoThumb, makeResourceFromFile, mergeResources, parser, parseYouTubeDuration } from './utils';
 import { notesCollection } from './const';
 
 dayjs.extend(customParseFormat)
@@ -684,7 +684,7 @@ export class youtubeImport {
         const thumbFile = new File([blob], 'youtube-thumbnail.jpg', { type: blob.type });
 
         // upload file to db
-        this.thumbURL = await uploadFileToPocketbase(this.recordID, thumbFile)
+        this.thumbURL = await addAsOnlyFileToRecord(this.recordID, thumbFile)
 
         // add thumbnail to record
         await addThumbnailToRecord(this.recordID, this.thumbURL)
@@ -763,9 +763,6 @@ export class youtubeImport {
         this.publishedDate = dayjs(this.publishedDate).format('MM/DD/YYYY') ?? ""
         this.duration = parseYouTubeDuration(this.duration) ?? ""
         this.viewCount = Number(this.viewCount).toLocaleString('en-US')
-
-        // clear existing attachments
-        await deleteAllAttachments(this.recordID)
 
         // add thumbnail and resource
         await this.addThumbnailandResource(this.youtubeThumbURL)

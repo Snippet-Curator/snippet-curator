@@ -7,7 +7,7 @@ import pb, { uploadFileToPocketbase } from '$lib/db.svelte'
 import { notesCollection, pbURL, baseURL } from './const';
 // import sanitizeHTML from 'sanitize-html';
 import { XMLParser } from 'fast-xml-parser'
-import { type Note } from './types';
+import { type Note, type PError } from './types';
 import type { RecordModel } from 'pocketbase';
 
 
@@ -386,6 +386,22 @@ export async function deleteAllAttachments(recordID: string) {
     if (!record) return
 }
 
+/**
+ * Add this file as the only attachment, overwrite any existing
+ */
+export async function addAsOnlyFileToRecord(recordID: string, file: File) {
+    // upload to database
+    const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).update(recordID, {
+        'attachments': [file],
+    }))
+
+    if (error) {
+        console.error('Error uploading file: ', error.message, error.data)
+        return ''
+    }
+
+    return `${baseURL}\/${notesCollection}\/${recordID}\/${record.attachments.at(-1)}`
+}
 
 /**
  * Create one Resource for record based on file
