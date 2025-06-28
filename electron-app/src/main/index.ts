@@ -45,7 +45,7 @@ function createWindow(): void {
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),
             sandbox: false
-        }
+        },
     })
 
     mainWindow.on('ready-to-show', () => {
@@ -85,6 +85,12 @@ function createWindow(): void {
         mainWindow.webContents.openDevTools()
     }
 }
+
+// ----------------------------------------------
+// For Pocketbase
+//
+//
+// ----------------------------------------------
 
 function copyPbFolder(requiredFolders: string[]) {
     for (const folder of requiredFolders) {
@@ -200,6 +206,9 @@ app.whenReady().then(async () => {
 
     // IPC test
     ipcMain.on('ping', () => console.log('pong'))
+    ipcMain.handle('get-app-version', () => {
+        return app.getVersion()
+    })
 
     createWindow()
 

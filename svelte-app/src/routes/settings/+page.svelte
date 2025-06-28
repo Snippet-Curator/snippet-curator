@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import * as Topbar from '$lib/components/Topbar/index';
-	import { KBD, DiscoverSetting } from '$lib/components/Settings';
+	import { KBD, DiscoverSetting, Version } from '$lib/components/Settings';
 </script>
 
 <Topbar.Root>
@@ -15,5 +15,7 @@
 		<KBD />
 		<div class="divider"></div>
 		<DiscoverSetting />
+		<div class="divider"></div>
+		<Version />
 	</div>
 </ScrollArea>
