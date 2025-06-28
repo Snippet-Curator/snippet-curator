@@ -371,6 +371,23 @@ export function parseYouTubeDuration(duration: string) {
 // ─────────────────────────────
 
 /**
+ * Clear attachments
+ */
+export async function deleteAllAttachments(recordID: string) {
+    const { data: record, error } = await tryCatch(pb.collection(notesCollection).update(recordID, {
+        'attachments': [],
+    }))
+
+    if (error) {
+        console.error('Error clearing attachments: ', error.message)
+        return
+    }
+
+    if (!record) return
+}
+
+
+/**
  * Create one Resource for record based on file
  */
 export function makeResourceFromFile(file: File, hash: string, url: string) {
