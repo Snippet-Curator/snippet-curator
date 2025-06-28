@@ -5,7 +5,7 @@ import { existsSync, cpSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { spawn } from 'child_process'
-// import { log } from 'electron-log' 
+import log from 'electron-log/main'
 import { autoUpdater } from 'electron-updater';
 
 import icon from '../../resources/icon.png?asset'
@@ -175,10 +175,39 @@ function runPocketbase() {
 //
 //
 // ----------------------------------------------
-// autoUpdater.logger = log
-// autoUpdater.logger.transports.file.level = 'info'
-// log.info('App starting...')
+log.initialize()
+log.transports.file.level = 'info'
+log.info('App starting...')
 
+
+// ----------------------------------------------
+// For autoUpdater
+//
+//
+// ----------------------------------------------
+autoUpdater.on('checking-for-update', () => {
+    log.info('checking for update')
+})
+
+autoUpdater.on('update-available', () => {
+    log.info('Update available')
+})
+
+autoUpdater.on('update-available', () => {
+    log.info('Update available')
+})
+
+autoUpdater.on('update-not-available', () => {
+    log.info('Update not available')
+})
+
+autoUpdater.on('error', (err) => {
+    log.info('Error in auto-updater: ', err)
+})
+
+autoUpdater.on('update-downloaded', () => {
+    log.info('Update downloaded')
+})
 
 
 // This method will be called when Electron has finished
@@ -218,10 +247,8 @@ app.whenReady().then(async () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
 
-    app.on('ready', () => {
-        autoUpdater.checkForUpdatesAndNotify()
-    }
-    )
+
+    autoUpdater.checkForUpdatesAndNotify()
 })
 
 // Gracefully handle quitting
