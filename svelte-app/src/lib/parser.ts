@@ -748,17 +748,16 @@ export class youtubeImport {
             'status': 'active',
         }
 
-        const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).create(skeletonData))
+        const filter = `sources.0.source = "Youtube" && sources.0.source_url ~ "${this.youtubeID}"`
 
-        if (error) {
-            if (error.data.data.title.code == "validation_not_unique") {
-                throw new Error('Skipped duplicate note')
-            }
-            throw (error)
+        const { data: record, error } = await tryCatch<RecordModel, PError>(pb.collection(notesCollection).getFirstListItem(filter))
+
+        if (error || !record) {
+            const newRecord = await pb.collection(notesCollection).create(skeletonData)
+            this.recordID = newRecord.id
+        } else {
+            this.recordID = record.id
         }
-
-        if (!record) return
-        this.recordID = record.id
 
         await this.fetchYoutubeMetadata(this.youtubeID, this.youtubeAPI)
         this.publishedDate = dayjs(this.publishedDate).format('MM/DD/YYYY') ?? ""
