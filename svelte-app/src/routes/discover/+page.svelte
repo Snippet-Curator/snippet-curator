@@ -176,8 +176,12 @@
 			{note}
 			thumbURL={note?.thumbnail}
 			bind:isOpen={isEditNoteOpen}
-			action={(selectedThumbnailURL) => {
-				noteState.changeThumbnail(selectedThumbnailURL);
+			action={async (title, description, sources, selectedThumbnailURL) => {
+				await noteState.changeTitle(title);
+				await noteState.changeDescription(description);
+				await noteState.changeSources(sources);
+				await noteState.changeThumbnail(selectedThumbnailURL);
+				await noteState.getNote();
 			}}
 		></EditNote>
 	{/if}
