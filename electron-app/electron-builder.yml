@@ -26,6 +26,7 @@ extraResources:
     to: ./db/pocketbase
 asarUnpack:
   - resources/**
+  - db/pocketbase
 win:
   executableName: Snippet Curator
   icon: resources/icon.ico
