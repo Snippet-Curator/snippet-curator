@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [windows-latest, macos-latest]
 
     steps:
       - name: Checkout code
@@ -76,10 +76,10 @@ jobs:
           # macOS signing (optional)
           # CSC_LINK and CSC_KEY_PASSWORD will work here too
           # For notarization:
-          APPLE_ID: ${{ secrets.APPLEID }}
-          APPLE_ID_PASS: ${{ secrets.APPLEIDPASS }}
+          APPLEID: ${{ secrets.APPLEID }}
+          APPLEIDPASS: ${{ secrets.APPLEIDPASS }}
           CSC_NAME: ${{ secrets.CSC_NAME }}
-          APPLE_TEAM_ID: ${{ secrets.APPLETEAMID }}
+          APPLETEAMID: ${{ secrets.APPLETEAMID }}
      
       - name: Upload to release mirror
         uses: softprops/action-gh-release@v2
