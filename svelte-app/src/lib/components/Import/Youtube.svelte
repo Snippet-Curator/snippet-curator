@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { getNotebookState, getSettingState } from '$lib/db.svelte';
+	import { getMouseState } from '$lib/utils.svelte';
 	import { getImportState } from './import.svelte';
 
 	const settingState = getSettingState();
 	const importState = getImportState();
 	const notebookState = getNotebookState();
+	const mouseState = getMouseState();
+
 	const notebooks = $derived(notebookState.flatNotebooks);
 
 	let youtubeURLs = $state('');
@@ -40,8 +43,10 @@
 				<button
 					disabled={!settingState.youtubeAPIKey}
 					onclick={async () => {
+						mouseState.isBusy = true;
 						importState.getSelectedNotebookID(selectedYoutubeNotebookID);
 						await importState.importYoutube(youtubeURLs, settingState.youtubeAPIKey);
+						mouseState.isBusy = false;
 					}}
 					class="btn btn-neutral">Import</button
 				>

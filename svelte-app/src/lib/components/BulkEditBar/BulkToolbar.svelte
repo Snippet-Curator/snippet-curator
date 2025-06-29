@@ -9,6 +9,7 @@
 	import BulkArchive from './bulk-archive.svelte';
 	import BulkDelete from './bulk-delete.svelte';
 	import BulkMerge from './bulk-merge.svelte';
+	import { getMouseState } from '$lib/utils.svelte';
 
 	type Props = {
 		selectedNotesID: string[];
@@ -32,6 +33,7 @@
 	let isEditNotebookOpen = $state(false);
 	let isEditTagsOpen = $state(false);
 	let isSelectAll = $state(false);
+	const mouseState = getMouseState();
 
 	const currentTagID = $derived(notelistState.noteType == 'tags' ? page.params.slug : '');
 
@@ -70,10 +72,12 @@
 			<BulkMerge
 				{selectedNotesID}
 				merge={async () => {
+					mouseState.isBusy = true;
 					await notelistState.mergeNotes(selectedNotesID);
 					updatePage();
 					selectedNotesID = [];
 					isBulkEdit = false;
+					mouseState.isBusy = false;
 				}}
 			></BulkMerge>
 			{#if !isTrash}

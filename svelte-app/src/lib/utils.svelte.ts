@@ -1,7 +1,6 @@
 import { page } from '$app/state';
 import { getContext, setContext } from 'svelte';
 
-
 export function categorizeMediabyType(content: string) {
     const mediaMatch =
         /<media\s+src=["']?(?<src>[^"'\s>]+)["']?\s+type=["']?(?<type>[^"'\s>]+)["']?\s*>/g;
@@ -44,9 +43,13 @@ function signalSavePage() {
     }
 }
 
-export class mobileState {
+class mobileState {
     isMobile = $state(false)
     isSidebarOpen = $state(true)
+}
+
+class mouseState {
+    isBusy = $state(false)
 }
 
 // Types for the result object with discriminated union
@@ -94,5 +97,12 @@ export function getMobileState() {
 }
 export const saveCurrentPage = (newPage: number) =>
     signalPageState.updatePageData(page.url.hash, newPage);
+
+export function setMouseState() {
+    return setContext('mouse', new mouseState())
+}
+export function getMouseState() {
+    return getContext<ReturnType<typeof setMouseState>>('mouse')
+}
 
 

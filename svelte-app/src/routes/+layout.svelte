@@ -17,17 +17,19 @@
 	} from '$lib/db.svelte';
 
 	import { Command, Dock, Icon, NotebookList, Pinned, TagList } from '$lib/components';
-	import { getMobileState, setMobileState } from '$lib/utils.svelte';
+	import { getMobileState, setMobileState, getMouseState, setMouseState } from '$lib/utils.svelte';
 
 	let { children } = $props();
 	setTagState();
 	setNotebookState();
 	setMobileState();
 	setSettingState();
+	setMouseState();
 	const tagState = getTagState();
 	const notebookState = getNotebookState();
 	const mobileState = getMobileState();
 	const settingState = getSettingState();
+	const mouseState = getMouseState();
 
 	let screenWidth = window.innerWidth;
 
@@ -89,7 +91,10 @@
 
 <Command />
 
-<Resizable.PaneGroup direction="horizontal" class="font-display max-h-screen min-h-screen w-full">
+<Resizable.PaneGroup
+	direction="horizontal"
+	class="{mouseState.isBusy ? 'cursor-progress' : ''} font-display max-h-screen min-h-screen w-full"
+>
 	<Resizable.Pane
 		class="{mobileState.isSidebarOpen
 			? '-motion-translate-x-in-100 motion-duration-200'

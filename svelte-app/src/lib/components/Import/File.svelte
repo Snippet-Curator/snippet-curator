@@ -1,16 +1,22 @@
 <script lang="ts">
 	import pb, { getNotebookState, getTagState } from '$lib/db.svelte';
+	import { getMouseState } from '$lib/utils.svelte';
 	import { getImportState } from './import.svelte';
 
 	const notebookState = getNotebookState();
 	const tagState = getTagState();
 	const importState = getImportState();
+	const mouseState = getMouseState();
+
 	const notebooks = $derived(notebookState.flatNotebooks);
 	let selectedNotebookID = $state<string>();
 
 	async function upload() {
 		// avoid updating tags and notebook errors
 		await pb.collection('notes').unsubscribe();
+
+		// setting mouse state
+		mouseState.isBusy = true;
 
 		importState.getSelectedNotebookID(selectedNotebookID);
 		await importState.importFiles();
@@ -28,6 +34,9 @@
 			notebookState.getAllCounts();
 			tagState.getAll();
 		});
+
+		// setting mouse state
+		mouseState.isBusy = false;
 	}
 </script>
 
