@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [macos-latest, windows-latest]
 
     steps:
       - name: Checkout code
@@ -87,12 +87,9 @@ jobs:
           cd electron-app
           npm run publish
         env:
-          # Common envs
           GH_TOKEN: ${{ secrets.RELEASE_MIRROR_TOKEN }}
 
           # macOS signing (optional)
-          # CSC_LINK and CSC_KEY_PASSWORD will work here too
-          # For notarization:
           APPLEID: ${{ secrets.APPLEID }}
           APPLEIDPASS: ${{ secrets.APPLEIDPASS }}
           CSC_NAME: ${{ secrets.CSC_NAME }}
