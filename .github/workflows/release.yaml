@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [macos-latest]
 
     steps:
       - name: Checkout code
@@ -64,6 +64,19 @@ jobs:
           fi
           mkdir -p electron-app/out/renderer
           cp -R svelte-app/build/* electron-app/out/renderer
+
+      - name: Import Code Signing Certificate (Mac)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+         echo "$CERT_P12_BASE64" | base64 --decode > certificate.p12
+         security create-keychain -p "" build.keychain
+         security default-keychain -s build.keychain
+         security unlock-keychain -p "" build.keychain
+         security import certificate.p12 -k build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign
+         security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+        env:
+         CERT_P12_BASE64: ${{ secrets.CERT_P12_BASE64 }}
+         CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
 
       - name: Build Electron App
         run: |
