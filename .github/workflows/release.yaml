@@ -65,6 +65,10 @@ jobs:
           mkdir -p electron-app/out/renderer
           cp -R svelte-app/build/* electron-app/out/renderer
 
+      - name: Make PocketBase executable
+        if: startsWith(matrix.os, 'macos')
+        run: chmod +x electron-app/db/pocketbase
+
       - name: Import Code Signing Certificate (Mac)
         if: startsWith(matrix.os, 'macos')
         run: |

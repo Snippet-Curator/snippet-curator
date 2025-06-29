@@ -20,10 +20,6 @@ extraResources:
     to: db/pb_migrations
   - from: ./db/pb_hooks
     to: db/pb_hooks
-  - from: ./db/pocketbase.exe
-    to: ./db/pocketbase.exe
-  - from: ./db/pocketbase
-    to: ./db/pocketbase
 asarUnpack:
   - resources/**
   - db/pocketbase
@@ -32,6 +28,9 @@ win:
   icon: resources/icon.ico
   target:
     - nsis
+  extraResources: 
+    - from: ./db/pocketbase.exe
+      to: ./db/pocketbase.exe
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -50,6 +49,9 @@ mac:
   notarize: false
   hardenedRuntime: true
   gatekeeperAssess: false
+  extraResources: 
+  - from: ./db/pocketbase
+    to: ./db/pocketbase
 dmg:
   artifactName: ${name}-${version}.${ext}
   sign: false
