@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import * as ContextMenu from '$lib/components/ui/context-menu/index';
 	import { getNotebookState, getTagState } from '$lib/db.svelte';
@@ -40,7 +39,9 @@
 
 {#snippet renderTag(tag: Tag)}
 	<ContextMenu.Root>
-		<ContextMenu.Trigger class="flex cursor-auto items-center justify-between p-0 pr-1">
+		<ContextMenu.Trigger
+			class="motion-translate-y-in-50 motion-duration-200 flex cursor-auto items-center justify-between p-0 pr-1"
+		>
 			<a
 				href="#/tags/{tag.id}"
 				class="{page.url.hash == `#/tags/${tag.id}`
@@ -62,10 +63,12 @@
 {/snippet}
 
 {#if notebooks.length > 0 || tags.length > 0}
-	<div class="bg-base-300/40 p-golden-sm px-golden-md mr-4 rounded-md">
+	<div
+		class="bg-base-300/40 p-golden-sm px-golden-md motion-scale-in-50 motion-opacity-in-0 motion-duration-200 motion-ease-spring-bouncier mr-4 rounded-md"
+	>
 		<ul class="">
 			{#each notebooks as notebook}
-				<li>
+				<li class="motion-translate-y-in-50 motion-duration-200">
 					{@render renderNotebook(notebook)}
 				</li>
 			{/each}
