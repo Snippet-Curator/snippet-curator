@@ -3,8 +3,6 @@
 	import dayjs from 'dayjs';
 	import customParseFormat from 'dayjs/plugin/customParseFormat';
 
-	const API = 'AIzaSyBEes-owCgponHK68ZO7za_eLQx0s3-um4';
-
 	async function fetchYoutubeMetadata(videoID: string, apiKey: string) {
 		const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,player,contentDetails,statistics&id=${videoID}&key=${apiKey}`;
 
