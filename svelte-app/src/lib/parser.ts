@@ -652,6 +652,7 @@ export class youtubeImport {
         const video = data.items?.[0];
 
         if (!video) {
+            await pb.collection(notesCollection).delete(this.recordID)
             throw new Error('Video not found');
         }
 
