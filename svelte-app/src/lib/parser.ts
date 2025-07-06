@@ -22,11 +22,12 @@ export class htmlImport {
     added: string
     description: string | null
     selectedNotebookdID: string
+    selectedTagIDs: string[]
     HTMLparser: DOMParser
     resources: Resource[]
     bodyResources: Resource[] // this is for thumbnail generation
 
-    constructor(fileContent: string, selectedNotebookID: string) {
+    constructor(fileContent: string, selectedNotebookID: string, selectedTagIDs: string[]) {
         this.HTMLparser = new DOMParser()
         this.content = fileContent
         this.parsedHTML = this.parseHTML(fileContent)
@@ -37,6 +38,7 @@ export class htmlImport {
         this.added = this.getAdded()
         this.recordID = ''
         this.selectedNotebookdID = selectedNotebookID
+        this.selectedTagIDs = selectedTagIDs
         this.resources = []
         this.bodyResources = []
     }
@@ -206,6 +208,7 @@ export class htmlImport {
             'description': this.description,
             'weight': 5,
             'notebook': this.selectedNotebookdID,
+            'tags': this.selectedNotebookdID,
             'last_score_updated': new Date().toISOString(),
             'sources': JSON.stringify(sources),
             'status': 'active'
@@ -258,11 +261,13 @@ export class EnImport {
     recordID: string
     description: string | null
     selectedNotebookdID: string
+    selectedTagsID: string[]
 
-    constructor(fileContent: string, selectedNotebookID: string) {
+    constructor(fileContent: string, selectedNotebookID: string, selectedTagsID: string[]) {
 
         this.recordID = ''
         this.selectedNotebookdID = selectedNotebookID
+        this.selectedTagsID = selectedTagsID
 
         const { xmlNote, xmlMedia, xmlContent } = this.parseEnex(fileContent)
 
@@ -462,7 +467,9 @@ export class EnImport {
     }
 
     async uploadToDB() {
-        const tags = await this.addTags()
+        const oldTags = await this.addTags()
+        const newTags = this.selectedTagsID || []
+        const tags = [...oldTags, ...newTags]
         const sources = [{
             'source': this.source,
             'source_url': this.sourceURL
@@ -520,8 +527,9 @@ export class fileImport {
     fileURL: string
     recordID: string
     selectedNotebookdID: string
+    selectedTagIDs: string[]
 
-    constructor(file: File, selectedNotebookID: string) {
+    constructor(file: File, selectedNotebookID: string, selectedTagIDs: string[]) {
         this.file = file
         this.mimeType = file.type
         this.recordID = ''
@@ -529,6 +537,7 @@ export class fileImport {
         this.content = ''
         this.title = `${file.name} ${dayjs(Date()).format('MM-DD-YYYY')}`
         this.selectedNotebookdID = selectedNotebookID
+        this.selectedTagIDs = selectedTagIDs
         this.added = new Date().toISOString()
     }
 
@@ -542,6 +551,7 @@ export class fileImport {
         const skeletonData = {
             'title': this.title,
             'notebook': this.selectedNotebookdID,
+            'tags': this.selectedTagIDs,
             'last_score_updated': new Date().toISOString(),
             'weight': 5,
             'added': this.added,
@@ -597,14 +607,16 @@ export class youtubeImport {
     youtubeID: string | undefined
     youtubeAPI: string
     selectedNotebookID: string
+    selectedTagIDs: string[]
     viewCount: string
     publishedDate: string
     duration: string
 
-    constructor(youtubeFullURL: string, selectedNotebookID: string, youtubeAPI: string) {
+    constructor(youtubeFullURL: string, selectedNotebookID: string, selectedTagIDs: string[], youtubeAPI: string) {
         this.youtubeFullURL = youtubeFullURL
         this.youtubeID = this.getYoutubeID(youtubeFullURL)
         this.selectedNotebookID = selectedNotebookID
+        this.selectedTagIDs = selectedTagIDs
         this.youtubeAPI = youtubeAPI
         this.youtubeThumbURL = ''
         this.thumbURL = ""
@@ -743,6 +755,7 @@ export class youtubeImport {
         const skeletonData = {
             'title': this.title,
             'notebook': this.selectedNotebookID,
+            'tags': this.selectedTagIDs,
             'last_score_updated': new Date().toISOString(),
             'weight': 5,
             'added': new Date().toISOString(),

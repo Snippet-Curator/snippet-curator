@@ -8,9 +8,12 @@
 	import Youtube from '$lib/components/Import/Youtube.svelte';
 	import Status from '$lib/components/Import/Status.svelte';
 
-	import { getNotebookState } from '$lib/db.svelte';
+	import { getNotebookState, getTagState } from '$lib/db.svelte';
 
 	const notebookState = getNotebookState();
+	const tagState = getTagState();
+	const notebooks = $derived(notebookState.flatNotebooks);
+	const tags = $derived(tagState.flatTags);
 
 	setImportState(notebookState.inboxID);
 </script>
@@ -23,8 +26,8 @@
 
 <ScrollArea class="h-[calc(100vh-60px)] overflow-y-auto">
 	<div class="mx-auto mb-20 max-w-5xl">
-		<File />
-		<Youtube />
+		<File {notebookState} {tagState} />
+		<Youtube {notebooks} {tags} />
 		<div class="divider"></div>
 		<Status />
 	</div>

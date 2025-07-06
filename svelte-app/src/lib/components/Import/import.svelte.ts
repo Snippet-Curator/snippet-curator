@@ -10,26 +10,7 @@ type FailureFile = {
 
 const decoder = new TextDecoder('utf-8');
 
-interface ImportState {
-    filesToUpload: File[]
-    totalFiles: number
-    progress: number
-    currentFile: string
-    uploadStatus: UploadStatus
-    successFiles: string[]
-    failureFiles: FailureFile[]
-    successYTs: string[]
-    failureYTs: string[]
-    selectedNotebookID: string
-    getSelectedNotebookID: (newID: string | undefined) => string
-    getDecodedText: (file: File) => Promise<string>
-    handleFileUpload: (event: Event) => void
-    uploadSingleFile: (file: File, type: 'html' | 'enex' | 'file') => Promise<void>
-    uploadFileByType: (file: File) => Promise<void>
-    importFiles: () => void
-}
-
-export class ImportStateClass implements ImportState {
+export class ImportStateClass {
     uploadStatus = $state<UploadStatus>('stopped')
     successFiles = $state<string[]>([])
     failureFiles = $state<FailureFile[]>([])
@@ -40,6 +21,7 @@ export class ImportStateClass implements ImportState {
     currentFile = $state('');
     filesToUpload = $state<File[]>([])
     selectedNotebookID = $state<string>('')
+    selectedTagIDs = $state<string[]>([])
     inboxID = $state<string>()
 
     constructor(inboxID: string) {
@@ -73,7 +55,7 @@ export class ImportStateClass implements ImportState {
     async uploadSingleFile(file: File, type: 'html' | 'enex' | 'file') {
         if (type === 'html') {
             const decodedText = await this.getDecodedText(file)
-            const parsedHTML = new htmlImport(decodedText, this.selectedNotebookID);
+            const parsedHTML = new htmlImport(decodedText, this.selectedNotebookID, this.selectedTagIDs);
             const { data, error } = await tryCatch(parsedHTML.uploadToDB())
 
             if (error) {
@@ -91,7 +73,7 @@ export class ImportStateClass implements ImportState {
 
         if (type === 'enex') {
             const decodedText = await this.getDecodedText(file)
-            const parsedXML = new EnImport(decodedText, this.selectedNotebookID);
+            const parsedXML = new EnImport(decodedText, this.selectedNotebookID, this.selectedTagIDs);
 
             const { data, error } = await tryCatch(parsedXML.uploadToDB())
 
@@ -109,7 +91,7 @@ export class ImportStateClass implements ImportState {
         }
 
         if (type === 'file') {
-            const imageFile = new fileImport(file, this.selectedNotebookID);
+            const imageFile = new fileImport(file, this.selectedNotebookID, this.selectedTagIDs);
 
             const { data, error } = await tryCatch(imageFile.uploadToDB())
 
@@ -127,11 +109,12 @@ export class ImportStateClass implements ImportState {
         }
     }
 
-    async uploadYoutube(url: string, selectedNotebookID: string, APIKey: string) {
+    async uploadYoutube(url: string, selectedNotebookID: string, selectedTagIDs: string[], APIKey: string) {
 
         const youtubeFile = new youtubeImport(
             url,
             selectedNotebookID,
+            selectedTagIDs,
             APIKey)
 
         const { data, error } = await tryCatch(youtubeFile.uploadToDB())
@@ -148,7 +131,6 @@ export class ImportStateClass implements ImportState {
         this.successFiles.push(url);
         return
     }
-
 
     async uploadFileByType(file: File) {
 
@@ -184,7 +166,7 @@ export class ImportStateClass implements ImportState {
             this.progress = Math.round(((index + 1) / this.totalFiles) * 100);
             if (!url) continue
             this.currentFile = url.trim()
-            await this.uploadYoutube(url.trim(), this.selectedNotebookID, API)
+            await this.uploadYoutube(url.trim(), this.selectedNotebookID, this.selectedTagIDs, API)
         }
         this.currentFile = '';
         this.uploadStatus = 'completed';

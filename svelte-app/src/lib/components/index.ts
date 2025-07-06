@@ -9,6 +9,8 @@ export { default as Blank } from './Layout/Blank.svelte'
 export { default as Navbar } from './Navbar/NavToolbar.svelte'
 export { default as Command } from './Layout/Command.svelte'
 export { default as Pinned } from './Layout/Pinned.svelte'
+export { default as SelectTags } from './Layout/SelectTags.svelte'
+export { default as SelectNotebook } from './Layout/SelectNotebook.svelte'
 
 // notes
 export { default as Pagination } from './Layout/Pagination.svelte'

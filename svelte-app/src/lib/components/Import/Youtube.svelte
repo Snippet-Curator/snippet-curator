@@ -1,17 +1,19 @@
 <script lang="ts">
-	import { getNotebookState, getSettingState } from '$lib/db.svelte';
+	import { getSettingState } from '$lib/db.svelte';
 	import { getMouseState } from '$lib/utils.svelte';
+	import { SelectTags, SelectNotebook } from '$lib/components/index';
 	import { getImportState } from './import.svelte';
+
+	let { notebooks, tags } = $props();
 
 	const settingState = getSettingState();
 	const importState = getImportState();
-	const notebookState = getNotebookState();
+
 	const mouseState = getMouseState();
 
-	const notebooks = $derived(notebookState.flatNotebooks);
-
 	let youtubeURLs = $state('');
-	let selectedYoutubeNotebookID = $state<string>();
+	let selectedYoutubeNotebookID = $state<string>('');
+	let selectedTagIDs = $state<string[]>([]);
 </script>
 
 <section class="card mx-auto">
@@ -33,18 +35,16 @@
 					bind:value={youtubeURLs}
 					class="textarea w-full"
 				></textarea>
-				<select class="select w-full" bind:value={selectedYoutubeNotebookID}>
-					<option disabled selected>Import into Notebook</option>
-					{#each notebooks as notebook}
-						<option value={notebook.id}>{notebook.name}</option>
-					{/each}
-				</select>
+
+				<SelectNotebook bind:selectedNotebookID={selectedYoutubeNotebookID} {notebooks} />
+				<SelectTags bind:selectedTagIDs {tags} />
 
 				<button
 					disabled={!settingState.youtubeAPIKey}
 					onclick={async () => {
 						mouseState.isBusy = true;
 						importState.getSelectedNotebookID(selectedYoutubeNotebookID);
+						importState.selectedTagIDs = selectedTagIDs;
 						await importState.importYoutube(youtubeURLs, settingState.youtubeAPIKey);
 						mouseState.isBusy = false;
 					}}

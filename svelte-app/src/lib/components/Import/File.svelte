@@ -1,15 +1,16 @@
 <script lang="ts">
-	import pb, { getNotebookState, getTagState } from '$lib/db.svelte';
+	import pb from '$lib/db.svelte';
 	import { getMouseState } from '$lib/utils.svelte';
+	import { SelectTags, SelectNotebook } from '$lib/components/index';
 	import { getImportState } from './import.svelte';
 
-	const notebookState = getNotebookState();
-	const tagState = getTagState();
+	let { notebookState, tagState } = $props();
+
 	const importState = getImportState();
 	const mouseState = getMouseState();
 
-	const notebooks = $derived(notebookState.flatNotebooks);
-	let selectedNotebookID = $state<string>();
+	let selectedNotebookID = $state<string>('');
+	let selectedTagIDs = $state<string[]>([]);
 
 	async function upload() {
 		// avoid updating tags and notebook errors
@@ -19,6 +20,7 @@
 		mouseState.isBusy = true;
 
 		importState.getSelectedNotebookID(selectedNotebookID);
+		importState.selectedTagIDs = selectedTagIDs;
 		await importState.importFiles();
 
 		// get initial counts again
@@ -69,12 +71,8 @@
 						class="file-input w-full"
 					/>
 
-					<select class="select w-full" bind:value={selectedNotebookID}>
-						<option disabled selected>Import into Notebook</option>
-						{#each notebooks as notebook}
-							<option value={notebook.id}>{notebook.name}</option>
-						{/each}
-					</select>
+					<SelectNotebook bind:selectedNotebookID notebooks={notebookState.flatNotebooks} />
+					<SelectTags bind:selectedTagIDs tags={tagState.flatTags} />
 
 					<!-- <label for="file" class="fieldset-label text-sm">Max size 5GB</label> -->
 
