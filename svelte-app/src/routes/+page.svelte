@@ -19,6 +19,7 @@
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { saveCurrentPage, searchState, signalPageState } from '$lib/utils.svelte';
 	import type { Notebook, Tag } from '$lib/types';
+	import FilterSearch from '$lib/components/Dialogs/FilterSearch.svelte';
 
 	const query = PocketbaseQuery.getInstance<{
 		title: string;
@@ -32,6 +33,7 @@
 	let isBulkEdit = $state(false);
 	let selectedNotesID = $state<string[]>([]);
 	let isLoading = $state(true);
+	let isFilterSearch = $state(false);
 
 	let notebookID = 'homepage';
 	const noteType: NoteType = {
@@ -122,6 +124,7 @@
 		}}
 	/>
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
+	<!-- <button onclick={() => (isFilterSearch = true)} class="btn btn-square">filter</button> -->
 </Topbar.Root>
 
 <ScrollArea scrollHideDelay={200} class="relative mb-20 h-[calc(100vh-60px)] overflow-y-auto">
@@ -158,3 +161,5 @@
 		{/if}
 	{/await}
 </ScrollArea>
+
+<FilterSearch bind:isOpen={isFilterSearch} />
