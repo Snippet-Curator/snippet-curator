@@ -18,11 +18,13 @@
 	} from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { saveCurrentPage, searchState, signalPageState } from '$lib/utils.svelte';
+	import type { Notebook, Tag } from '$lib/types';
 
 	const query = PocketbaseQuery.getInstance<{
 		title: string;
 		content: string;
-		tags: string;
+		tags: Tag;
+		notebook: Notebook;
 		status: 'active' | 'archived' | 'deleted';
 	}>();
 
@@ -58,11 +60,22 @@
 			updatePage(1);
 			return;
 		}
-		let searchedTag;
+		let searchedTagID;
 		try {
-			searchedTag = await pb.collection('tags').getFirstListItem(`name~"${searchInput}"`);
+			const searchedTag = await pb.collection('tags').getFirstListItem(`name~"${searchInput}"`);
+			searchedTagID = searchedTag.id;
 		} catch (e) {
-			searchedTag = '';
+			searchedTagID = '';
+		}
+
+		let searchNotebookID;
+		try {
+			const searchNotebook = await pb
+				.collection('notebooks')
+				.getFirstListItem(`name~"${searchInput}"`);
+			searchNotebookID = searchNotebook.id;
+		} catch (e) {
+			searchNotebookID = '';
 		}
 
 		const customFilters = query
@@ -71,7 +84,9 @@
 			.or()
 			.like('content', searchInput)
 			.or()
-			.like('tags', searchedTag.id)
+			.like('tags', searchedTagID)
+			.or()
+			.equal('notebook', searchNotebookID)
 			.closeBracket()
 			.and()
 			.openBracket()
