@@ -21,7 +21,7 @@ export class ImportStateClass {
     currentFile = $state('');
     filesToUpload = $state<File[]>([])
     selectedNotebookID = $state<string>('')
-    selectedTagIDs = $state<string[]>([])
+    selectedTagIdArray = $state<string[]>([])
     inboxID = $state<string>()
 
     constructor(inboxID: string) {
@@ -55,7 +55,7 @@ export class ImportStateClass {
     async uploadSingleFile(file: File, type: 'html' | 'enex' | 'file') {
         if (type === 'html') {
             const decodedText = await this.getDecodedText(file)
-            const parsedHTML = new htmlImport(decodedText, this.selectedNotebookID, this.selectedTagIDs);
+            const parsedHTML = new htmlImport(decodedText, this.selectedNotebookID, this.selectedTagIdArray);
             const { data, error } = await tryCatch(parsedHTML.uploadToDB())
 
             if (error) {
@@ -73,7 +73,7 @@ export class ImportStateClass {
 
         if (type === 'enex') {
             const decodedText = await this.getDecodedText(file)
-            const parsedXML = new EnImport(decodedText, this.selectedNotebookID, this.selectedTagIDs);
+            const parsedXML = new EnImport(decodedText, this.selectedNotebookID, this.selectedTagIdArray);
 
             const { data, error } = await tryCatch(parsedXML.uploadToDB())
 
@@ -91,7 +91,7 @@ export class ImportStateClass {
         }
 
         if (type === 'file') {
-            const imageFile = new fileImport(file, this.selectedNotebookID, this.selectedTagIDs);
+            const imageFile = new fileImport(file, this.selectedNotebookID, this.selectedTagIdArray);
 
             const { data, error } = await tryCatch(imageFile.uploadToDB())
 
@@ -109,12 +109,12 @@ export class ImportStateClass {
         }
     }
 
-    async uploadYoutube(url: string, selectedNotebookID: string, selectedTagIDs: string[], APIKey: string) {
+    async uploadYoutube(url: string, selectedNotebookID: string, selectedTagIdArray: string[], APIKey: string) {
 
         const youtubeFile = new youtubeImport(
             url,
             selectedNotebookID,
-            selectedTagIDs,
+            selectedTagIdArray,
             APIKey)
 
         const { data, error } = await tryCatch(youtubeFile.uploadToDB())
@@ -166,7 +166,7 @@ export class ImportStateClass {
             this.progress = Math.round(((index + 1) / this.totalFiles) * 100);
             if (!url) continue
             this.currentFile = url.trim()
-            await this.uploadYoutube(url.trim(), this.selectedNotebookID, this.selectedTagIDs, API)
+            await this.uploadYoutube(url.trim(), this.selectedNotebookID, this.selectedTagIdArray, API)
         }
         this.currentFile = '';
         this.uploadStatus = 'completed';

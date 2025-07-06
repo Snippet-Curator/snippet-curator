@@ -22,12 +22,12 @@ export class htmlImport {
     added: string
     description: string | null
     selectedNotebookdID: string
-    selectedTagIDs: string[]
+    selectedTagIdArrays: string[]
     HTMLparser: DOMParser
     resources: Resource[]
     bodyResources: Resource[] // this is for thumbnail generation
 
-    constructor(fileContent: string, selectedNotebookID: string, selectedTagIDs: string[]) {
+    constructor(fileContent: string, selectedNotebookID: string, selectedTagIdArrays: string[]) {
         this.HTMLparser = new DOMParser()
         this.content = fileContent
         this.parsedHTML = this.parseHTML(fileContent)
@@ -38,7 +38,7 @@ export class htmlImport {
         this.added = this.getAdded()
         this.recordID = ''
         this.selectedNotebookdID = selectedNotebookID
-        this.selectedTagIDs = selectedTagIDs
+        this.selectedTagIdArrays = selectedTagIdArrays
         this.resources = []
         this.bodyResources = []
     }
@@ -527,9 +527,9 @@ export class fileImport {
     fileURL: string
     recordID: string
     selectedNotebookdID: string
-    selectedTagIDs: string[]
+    selectedTagIdArrays: string[]
 
-    constructor(file: File, selectedNotebookID: string, selectedTagIDs: string[]) {
+    constructor(file: File, selectedNotebookID: string, selectedTagIdArrays: string[]) {
         this.file = file
         this.mimeType = file.type
         this.recordID = ''
@@ -537,7 +537,7 @@ export class fileImport {
         this.content = ''
         this.title = `${file.name} ${dayjs(Date()).format('MM-DD-YYYY')}`
         this.selectedNotebookdID = selectedNotebookID
-        this.selectedTagIDs = selectedTagIDs
+        this.selectedTagIdArrays = selectedTagIdArrays
         this.added = new Date().toISOString()
     }
 
@@ -551,7 +551,7 @@ export class fileImport {
         const skeletonData = {
             'title': this.title,
             'notebook': this.selectedNotebookdID,
-            'tags': this.selectedTagIDs,
+            'tags': this.selectedTagIdArrays,
             'last_score_updated': new Date().toISOString(),
             'weight': 5,
             'added': this.added,
@@ -607,16 +607,16 @@ export class youtubeImport {
     youtubeID: string | undefined
     youtubeAPI: string
     selectedNotebookID: string
-    selectedTagIDs: string[]
+    selectedTagIdArrays: string[]
     viewCount: string
     publishedDate: string
     duration: string
 
-    constructor(youtubeFullURL: string, selectedNotebookID: string, selectedTagIDs: string[], youtubeAPI: string) {
+    constructor(youtubeFullURL: string, selectedNotebookID: string, selectedTagIdArrays: string[], youtubeAPI: string) {
         this.youtubeFullURL = youtubeFullURL
         this.youtubeID = this.getYoutubeID(youtubeFullURL)
         this.selectedNotebookID = selectedNotebookID
-        this.selectedTagIDs = selectedTagIDs
+        this.selectedTagIdArrays = selectedTagIdArrays
         this.youtubeAPI = youtubeAPI
         this.youtubeThumbURL = ''
         this.thumbURL = ""
@@ -755,7 +755,7 @@ export class youtubeImport {
         const skeletonData = {
             'title': this.title,
             'notebook': this.selectedNotebookID,
-            'tags': this.selectedTagIDs,
+            'tags': this.selectedTagIdArrays,
             'last_score_updated': new Date().toISOString(),
             'weight': 5,
             'added': new Date().toISOString(),

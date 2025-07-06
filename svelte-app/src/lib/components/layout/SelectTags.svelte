@@ -5,18 +5,18 @@
 
 	type Props = {
 		tags: Tag[];
-		selectedTagIDs: string[];
+		selectedTagIdArray: string[];
 	};
 
-	let { tags, selectedTagIDs = $bindable() }: Props = $props();
+	let { tags, selectedTagIdArray = $bindable([]) }: Props = $props();
 
 	let searchValue = $state('');
 
-	const selectedTags = $derived(tags.filter((tag) => selectedTagIDs.includes(tag.id)));
+	const selectedTags = $derived(tags.filter((tag) => selectedTagIdArray.includes(tag.id)));
 	const filteredTags = $derived(
 		tags.filter((tag) => {
 			return (
-				!selectedTagIDs.includes(tag.id) &&
+				!selectedTagIdArray.includes(tag.id) &&
 				tag.name.toLowerCase().includes(searchValue.toLowerCase())
 			);
 		})
@@ -28,7 +28,9 @@
 		{#each selectedTags as tag}
 			<button
 				onclick={() => {
-					selectedTagIDs = selectedTagIDs.filter((selectedTagID) => selectedTagID != tag.id);
+					selectedTagIdArray = selectedTagIdArray.filter(
+						(selectedTagID) => selectedTagID != tag.id
+					);
 				}}
 				class="badge badge-primary hover:badge-ghost text-nowrap">{tag.name}</button
 			>
@@ -36,7 +38,7 @@
 	</div>
 {/if}
 
-<Combobox.Root bind:value={selectedTagIDs} type="multiple">
+<Combobox.Root bind:value={selectedTagIdArray} type="multiple">
 	<div class="relative h-10">
 		<Combobox.Input
 			placeholder="Search tags..."

@@ -14,21 +14,23 @@ import SidebarIcon from './topbar-sidebar.svelte'
 import NavBtns from './topbar-next-previous.svelte'
 import Weight from './topbar-weight.svelte'
 import Edit from './topbar-edit.svelte'
+import Filter from './topbar-filter.svelte'
 
 export {
-  Archive,
-  Back,
-  Delete,
-  Empty,
-  Info,
-  Notebook,
-  TagBtn,
-  NavBtns,
-  Tags,
-  Rating,
-  Keyboard,
-  SidebarIcon,
-  Weight,
-  Edit,
-  Topbar as Root,
+    Archive,
+    Back,
+    Delete,
+    Empty,
+    Info,
+    Notebook,
+    TagBtn,
+    NavBtns,
+    Tags,
+    Rating,
+    Keyboard,
+    SidebarIcon,
+    Weight,
+    Edit,
+    Filter,
+    Topbar as Root,
 }

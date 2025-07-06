@@ -8,7 +8,7 @@
 		selectedNotebookID: string;
 	};
 
-	let { notebooks, selectedNotebookID = $bindable() }: Props = $props();
+	let { notebooks, selectedNotebookID = $bindable('') }: Props = $props();
 
 	let searchValue = $state('');
 
@@ -17,14 +17,26 @@
 			return notebook.name.toLowerCase().includes(searchValue.toLowerCase());
 		})
 	);
+
+	const selectedNotebookName = $derived.by(() => {
+		const selectedNotebookArray = notebooks.filter((notebook) => notebook.id == selectedNotebookID);
+
+		if (selectedNotebookArray.length == 0) return '';
+
+		const notebookName = selectedNotebookArray[0].name;
+
+		return notebookName;
+	});
 </script>
 
-<Combobox.Root bind:value={selectedNotebookID} type="single">
+<Combobox.Root bind:value={selectedNotebookID} inputValue={selectedNotebookName} type="single">
 	<div class="relative h-10">
 		<Combobox.Input
 			placeholder="Search notebooks..."
 			class="input w-full"
-			oninput={(e) => (searchValue = e.currentTarget.value)}
+			oninput={(e) => {
+				searchValue = e.currentTarget.value;
+			}}
 		/>
 		<Combobox.Trigger>
 			<button

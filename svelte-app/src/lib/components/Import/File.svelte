@@ -10,7 +10,7 @@
 	const mouseState = getMouseState();
 
 	let selectedNotebookID = $state<string>('');
-	let selectedTagIDs = $state<string[]>([]);
+	let selectedTagIdArray = $state<string[]>([]);
 
 	async function upload() {
 		// avoid updating tags and notebook errors
@@ -20,7 +20,7 @@
 		mouseState.isBusy = true;
 
 		importState.getSelectedNotebookID(selectedNotebookID);
-		importState.selectedTagIDs = selectedTagIDs;
+		importState.selectedTagIdArray = selectedTagIdArray;
 		await importState.importFiles();
 
 		// get initial counts again
@@ -72,7 +72,7 @@
 					/>
 
 					<SelectNotebook bind:selectedNotebookID notebooks={notebookState.flatNotebooks} />
-					<SelectTags bind:selectedTagIDs tags={tagState.flatTags} />
+					<SelectTags bind:selectedTagIdArray tags={tagState.flatTags} />
 
 					<!-- <label for="file" class="fieldset-label text-sm">Max size 5GB</label> -->
 

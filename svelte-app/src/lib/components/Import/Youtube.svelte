@@ -13,7 +13,7 @@
 
 	let youtubeURLs = $state('');
 	let selectedYoutubeNotebookID = $state<string>('');
-	let selectedTagIDs = $state<string[]>([]);
+	let selectedTagIdArray = $state<string[]>([]);
 </script>
 
 <section class="card mx-auto">
@@ -37,14 +37,14 @@
 				></textarea>
 
 				<SelectNotebook bind:selectedNotebookID={selectedYoutubeNotebookID} {notebooks} />
-				<SelectTags bind:selectedTagIDs {tags} />
+				<SelectTags bind:selectedTagIdArray {tags} />
 
 				<button
 					disabled={!settingState.youtubeAPIKey}
 					onclick={async () => {
 						mouseState.isBusy = true;
 						importState.getSelectedNotebookID(selectedYoutubeNotebookID);
-						importState.selectedTagIDs = selectedTagIDs;
+						importState.selectedTagIdArray = selectedTagIdArray;
 						await importState.importYoutube(youtubeURLs, settingState.youtubeAPIKey);
 						mouseState.isBusy = false;
 					}}

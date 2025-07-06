@@ -6,7 +6,7 @@
 
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
-	import pb, { getNotelistState, setNotelistState, type NoteType } from '$lib/db.svelte';
+	import pb, { getNotelistState, setNotelistState } from '$lib/db.svelte';
 	import {
 		Pagination,
 		NoteList,
@@ -17,17 +17,10 @@
 		NoteLoading
 	} from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
-	import { saveCurrentPage, searchState, signalPageState } from '$lib/utils.svelte';
-	import type { Notebook, Tag } from '$lib/types';
+	import { saveCurrentPage, signalPageState } from '$lib/utils.svelte';
+	import { getSearchState, setSearchState } from '$lib/search.svelte';
+	import type { Notebook, Tag, NoteType } from '$lib/types';
 	import FilterSearch from '$lib/components/Dialogs/FilterSearch.svelte';
-
-	const query = PocketbaseQuery.getInstance<{
-		title: string;
-		content: string;
-		tags: Tag;
-		notebook: Notebook;
-		status: 'active' | 'archived' | 'deleted';
-	}>();
 
 	let searchInput = $state('');
 	let isBulkEdit = $state(false);
@@ -39,8 +32,11 @@
 	const noteType: NoteType = {
 		type: 'default'
 	};
+
 	setNotelistState(notebookID, noteType);
+	setSearchState();
 	const notelistState = getNotelistState(notebookID);
+	const searchState = getSearchState();
 
 	const savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
 
@@ -62,43 +58,11 @@
 			updatePage(1);
 			return;
 		}
-		let searchedTagID;
-		try {
-			const searchedTag = await pb.collection('tags').getFirstListItem(`name~"${searchInput}"`);
-			searchedTagID = searchedTag.id;
-		} catch (e) {
-			searchedTagID = '';
-		}
 
-		let searchNotebookID;
-		try {
-			const searchNotebook = await pb
-				.collection('notebooks')
-				.getFirstListItem(`name~"${searchInput}"`);
-			searchNotebookID = searchNotebook.id;
-		} catch (e) {
-			searchNotebookID = '';
-		}
-
-		const customFilters = query
-			.openBracket()
-			.like('title', searchInput)
-			.or()
-			.like('content', searchInput)
-			.or()
-			.like('tags', searchedTagID)
-			.or()
-			.equal('notebook', searchNotebookID)
-			.closeBracket()
-			.and()
-			.openBracket()
-			.equal('status', 'active')
-			.or()
-			.equal('status', 'archived')
-			.closeBracket()
-			.build();
-
-		await notelistState.getByFilter(customFilters, page);
+		await searchState.getSearchTags(searchInput);
+		await searchState.getSearchNotebook(searchInput);
+		searchState.makeSearchQuery(searchInput);
+		await notelistState.getByFilter(searchState.customFilter, page);
 		searchState.searchTerm = searchInput;
 	};
 
@@ -123,8 +87,8 @@
 			updatePage(1);
 		}}
 	/>
+	<Topbar.Filter bind:isOpen={isFilterSearch} />
 	<BulkEditBtn bind:isBulkEdit bind:selectedNotesID />
-	<!-- <button onclick={() => (isFilterSearch = true)} class="btn btn-square">filter</button> -->
 </Topbar.Root>
 
 <ScrollArea scrollHideDelay={200} class="relative mb-20 h-[calc(100vh-60px)] overflow-y-auto">
@@ -162,4 +126,8 @@
 	{/await}
 </ScrollArea>
 
-<FilterSearch bind:isOpen={isFilterSearch} />
+<FilterSearch
+	bind:isOpen={isFilterSearch}
+	bind:searchInput
+	search={async (customFilters) => await notelistState.getByFilter(customFilters, savedPage)}
+/>

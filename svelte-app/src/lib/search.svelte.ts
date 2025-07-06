@@ -1,0 +1,102 @@
+import { getContext, setContext } from "svelte"
+import PocketbaseQuery from '@emresandikci/pocketbase-query';
+import type { Notebook, Tag } from '$lib/types';
+import { tryCatch } from '$lib/utils.svelte';
+import pb from '$lib/db.svelte';
+import { viewNotebooksCollection, viewNotesCollection, viewTagsCollectionName } from './const';
+
+export class searchState {
+    searchTerm = $state('');
+    searchInput = $state('')
+    selectedTagIdArray = $state<string[]>([])
+    searchedTagID = $state<string>('')
+    searchNotebookID = $state<string>('')
+    customFilter = $state('')
+    tagFilter = $state('')
+    query = PocketbaseQuery.getInstance<{
+        title: string;
+        content: string;
+        tags: Tag;
+        notebook: Notebook;
+        status: 'active' | 'archived' | 'deleted';
+    }>();
+
+    getTagFilter(selectedTagIdArray: string[]) {
+        return selectedTagIdArray.map((tagId) => `tags~"${tagId}"`).join(' && ');
+    }
+
+    async getSearchTags(searchInput: string) {
+        const { data, error } = await tryCatch(pb.collection(viewTagsCollectionName).getFirstListItem(`name~"${searchInput}"`))
+
+        if (error || !data) {
+            console.error('Error getting search tags: ', error.data)
+            this.searchedTagID = '';
+            return
+        }
+
+        this.searchedTagID = data.id;
+    }
+
+    async getSearchNotebook(searchInput: string) {
+        const { data, error } = await tryCatch(pb.collection(viewNotebooksCollection).getFirstListItem(`name~"${searchInput}"`))
+
+        if (error || !data) {
+            console.error('Error getting search notebook: ', error.data)
+            this.searchNotebookID = '';
+            return
+        }
+
+        this.searchNotebookID = data.id;
+    }
+
+    makeSearchQuery(searchInput: string) {
+        this.customFilter = this.query
+            .openBracket()
+            .like('title', this.searchInput)
+            .or()
+            .like('content', searchInput)
+            .or()
+            .like('tags', this.searchedTagID)
+            .or()
+            .equal('notebook', this.searchNotebookID)
+            .closeBracket()
+            .and()
+            .openBracket()
+            .equal('status', 'active')
+            .or()
+            .equal('status', 'archived')
+            .closeBracket()
+            .build();
+    }
+
+    makeFilterQuery(searchInput: string) {
+        const tagFilter = this.getTagFilter(this.selectedTagIdArray)
+        this.customFilter = this.query
+            .openBracket()
+            .like('title', searchInput)
+            .or()
+            .like('content', searchInput)
+            .closeBracket()
+            .and()
+            .customFilter(tagFilter)
+            .and()
+            .equal('notebook', this.searchNotebookID)
+            .and()
+            .openBracket()
+            .equal('status', 'active')
+            .or()
+            .equal('status', 'archived')
+            .closeBracket()
+            .build();
+    }
+}
+
+export function setSearchState() {
+    return setContext('search', new searchState())
+}
+
+export function getSearchState() {
+    return getContext<ReturnType<typeof setSearchState>>('search')
+}
+
+

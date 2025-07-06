@@ -24,13 +24,13 @@ export function getCorrectPage() {
     return page.state.previousHistoryPage
 }
 
-function changeSearchTerm() {
-    let searchTerm = $state('');
-    return {
-        get searchTerm() { return searchTerm },
-        set searchTerm(value) { searchTerm = value },
-    }
-}
+// function changeSearchTerm() {
+//     let searchTerm = $state('');
+//     return {
+//         get searchTerm() { return searchTerm },
+//         set searchTerm(value) { searchTerm = value },
+//     }
+// }
 
 function signalSavePage() {
     let savedPages = $state(new Map())
@@ -87,7 +87,7 @@ export function debounce<T extends (...args: any[]) => void>(fn: T, delay: numbe
     };
 }
 
-export const searchState = changeSearchTerm()
+// export const searchState = changeSearchTerm()
 export const signalPageState = signalSavePage()
 export function setMobileState() {
     return setContext('mobile', new mobileState())
