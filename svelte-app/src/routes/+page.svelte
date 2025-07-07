@@ -17,7 +17,7 @@
 	} from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { saveCurrentPage, signalPageState } from '$lib/utils.svelte';
-	import { getSearchState, setSearchState } from '$lib/search.svelte';
+	import { getSearchState } from '$lib/search.svelte';
 	import type { NoteType } from '$lib/types';
 
 	let searchInput = $state('');
@@ -32,7 +32,7 @@
 	};
 
 	setNotelistState(notebookID, noteType);
-	setSearchState();
+
 	const notelistState = getNotelistState(notebookID);
 	const searchState = getSearchState();
 
@@ -45,7 +45,7 @@
 
 		// get default page if no filters
 		if (
-			!searchInput &&
+			!searchState.searchInput &&
 			!searchState.searchNotebookID &&
 			searchState.selectedTagIdArray.length == 0
 		) {
@@ -56,7 +56,7 @@
 		}
 
 		// run same filter if search term is same
-		if (searchState.searchTerm === searchInput) {
+		if (searchState.searchTerm === searchState.searchInput) {
 			console.log('same search', searchState.customFilter);
 			await notelistState.getByFilter(searchState.customFilter, newPage);
 			return;
@@ -66,17 +66,20 @@
 		console.log('different search', searchState.customFilter);
 		await searchState.getSearchTags(searchInput.trim());
 		await searchState.getSearchNotebook(searchInput.trim());
-		searchState.makeSearchQuery(searchInput);
+		searchState.makeSearchQuery(searchState.searchInput);
 		await notelistState.getByFilter(searchState.customFilter, newPage);
-		searchState.searchTerm = searchInput;
+		searchState.searchTerm = searchState.searchInput;
 	};
 
 	isLoading = false;
 	let initialLoading = $state();
 
+	$inspect('searchInput', searchState.searchInput);
+	$inspect('searchterm', searchState.searchTerm);
+
 	onMount(async () => {
 		if (searchState.searchTerm) {
-			searchInput = searchState.searchTerm;
+			searchState.searchInput = searchState.searchTerm;
 		}
 		initialLoading = updatePage(savedPage);
 	});
@@ -85,7 +88,7 @@
 <Topbar.Root>
 	<Topbar.SidebarIcon></Topbar.SidebarIcon>
 	<Search
-		bind:searchInput
+		bind:searchInput={searchState.searchInput}
 		searchNotes={() => updatePage(1)}
 		clearNote={() => {
 			searchState.searchTerm = '';
@@ -123,7 +126,7 @@
 				bind:selectedNotesID
 				notes={notelistState.notes}
 			/>
-		{:else if searchInput || searchState.searchNotebookID || searchState.selectedTagIdArray.length > 0}
+		{:else if searchState.searchInput || searchState.searchNotebookID || searchState.selectedTagIdArray.length > 0}
 			<div class="grid h-full place-items-center">No Notes Found.</div>
 		{:else}
 			<Blank />
@@ -134,6 +137,5 @@
 
 <FilterSearch
 	bind:isOpen={isFilterSearch}
-	bind:searchInput
 	search={async (customFilters) => await notelistState.getByFilter(customFilters, savedPage)}
 />

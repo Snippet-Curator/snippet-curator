@@ -5,6 +5,13 @@
 	import { getNotebookState, getTagState } from '$lib/db.svelte';
 	import { getSearchState } from '$lib/search.svelte';
 
+	type Props = {
+		isOpen: boolean;
+		search: (customFilter: string) => void;
+	};
+
+	let { isOpen = $bindable(), search }: Props = $props();
+
 	const searchState = getSearchState();
 	const notebookState = getNotebookState();
 	const tagState = getTagState();
@@ -12,16 +19,14 @@
 	const notebooks = $derived(notebookState.flatNotebooks);
 	const tags = $derived(tagState.flatTags);
 
-	type Props = {
-		isOpen: boolean;
-		searchInput: string;
-		search: (customFilter: string) => void;
-	};
-
-	let { isOpen = $bindable(), searchInput = $bindable(), search }: Props = $props();
+	let filterNotebookID = $state(searchState.searchNotebookID);
+	let filterTagIDArray = $state<string[]>([]);
 
 	function submitForm() {
-		searchState.makeFilterQuery(searchInput);
+		searchState.searchTerm = searchState.searchInput;
+		searchState.searchNotebookID = filterNotebookID;
+		searchState.selectedTagIdArray = filterTagIDArray;
+		searchState.makeFilterQuery(searchState.searchInput);
 		search(searchState.customFilter);
 		isOpen = false;
 	}
@@ -44,8 +49,18 @@
 				<legend class="fieldset-legend">Search Term</legend>
 			</div>
 
-			<input type="text" class="input col-span-8 col-start-4 w-full" bind:value={searchInput} />
-			<button onclick={() => (searchInput = '')} class="btn col-span-1">Clear</button>
+			<input
+				type="text"
+				class="input col-span-8 col-start-4 w-full"
+				placeholder="Search title and content..."
+				bind:value={searchState.searchInput}
+			/>
+			<button
+				onclick={() => {
+					searchState.searchInput = '';
+				}}
+				class="btn col-span-1">Clear</button
+			>
 		</div>
 
 		<div class="gap-x-golden-md grid grid-cols-12 items-center">
@@ -53,11 +68,9 @@
 				<legend class="fieldset-legend">Notebook</legend>
 			</div>
 			<div class="col-span-8 w-full text-right">
-				<SelectNotebook {notebooks} bind:selectedNotebookID={searchState.searchNotebookID} />
+				<SelectNotebook {notebooks} bind:selectedNotebookID={filterNotebookID} />
 			</div>
-			<button onclick={() => (searchState.searchNotebookID = '')} class="btn col-span-1"
-				>Clear</button
-			>
+			<button onclick={() => (filterNotebookID = '')} class="btn col-span-1">Clear</button>
 		</div>
 
 		<div class="gap-x-golden-md grid grid-cols-12 items-start">
@@ -65,12 +78,17 @@
 				<legend class="fieldset-legend">Tags</legend>
 			</div>
 			<div class="col-span-9 col-start-4 text-right">
-				<SelectTags {tags} bind:selectedTagIdArray={searchState.selectedTagIdArray} />
+				<SelectTags {tags} bind:selectedTagIdArray={filterTagIDArray} />
 			</div>
 		</div>
 
 		<div class="flex justify-end gap-x-2">
-			<button onclick={() => (isOpen = false)} class="btn">Close</button>
+			<button
+				onclick={() => {
+					isOpen = false;
+				}}
+				class="btn">Close</button
+			>
 			<button onclick={submitForm} class="btn btn-primary">Save</button>
 		</div>
 	</Dialog.Content>

@@ -18,6 +18,7 @@
 
 	import { Command, Dock, Icon, NotebookList, Pinned, TagList } from '$lib/components';
 	import { getMobileState, setMobileState, getMouseState, setMouseState } from '$lib/utils.svelte';
+	import { setSearchState } from '$lib/search.svelte';
 
 	let { children } = $props();
 	setTagState();
@@ -25,6 +26,7 @@
 	setMobileState();
 	setSettingState();
 	setMouseState();
+	setSearchState();
 	const tagState = getTagState();
 	const notebookState = getNotebookState();
 	const mobileState = getMobileState();
