@@ -12,9 +12,6 @@
 	const notebooks = $derived(notebookState.flatNotebooks);
 	const tags = $derived(tagState.flatTags);
 
-	let selectedNotebookID = $state('');
-	let selectedTagIdArray = $state<string[]>([]);
-
 	type Props = {
 		isOpen: boolean;
 		searchInput: string;
@@ -22,6 +19,12 @@
 	};
 
 	let { isOpen = $bindable(), searchInput = $bindable(), search }: Props = $props();
+
+	function submitForm() {
+		searchState.makeFilterQuery(searchInput);
+		search(searchState.customFilter);
+		isOpen = false;
+	}
 </script>
 
 <Dialog.Root open={isOpen}>
@@ -40,9 +43,9 @@
 			<div class="col-span-3">
 				<legend class="fieldset-legend">Search Term</legend>
 			</div>
-			<div class="col-span-9 w-full text-right">
-				<input type="text" class="input" bind:value={searchInput} />
-			</div>
+
+			<input type="text" class="input col-span-8 col-start-4 w-full" bind:value={searchInput} />
+			<button onclick={() => (searchInput = '')} class="btn col-span-1">Clear</button>
 		</div>
 
 		<div class="gap-x-golden-md grid grid-cols-12 items-center">
@@ -58,7 +61,7 @@
 		</div>
 
 		<div class="gap-x-golden-md grid grid-cols-12 items-start">
-			<div class="col-span-12">
+			<div class="col-span-3">
 				<legend class="fieldset-legend">Tags</legend>
 			</div>
 			<div class="col-span-9 col-start-4 text-right">
@@ -68,14 +71,7 @@
 
 		<div class="flex justify-end gap-x-2">
 			<button onclick={() => (isOpen = false)} class="btn">Close</button>
-			<button
-				onclick={() => {
-					searchState.makeFilterQuery(searchInput);
-					search(searchState.customFilter);
-					isOpen = false;
-				}}
-				class="btn btn-primary">Save</button
-			>
+			<button onclick={submitForm} class="btn btn-primary">Save</button>
 		</div>
 	</Dialog.Content>
 </Dialog.Root>

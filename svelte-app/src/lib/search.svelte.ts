@@ -1,9 +1,11 @@
-import { getContext, setContext } from "svelte"
 import PocketbaseQuery from '@emresandikci/pocketbase-query';
+
+import { getContext, setContext } from "svelte"
+
 import type { Notebook, Tag } from '$lib/types';
 import { tryCatch } from '$lib/utils.svelte';
 import pb from '$lib/db.svelte';
-import { viewNotebooksCollection, viewNotesCollection, viewTagsCollectionName } from './const';
+import { viewNotebooksCollection, viewTagsCollectionName } from './const';
 
 export class searchState {
     searchTerm = $state('');
@@ -11,7 +13,7 @@ export class searchState {
     selectedTagIdArray = $state<string[]>([])
     searchedTagID = $state<string>('')
     searchNotebookID = $state<string>('')
-    customFilter = $state('')
+    customFilter = $state(`(status="active" || status="archived")`)
     tagFilter = $state('')
     query = PocketbaseQuery.getInstance<{
         title: string;
@@ -21,11 +23,20 @@ export class searchState {
         status: 'active' | 'archived' | 'deleted';
     }>();
 
+    resetCustomFilter() {
+        this.customFilter = `(status="active" || status="archived")`
+    }
+
     getTagFilter(selectedTagIdArray: string[]) {
         return selectedTagIdArray.map((tagId) => `tags~"${tagId}"`).join(' && ');
     }
 
     async getSearchTags(searchInput: string) {
+        if (!searchInput) {
+            this.searchedTagID = ''
+            return
+        }
+
         const { data, error } = await tryCatch(pb.collection(viewTagsCollectionName).getFirstListItem(`name~"${searchInput}"`))
 
         if (error || !data) {
@@ -38,6 +49,11 @@ export class searchState {
     }
 
     async getSearchNotebook(searchInput: string) {
+        if (!searchInput) {
+            this.searchNotebookID = '';
+            return
+        }
+
         const { data, error } = await tryCatch(pb.collection(viewNotebooksCollection).getFirstListItem(`name~"${searchInput}"`))
 
         if (error || !data) {

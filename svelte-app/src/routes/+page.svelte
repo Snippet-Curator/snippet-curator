@@ -1,12 +1,10 @@
 <script lang="ts">
-	import PocketbaseQuery from '@emresandikci/pocketbase-query';
-
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
-	import pb, { getNotelistState, setNotelistState } from '$lib/db.svelte';
+	import { getNotelistState, setNotelistState } from '$lib/db.svelte';
 	import {
 		Pagination,
 		NoteList,
@@ -14,13 +12,13 @@
 		BulkToolbar,
 		BulkEditBtn,
 		Blank,
-		NoteLoading
+		NoteLoading,
+		FilterSearch
 	} from '$lib/components/';
 	import * as Topbar from '$lib/components/Topbar/index';
 	import { saveCurrentPage, signalPageState } from '$lib/utils.svelte';
 	import { getSearchState, setSearchState } from '$lib/search.svelte';
-	import type { Notebook, Tag, NoteType } from '$lib/types';
-	import FilterSearch from '$lib/components/Dialogs/FilterSearch.svelte';
+	import type { NoteType } from '$lib/types';
 
 	let searchInput = $state('');
 	let isBulkEdit = $state(false);
@@ -38,31 +36,38 @@
 	const notelistState = getNotelistState(notebookID);
 	const searchState = getSearchState();
 
-	const savedPage = $derived(signalPageState.savedPages.get(page.url.hash));
+	const savedPage = $derived<number>(signalPageState.savedPages.get(page.url.hash) ?? 1);
 
 	const updatePage = async (newPage: number) => {
+		// saves current clicked page number
 		saveCurrentPage(newPage);
 		notelistState.clickedPage = newPage;
 
-		if (!searchInput) {
+		// get default page if no filters
+		if (
+			!searchInput &&
+			!searchState.searchNotebookID &&
+			searchState.selectedTagIdArray.length == 0
+		) {
+			searchState.searchTerm = '';
+			searchState.resetCustomFilter();
 			await notelistState.getByPage(newPage);
 			return;
 		}
 
-		await searchNotes(searchInput, newPage);
-	};
-
-	const searchNotes = async (searchInput: string, page: number) => {
-		if (!searchInput) {
-			searchState.searchTerm = '';
-			updatePage(1);
+		// run same filter if search term is same
+		if (searchState.searchTerm === searchInput) {
+			console.log('same search', searchState.customFilter);
+			await notelistState.getByFilter(searchState.customFilter, newPage);
 			return;
 		}
 
-		await searchState.getSearchTags(searchInput);
-		await searchState.getSearchNotebook(searchInput);
+		// uses new search filter
+		console.log('different search', searchState.customFilter);
+		await searchState.getSearchTags(searchInput.trim());
+		await searchState.getSearchNotebook(searchInput.trim());
 		searchState.makeSearchQuery(searchInput);
-		await notelistState.getByFilter(searchState.customFilter, page);
+		await notelistState.getByFilter(searchState.customFilter, newPage);
 		searchState.searchTerm = searchInput;
 	};
 
@@ -81,9 +86,10 @@
 	<Topbar.SidebarIcon></Topbar.SidebarIcon>
 	<Search
 		bind:searchInput
-		searchNotes={(searchInput) => searchNotes(searchInput, 1)}
+		searchNotes={() => updatePage(1)}
 		clearNote={() => {
 			searchState.searchTerm = '';
+			searchState.resetCustomFilter();
 			updatePage(1);
 		}}
 	/>
@@ -117,7 +123,7 @@
 				bind:selectedNotesID
 				notes={notelistState.notes}
 			/>
-		{:else if searchInput}
+		{:else if searchInput || searchState.searchNotebookID || searchState.selectedTagIdArray.length > 0}
 			<div class="grid h-full place-items-center">No Notes Found.</div>
 		{:else}
 			<Blank />
