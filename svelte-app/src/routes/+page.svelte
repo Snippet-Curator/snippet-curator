@@ -57,13 +57,11 @@
 
 		// run same filter if search term is same
 		if (searchState.searchTerm === searchState.searchInput) {
-			console.log('same search', searchState.customFilter);
 			await notelistState.getByFilter(searchState.customFilter, newPage);
 			return;
 		}
 
 		// uses new search filter
-		console.log('different search', searchState.customFilter);
 		await searchState.getSearchTags(searchInput.trim());
 		await searchState.getSearchNotebook(searchInput.trim());
 		searchState.makeSearchQuery(searchState.searchInput);
@@ -73,9 +71,6 @@
 
 	isLoading = false;
 	let initialLoading = $state();
-
-	$inspect('searchInput', searchState.searchInput);
-	$inspect('searchterm', searchState.searchTerm);
 
 	onMount(async () => {
 		if (searchState.searchTerm) {
