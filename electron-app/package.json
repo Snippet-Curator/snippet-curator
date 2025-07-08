@@ -2,7 +2,7 @@
   "name": "snippet-curator",
   "appID": "com.krxiang.curator",
   "productName": "Snippet Curator",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "collect and discover",
   "main": "./out/main/index.js",
   "author": "kang rui xiang",
