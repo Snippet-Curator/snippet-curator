@@ -132,5 +132,5 @@
 
 <FilterSearch
 	bind:isOpen={isFilterSearch}
-	search={async (customFilters) => await notelistState.getByFilter(customFilters, savedPage)}
+	search={async (customFilters) => await notelistState.getByFilter(customFilters, 1)}
 />
