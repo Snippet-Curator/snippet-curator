@@ -20,12 +20,14 @@
 	const tags = $derived(tagState.flatTags);
 
 	let filterNotebookID = $state(searchState.searchNotebookID);
-	let filterTagIDArray = $state<string[]>([]);
+	let filterTagIdArray = $state<string[]>([]);
+	let filterExcludeTagIdArray = $state<string[]>([]);
 
 	function submitForm() {
 		searchState.searchTerm = searchState.searchInput;
 		searchState.searchNotebookID = filterNotebookID;
-		searchState.selectedTagIdArray = filterTagIDArray;
+		searchState.selectedTagIdArray = filterTagIdArray;
+		searchState.selectedExcludeTagIdArray = filterExcludeTagIdArray;
 		searchState.makeFilterQuery(searchState.searchInput);
 		search(searchState.customFilter);
 		isOpen = false;
@@ -78,7 +80,16 @@
 				<legend class="fieldset-legend">Tags</legend>
 			</div>
 			<div class="col-span-9 col-start-4 text-right">
-				<SelectTags {tags} bind:selectedTagIdArray={filterTagIDArray} />
+				<SelectTags {tags} bind:selectedTagIdArray={filterTagIdArray} />
+			</div>
+		</div>
+
+		<div class="gap-x-golden-md grid grid-cols-12 items-start">
+			<div class="col-span-3">
+				<legend class="fieldset-legend">Exclude Tags</legend>
+			</div>
+			<div class="col-span-9 col-start-4 text-right">
+				<SelectTags {tags} bind:selectedTagIdArray={filterExcludeTagIdArray} />
 			</div>
 		</div>
 

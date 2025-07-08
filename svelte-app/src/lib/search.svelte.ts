@@ -11,6 +11,7 @@ export class searchState {
     searchTerm = $state('');
     searchInput = $state('')
     selectedTagIdArray = $state<string[]>([])
+    selectedExcludeTagIdArray = $state<string[]>([])
     searchedTagID = $state<string>('')
     searchNotebookID = $state<string>('')
     customFilter = $state(`(status="active" || status="archived")`)
@@ -29,6 +30,10 @@ export class searchState {
 
     getTagFilter(selectedTagIdArray: string[]) {
         return selectedTagIdArray.map((tagId) => `tags~"${tagId}"`).join(' && ');
+    }
+
+    getTagExcludeFilter(selectedTagIdArray: string[]) {
+        return selectedTagIdArray.map((tagId) => `tags!~"${tagId}"`).join(' && ');
     }
 
     async getSearchTags(searchInput: string) {
@@ -87,6 +92,7 @@ export class searchState {
 
     makeFilterQuery(searchInput: string) {
         const tagFilter = this.getTagFilter(this.selectedTagIdArray)
+        const tagExcludeFilter = this.getTagExcludeFilter(this.selectedExcludeTagIdArray)
         this.customFilter = this.query
             .openBracket()
             .like('title', searchInput)
@@ -95,6 +101,8 @@ export class searchState {
             .closeBracket()
             .and()
             .customFilter(tagFilter)
+            .and()
+            .customFilter(tagExcludeFilter)
             .and()
             .equal('notebook', this.searchNotebookID)
             .and()
