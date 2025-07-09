@@ -208,7 +208,7 @@ export class htmlImport {
             'description': this.description,
             'weight': 5,
             'notebook': this.selectedNotebookdID,
-            'tags': this.selectedNotebookdID,
+            'tags': this.selectedTagIdArrays,
             'last_score_updated': new Date().toISOString(),
             'sources': JSON.stringify(sources),
             'status': 'active'
