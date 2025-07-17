@@ -22,23 +22,23 @@
 
 	let { children } = $props();
 	setTagState();
-	setNotebookState();
+	// setNotebookState();
 	setMobileState();
 	setSettingState();
 	setMouseState();
 	setSearchState();
 	const tagState = getTagState();
-	const notebookState = getNotebookState();
+	// const notebookState = getNotebookState();
 	const mobileState = getMobileState();
 	const settingState = getSettingState();
 	const mouseState = getMouseState();
 
 	let screenWidth = window.innerWidth;
 
-	async function getDefaultNotebooks() {
-		await notebookState.getInbox();
-		await notebookState.getAllCounts();
-	}
+	// async function getDefaultNotebooks() {
+	// 	await notebookState.getInbox();
+	// 	await notebookState.getAllCounts();
+	// }
 
 	const updateScreenWidth = () => {
 		screenWidth = window.innerWidth;
@@ -82,7 +82,7 @@
 
 	onMount(async () => {
 		updateScreenWidth();
-		defaultNotebooks = getDefaultNotebooks();
+		// defaultNotebooks = getDefaultNotebooks();
 		await settingState.getDefaultSettings();
 	});
 
@@ -91,7 +91,7 @@
 	});
 </script>
 
-<Command />
+<!-- <Command /> -->
 
 <Resizable.PaneGroup
 	direction="horizontal"
@@ -115,16 +115,16 @@
 			<a class={page.url.hash == '#/discover' ? 'menu-active' : ''} href="#/discover">Discover</a>
 		</li>
 		<li>
-			<a
+			<!-- <a
 				class="{page.url.hash == '#/' || page.url.hash == ''
 					? 'menu-active'
 					: ''} flex w-full justify-between"
 				href="#/"
-			>
-				<span>Search</span> {notebookState.totalNoteCount}</a
-			>
+			> -->
+			<!-- <span>Search</span> {notebookState.totalNoteCount}</a -->
+			<!-- > -->
 		</li>
-		{#await defaultNotebooks then}
+		<!-- {#await defaultNotebooks then}
 			<li>
 				<a
 					class="{page.url.hash == `#/notebook/${notebookState.inboxID}` &&
@@ -132,18 +132,18 @@
 					href="#/notebook/{notebookState.inboxID}"><span>Inbox</span> {notebookState.inboxCount}</a
 				>
 			</li>
-		{/await}
+		{/await} -->
 
 		<div class="divider my-0 py-0"></div>
 
 		<ScrollArea scrollHideDelay={200} class="h-10 grow">
-			<Pinned />
+			<!-- <Pinned /> -->
 
 			<span class="menu-title flex max-h-60 items-center gap-2 overflow-y-auto"
 				><NotebookIcon size={18} />Notebooks</span
 			>
 
-			<NotebookList notebooks={notebookState.notebooks} />
+			<!-- <NotebookList notebooks={notebookState.notebooks} /> -->
 
 			<span class="menu-title flex items-center gap-2"><Tags size={18} /> Tags</span>
 
