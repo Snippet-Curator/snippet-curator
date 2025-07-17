@@ -21,13 +21,13 @@
 	import { setSearchState } from '$lib/search.svelte';
 
 	let { children } = $props();
-	setTagState();
+	// setTagState();
 	// setNotebookState();
 	setMobileState();
 	setSettingState();
 	setMouseState();
 	setSearchState();
-	const tagState = getTagState();
+	// const tagState = getTagState();
 	// const notebookState = getNotebookState();
 	const mobileState = getMobileState();
 	const settingState = getSettingState();
@@ -147,7 +147,7 @@
 
 			<span class="menu-title flex items-center gap-2"><Tags size={18} /> Tags</span>
 
-			<TagList tags={tagState.tags} />
+			<!-- <TagList tags={tagState.tags} /> -->
 		</ScrollArea>
 
 		{#snippet renderBottomPages(name: string, url: string, icon: any)}
