@@ -10,7 +10,7 @@ COPY ./svelte-app/package.json ./
 RUN npm install
 
 # Get Pocketbase
-ARG PB_VERSION=0.28.1
+ARG PB_VERSION=0.28.4
 RUN apk add --no-cache \
     unzip \
     ca-certificates
