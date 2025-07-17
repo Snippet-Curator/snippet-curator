@@ -504,7 +504,8 @@ export class NotelistState {
         }))
 
         if (error) {
-            console.error('Unable to get notes by filter ', error.data)
+            console.error('Unable to get notes by filter ', error.message)
+            return
         }
         const end = performance.now()
         console.log(`search complete in ${end - start} ms`)
