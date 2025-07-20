@@ -17,6 +17,8 @@ function recencyScore(lastOpened, maxDay) {
   // Clamp to range
   const clamped = Math.min(daysAgo, maxDay)
 
+  if (maxDay === 0) return 0
+
   // Cubic easing in: slow start, faster end
   const normalized = clamped / maxDay
   const score = Math.pow(normalized, 3) // change exponent to control curve shape, lower 2 = gentle curve, 4+ = slow start and sharp end
@@ -29,7 +31,7 @@ function findSettingbyName(name) {
     const record = $app.findFirstRecordByData('settings', 'name', name)
     return record.getFloat('value')
   } catch (e) {
-    console.error('Error getting setting')
+    console.error('Error getting setting: ', name)
     return
   }
 }
