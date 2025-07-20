@@ -67,6 +67,15 @@
 				'Weight of random modifier. Higher weight means more randomness.'
 			)}
 			{@render renderDiscoverSetting(
+				'maxDay',
+				'Max Day Cutoff (Day)',
+				settingState.maxDay,
+				'Notes older than this cutoff will receive the maximum recency score.',
+				0,
+				365,
+				1
+			)}
+			{@render renderDiscoverSetting(
 				'fullPenaltyWindow',
 				'Full Penalty Window (Hour)',
 				settingState.fullPenaltyWindow,
@@ -95,7 +104,7 @@
 			)}
 			{@render renderDiscoverSetting(
 				'scoreRefreshHour',
-				'Score Refresh Frequency When Open (hour)',
+				'Score Refresh Frequency When Open (Hour)',
 				settingState.scoreRefreshHour,
 				'Curator will refresh scores when open. Default refresh is every 6 hours. Changing it to 0 to stop refresh automatically.',
 				0,

@@ -7,20 +7,18 @@ function normalizeWeight(val, min, max) {
   return Math.max(0, Math.min(1, (val - min) / (max - min)))
 }
 
-function recencyScore(lastOpened) {
+function recencyScore(lastOpened, maxDay) {
   const openedDate = new Date(lastOpened)
   if (isNaN(openedDate.getTime())) {
     return 0.1 + Math.random() * 0.9
   }
   const daysAgo = (Date.now() - openedDate.getTime()) / (1000 * 60 * 60 * 24)
 
-  const maxDays = 30
-
   // Clamp to range
-  const clamped = Math.min(daysAgo, maxDays)
+  const clamped = Math.min(daysAgo, maxDay)
 
   // Cubic easing in: slow start, faster end
-  const normalized = clamped / maxDays
+  const normalized = clamped / maxDay
   const score = Math.pow(normalized, 3) // change exponent to control curve shape, lower 2 = gentle curve, 4+ = slow start and sharp end
 
   return score
@@ -59,11 +57,12 @@ function calculateNoteScore(
   recencyWeight,
   weightWeight,
   randomWeight,
+  maxDay,
   fullPenaltyWindow,
   decayWindow
 ) {
   const ratingNorm = normalizeRating(rating ?? 0, 1, 5)
-  const recencyNorm = recencyScore(lastOpened ?? new Date())
+  const recencyNorm = recencyScore(lastOpened ?? new Date(), maxDay)
   const weightNorm = normalizeWeight(weight ?? 0, 0, 10)
   const randomFactor = Math.random() < 0.05 ? 0.8 + Math.random() * 0.2 : Math.random() // 5% chance of random boost, otherwise random.
 
