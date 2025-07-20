@@ -90,7 +90,7 @@
 				settingState.decayWindow,
 				'Penalty will gradually reduce during this time period for penalized notes (default 12 hours).',
 				1,
-				24,
+				1000,
 				1
 			)}
 			{@render renderDiscoverSetting(
