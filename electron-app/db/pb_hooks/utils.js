@@ -14,8 +14,16 @@ function recencyScore(lastOpened) {
   }
   const daysAgo = (Date.now() - openedDate.getTime()) / (1000 * 60 * 60 * 24)
 
-  // 100 day normalization. Increases more early on and then flattens
-  return Math.min(1, Math.log(1 + daysAgo) / Math.log(1 + 100))
+  const maxDays = 100
+
+  // Clamp to range
+  const clamped = Math.min(daysAgo, maxDays)
+
+  // Cubic easing in: slow start, faster end
+  const normalized = clamped / maxDays
+  const score = Math.pow(normalized, 3) // change exponent to control curve shape, lower 2 = gentle curve, 4+ = slow start and sharp end
+
+  return score
 }
 
 function findSettingbyName(name) {

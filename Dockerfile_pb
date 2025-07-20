@@ -1,0 +1,30 @@
+# === Builder stage ===
+FROM node:alpine AS builder
+WORKDIR /app
+
+# Get Pocketbase
+ARG PB_VERSION=0.28.4
+RUN apk add --no-cache \
+    unzip \
+    ca-certificates
+ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
+
+# Add pocketbase exec
+RUN unzip /tmp/pb.zip -d ./db
+
+# === Runner stage ===
+FROM node:alpine AS runner
+WORKDIR /app
+
+# Install minimal static server
+RUN npm install -g serve
+
+# Copy built output from builder
+COPY --from=builder /app/db/pocketbase ./db/pocketbase
+WORKDIR /app/db
+
+# Expose app port
+EXPOSE 8090
+
+# Start PocketBase in background
+CMD ["./pocketbase", "serve", "--dir", "pb_data", "--http=0.0.0.0:8090"]
