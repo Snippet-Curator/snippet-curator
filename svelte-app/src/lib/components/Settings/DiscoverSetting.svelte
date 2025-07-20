@@ -29,6 +29,7 @@
 				const input = event.target as HTMLInputElement;
 				let newValue = input.valueAsNumber;
 				if (!newValue) newValue = 0;
+				settingState[name] = newValue;
 				console.log('Changed setting: ', name, newValue);
 				settingState.changeSetting(name, newValue);
 			}}
