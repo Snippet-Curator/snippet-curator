@@ -14,7 +14,7 @@ function recencyScore(lastOpened) {
   }
   const daysAgo = (Date.now() - openedDate.getTime()) / (1000 * 60 * 60 * 24)
 
-  const maxDays = 100
+  const maxDays = 30
 
   // Clamp to range
   const clamped = Math.min(daysAgo, maxDays)
