@@ -3,7 +3,7 @@ FROM node:alpine AS builder
 WORKDIR /app
 
 # Setting PB URL environment
-ENV VITE_PB_URL=http://100.127.133.33:8090
+ENV VITE_PB_URL=http://macmini:8090
 
 # Copy package.json and install
 COPY ./svelte-app/package.json ./

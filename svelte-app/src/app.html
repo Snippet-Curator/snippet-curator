@@ -7,10 +7,10 @@
         default-src 'self' https://www.youtube.com https://www.google.com;
         script-src 'self' 'unsafe-inline' http://127.0.0.1:8090 ws://127.0.0.1:8090; 
         style-src 'self' 'unsafe-inline';
-        img-src 'self' data: http://100.127.133.33:8090 http://127.0.0.1:8090 https://i.ytimg.com;
-        media-src 'self' data: http://100.127.133.33:8090 http://127.0.0.1:8090;
-        frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com http://100.127.133.33:8090 http://127.0.0.1:8090 ws://127.0.0.1:8090;
-        connect-src 'self' https://i.ytimg.com https://www.googleapis.com http://100.127.133.33:8090 http://127.0.0.1:8090 ws://127.0.0.1:8090 ws://localhost:*/;
+        img-src 'self' data: http://macmini:8090 http://127.0.0.1:8090 https://i.ytimg.com;
+        media-src 'self' data: http://macmini:8090 http://127.0.0.1:8090;
+        frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com http://macmini:8090 http://127.0.0.1:8090 ws://127.0.0.1:8090;
+        connect-src 'self' https://i.ytimg.com https://www.googleapis.com http://macmini:8090 http://127.0.0.1:8090 ws://127.0.0.1:8090 ws://localhost:*/;
 
         " />
     <link rel="icon" href="%sveltekit.assets%/icon.svg" />
